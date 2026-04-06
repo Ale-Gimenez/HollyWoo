@@ -1,0 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap');
+
+:root{
+  --primary: #a83fbb;
+  --secundary: #d13c95;
+  --text: #2b003b;
+  --bg: #fff;
+  --error: #fff;
+  --bg2: #fff;
+  --shadow: 0 8px 5px rgba(0,0,0,0.15);
+}
+
+h1, h2, h3{
+  font-family: "Fjalla One", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+body {
+  font-family: "Fjalla One", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+
+  background: var(--bg);
+  color: var(--text);
+}
