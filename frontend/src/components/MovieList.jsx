@@ -1,5 +1,7 @@
 import { getMovies } from "../services/api";
 import { useEffect, useState } from "react";
+import './MovieList.css'
+import { Link } from "react-router-dom";
 
 export default function MovieList(){
     const [movies, setMovies] = useState([]);
@@ -29,12 +31,14 @@ export default function MovieList(){
             <div className="movie-grid">
                 {movies.map((movie) => (
                     <article key={movie.id} className="movie-card">
-                        <img src ={movie.poster} alt={`poster do filme ${movie.titulo}`} />
-                        <div className="movie-info">
-                            <h3>{movie.titulo}</h3>
-                            <p>{movie.ano}</p>
-                            <span>{movie.categorias}</span>
-                        </div>
+                        <Link to={`/filme?id=${movie.id}`}>
+                            <img src ={movie.imagem} alt={`poster do filme ${movie.titulo}`} />
+                            <div className="movie-info">
+                                <h3>{movie.titulo}</h3>
+                                <p>{movie.ano}</p>
+                                <span>{movie.categorias}</span>
+                            </div>
+                        </Link>
                     </article>
                 ))}
             </div>
