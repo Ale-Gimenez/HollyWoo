@@ -19,11 +19,6 @@ class PaisOut(BaseModel):
     id_pais: int
     nome: str
 
-class GeneroOut(BaseModel):
-    model_config = {"from_attributes": True}
-    id_genero: int
-    nome: str
-
 class LinguagemOut(BaseModel):
     model_config = {"from_attributes": True}
     id_linguagem: int
@@ -38,6 +33,22 @@ class ProdutoraOut(BaseModel):
     model_config = {"from_attributes": True}
     id_produtora: int
     nome: str
+
+# ─── Saga ─────────────────────────────────────────────────────────────────────
+
+class SagaOut(BaseModel):
+    model_config = {"from_attributes": True}
+    id_saga: int
+    nome: str
+    descricao: Optional[str] = None
+
+class SagaCreate(BaseModel):
+    nome: str
+    descricao: Optional[str] = None
+
+class SagaUpdate(BaseModel):
+    nome: Optional[str] = None
+    descricao: Optional[str] = None
 
 # ─── Ator / Diretor ───────────────────────────────────────────────────────────
 
@@ -64,6 +75,8 @@ class FilmeBase(BaseModel):
     poster: Optional[str] = None
     banner: Optional[str] = None
     trailer: Optional[str] = None
+    classificacao: Optional[str] = None   # "L","6","10","12","14","16","18"
+    estilo_visual: Optional[str] = None   # "3D","2D","Stop Motion","Anime"
 
 class FilmeCreate(FilmeBase):
     id_produtora_principal: Optional[int] = None
@@ -74,6 +87,7 @@ class FilmeCreate(FilmeBase):
     ids_atores: List[int] = []
     ids_diretores: List[int] = []
     ids_linguagens: List[int] = []
+    ids_sagas: List[int] = []
 
 class FilmeUpdate(BaseModel):
     """Todos os campos opcionais para PATCH."""
@@ -85,6 +99,8 @@ class FilmeUpdate(BaseModel):
     poster: Optional[str] = None
     banner: Optional[str] = None
     trailer: Optional[str] = None
+    classificacao: Optional[str] = None
+    estilo_visual: Optional[str] = None
     id_produtora_principal: Optional[int] = None
     id_pais_origem: Optional[int] = None
     ids_produtoras: Optional[List[int]] = None
@@ -93,6 +109,7 @@ class FilmeUpdate(BaseModel):
     ids_atores: Optional[List[int]] = None
     ids_diretores: Optional[List[int]] = None
     ids_linguagens: Optional[List[int]] = None
+    ids_sagas: Optional[List[int]] = None
 
 class FilmeOut(BaseModel):
     model_config = {"from_attributes": True}
@@ -105,6 +122,8 @@ class FilmeOut(BaseModel):
     poster: Optional[str]
     banner: Optional[str]
     trailer: Optional[str]
+    classificacao: Optional[str]
+    estilo_visual: Optional[str]
     flag: Optional[bool]
     pais_origem: Optional[PaisOut] = None
     produtoras: List[ProdutoraOut] = []
@@ -113,6 +132,7 @@ class FilmeOut(BaseModel):
     atores: List[AtorOut] = []
     diretores: List[DiretorOut] = []
     linguagens: List[LinguagemOut] = []
+    sagas: List[SagaOut] = []
 
 class FilmeListOut(BaseModel):
     """Versão resumida para listagem."""
@@ -122,6 +142,8 @@ class FilmeListOut(BaseModel):
     ano: Optional[int]
     poster: Optional[str]
     flag: Optional[bool]
+    classificacao: Optional[str]
+    estilo_visual: Optional[str]
     pais_origem: Optional[PaisOut] = None
     categorias: List[CategoriaOut] = []
 
@@ -161,7 +183,7 @@ class UsuarioOut(BaseModel):
     imagem: Optional[str]
     role: str
     data_criacao: Optional[datetime]
-
+    data_nascimento: Optional[date] = None
 
 class RoleUpdate(BaseModel):
     role: str
@@ -187,6 +209,14 @@ class TokenOut(BaseModel):
 class RefreshIn(BaseModel):
     refresh_token: str
 
+# ─── Favoritos ────────────────────────────────────────────────────────────────
+
+class FavoritoOut(BaseModel):
+    model_config = {"from_attributes": True}
+    id_favorito: int
+    id_filme: int
+    criado_em: Optional[datetime]
+    filme: FilmeListOut
 
 # ─── Destaques da Home ────────────────────────────────────────────────────────
 

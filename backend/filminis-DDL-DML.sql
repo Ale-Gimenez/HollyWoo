@@ -1,10 +1,11 @@
 -- ============================================================
---  Filminis — DDL + DML
---  Execute este script no MySQL para criar e popular o banco.
---  Usuários de exemplo:
---    admin@filminis.com  / admin123
---    user@filminis.com   / user123
---  (as senhas são salvas com bcrypt via API, não SHA2)
+--  Filminis — DDL + DML  (versão HollyWoo-compatible)
+--  Novidades vs original:
+--    • filme.classificacao  VARCHAR(10)   ex: "L","6","10","12","14","16","18"
+--    • filme.estilo_visual  VARCHAR(50)   ex: "3D","2D","Stop Motion","Anime"
+--    • tabela saga          (id, nome, descricao)
+--    • tabela filme_saga    (id_filme FK, id_saga FK)  — saga = franquia/série
+--    • filme.id_pais_origem adicionado ao DDL (estava só no DML original)
 -- ============================================================
 
 DROP DATABASE IF EXISTS filminis;
@@ -31,6 +32,14 @@ CREATE TABLE categoria (
 CREATE TABLE produtora (
     id_produtora INT PRIMARY KEY AUTO_INCREMENT,
     nome         VARCHAR(255) NOT NULL UNIQUE
+);
+
+-- ── Saga (franquia / série de filmes) ─────────────────────────────────────────
+
+CREATE TABLE saga (
+    id_saga    INT PRIMARY KEY AUTO_INCREMENT,
+    nome       VARCHAR(255) NOT NULL UNIQUE,
+    descricao  TEXT
 );
 
 -- ── Pessoas ───────────────────────────────────────────────────────────────────
@@ -79,6 +88,7 @@ CREATE TABLE filme (
     id_filme               INT PRIMARY KEY AUTO_INCREMENT,
     titulo                 VARCHAR(255) NOT NULL UNIQUE,
     id_produtora_principal INT,
+    id_pais_origem         INT,
     orcamento              DECIMAL(15,2),
     duracao                TIME,
     sinopse                LONGTEXT UNIQUE,
@@ -86,8 +96,11 @@ CREATE TABLE filme (
     poster                 VARCHAR(255) UNIQUE,
     banner                 VARCHAR(255) UNIQUE,
     trailer                VARCHAR(255) UNIQUE,
+    classificacao          VARCHAR(10),        -- "L","6","10","12","14","16","18"
+    estilo_visual          VARCHAR(50),        -- "3D","2D","Stop Motion","Anime"
     flag                   BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (id_produtora_principal) REFERENCES produtora(id_produtora)
+    FOREIGN KEY (id_produtora_principal) REFERENCES produtora(id_produtora),
+    FOREIGN KEY (id_pais_origem)         REFERENCES pais(id_pais)
 );
 
 CREATE TABLE filme_produtora (
@@ -138,6 +151,16 @@ CREATE TABLE filme_linguagem (
     FOREIGN KEY (id_linguagem) REFERENCES linguagem(id_linguagem)
 );
 
+-- ── Saga x Filme (N:N — um filme pode pertencer a mais de uma saga) ───────────
+
+CREATE TABLE filme_saga (
+    id_filme_saga INT PRIMARY KEY AUTO_INCREMENT,
+    id_filme      INT NOT NULL,
+    id_saga       INT NOT NULL,
+    FOREIGN KEY (id_filme) REFERENCES filme(id_filme),
+    FOREIGN KEY (id_saga)  REFERENCES saga(id_saga)
+);
+
 -- ── Usuário ───────────────────────────────────────────────────────────────────
 
 CREATE TABLE usuario (
@@ -151,6 +174,27 @@ CREATE TABLE usuario (
     imagem          VARCHAR(500),
     role            ENUM('admin','user') NOT NULL DEFAULT 'user',
     data_criacao    DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ── Favoritos ─────────────────────────────────────────────────────────────────
+
+CREATE TABLE favorito (
+    id_favorito  INT PRIMARY KEY AUTO_INCREMENT,
+    id_usuario   INT NOT NULL,
+    id_filme     INT NOT NULL,
+    criado_em    DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_usuario_filme (id_usuario, id_filme),
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario),
+    FOREIGN KEY (id_filme)   REFERENCES filme(id_filme)
+);
+
+-- ── Destaques da Home ─────────────────────────────────────────────────────────
+
+CREATE TABLE destaque_home (
+    id       INT AUTO_INCREMENT PRIMARY KEY,
+    id_filme INT NOT NULL UNIQUE,
+    ordem    INT NOT NULL DEFAULT 0,
+    FOREIGN KEY (id_filme) REFERENCES filme(id_filme)
 );
 
 -- ── Blacklist de refresh tokens ───────────────────────────────────────────────
@@ -183,23 +227,32 @@ INSERT INTO categoria (nome) VALUES
 
 INSERT INTO produtora (nome) VALUES
 ('Summit Entertainment'),('Studio Ghibli'),('Regency Enterprises'),('Millenium Films'),
-('6th & Idaho'),('Warner Bros.'),('Proximity Media'),('Netflix'),
-('Lakeshore Entertainment'),('20th Century Fox'),('Marvel Studios'),
-('Paramount Pictures'),('Thunder Road Pictures'),('Legendary Pictures'),('Sony Pictures Animation');
+('DC Studios'),('Warner Bros.'),('Ryan Coogler Prods.'),('Del Toro Films'),
+('Lakeshore Entertainment'),('Bazmark Films'),('Marvel Studios'),
+('Syncopy / Warner'),('Thunder Road'),('Legendary Pictures'),('AGBO');
+
+INSERT INTO saga (nome, descricao) VALUES
+('Crepúsculo', 'Saga romântica de vampiros baseada nos livros de Stephenie Meyer'),
+('Ghibli Miyazaki', 'Filmes de animação dirigidos por Hayao Miyazaki no Studio Ghibli'),
+('DC Extended Universe', 'Universo cinematográfico da DC Comics'),
+('Marvel Cinematic Universe', 'Universo cinematográfico da Marvel Studios'),
+('Matrix', 'Trilogia de ficção científica das irmãs Wachowski'),
+('John Wick', 'Franquia de ação protagonizada por Keanu Reeves'),
+('Duna', 'Adaptação da saga de ficção científica de Frank Herbert');
 
 INSERT INTO ator (nome, sobrenome) VALUES
 ('Kristen','Stewart'),('Robert','Pattinson'),('Taylor','Lautner'),
-('Yōji','Matsuda'),('Yuriko','Ishida'),('Yūko','Tanaka'),
-('Bill','Skarsgård'),('Lily-Rose','Depp'),('Nicholas','Hoult'),
-('David','Harbour'),('Milla','Jovovich'),('Zoë','Kravitz'),
-('Paul','Dano'),('David','Corenswet'),('Rachel','Brosnahan'),
+('Daveigh','Chase'),('Minami','Takayama'),('Chieko','Baishô'),
+('Lily-Rose','Depp'),('Nicholas','Hoult'),('Aaron','Taylor-Johnson'),
+('David','Harbour'),('Milla','Jovovich'),('Robert','Pattinson'),
+('Andy','Serkis'),('David','Corenswet'),('Rachel','Brosnahan'),
 ('Milly','Alcock'),('Michael','B. Jordan'),('Hailee','Steinfeld'),
 ('Oscar','Isaac'),('Jacob','Elordi'),('Mia','Goth'),
 ('Jason','Statham'),('Amy','Smart'),('Nicole','Kidman'),
 ('Ewan','McGregor'),('Robert','Downey Jr.'),('Chris','Evans'),
 ('Mark','Ruffalo'),('Chris','Hemsworth'),('Scarlett','Johansson'),
 ('Matthew','McConaughey'),('Anne','Hathaway'),('Keanu','Reeves'),
-('Michael','Nyqvist'),('Chieko','Baishô'),('Takuya','Kimura'),
+('Michael','Nyqvist'),('Takuya','Kimura'),
 ('Akihiro','Miwa'),('Tom','Holland'),('Zendaya',''),
 ('Benedict','Cumberbatch'),('Margot','Robbie'),('Ryan','Gosling'),
 ('America','Ferrera'),('Ryan','Reynolds'),('Morena','Baccarin'),
@@ -216,109 +269,69 @@ INSERT INTO diretor (nome, sobrenome) VALUES
 ('Denis','Villeneuve'),('Lana','Wachowski'),('Lilly','Wachowski'),
 ('Maggie','Kang'),('Chris','Appelhans');
 
-INSERT INTO filme (titulo, id_produtora_principal, id_pais_origem, orcamento, duracao, sinopse, ano, poster, flag) VALUES
+INSERT INTO filme (titulo, id_produtora_principal, id_pais_origem, orcamento, duracao, sinopse, ano, poster, classificacao, estilo_visual, flag) VALUES
 ('Crepúsculo',1,1,37000000,'02:02:00',
-'Bella Swan se apaixona pelo misterioso e deslumbrante Edward Cullen, descobrindo que ele é um vampiro.',
-2008,
-'https://br.web.img2.acsta.net/medias/nmedia/18/87/02/32/19871201.jpg',
-TRUE),
+ 'Bella Swan se apaixona pelo misterioso e deslumbrante Edward Cullen, descobrindo que ele é um vampiro.',
+ 2008,'https://br.web.img2.acsta.net/medias/nmedia/18/87/02/32/19871201.jpg','12','2D',TRUE),
 ('A Princesa Mononoke',2,3,20000000,'02:13:00',
-'Um jovem guerreiro se envolve em um conflito entre deuses da floresta e humanos que destroem a natureza.',
-1997,
-'https://i0.wp.com/studioghibli.com.br/wp-content/uploads/2025/03/Poster-Princesa-Mononoke-IMAX-scaled.jpeg',
-TRUE),
+ 'Um jovem guerreiro se envolve em um conflito entre deuses da floresta e humanos que destroem a natureza.',
+ 1997,'https://i0.wp.com/studioghibli.com.br/wp-content/uploads/2025/03/Poster-Princesa-Mononoke-IMAX-scaled.jpeg','12','Anime',TRUE),
 ('Nosferatu',3,1,50000000,'02:12:00',
-'Uma jovem casada é assombrada por um antigo mal enquanto seu marido viaja para fechar negócio com um misterioso conde.',
-2024,
-'https://m.media-amazon.com/images/I/715BLU5YPZL.jpg',
-TRUE),
+ 'Uma jovem casada é assombrada por um antigo mal enquanto seu marido viaja para fechar negócio com um misterioso conde.',
+ 2024,'https://m.media-amazon.com/images/I/715BLU5YPZL.jpg','16','2D',TRUE),
 ('Hellboy',4,1,50000000,'02:01:00',
-'Um ser sobrenatural luta contra forças das trevas enquanto protege o mundo humano.',
-2019,
-'https://img.elo7.com.br/product/zoom/25FA55C/big-poster-filme-hellboy-2019-lo004-tamanho-90x60-cm-hellboy.jpg',
-TRUE),
+ 'Um ser sobrenatural luta contra forças das trevas enquanto protege o mundo humano.',
+ 2019,'https://img.elo7.com.br/product/zoom/25FA55C/big-poster-filme-hellboy-2019-lo004-tamanho-90x60-cm-hellboy.jpg','14','2D',TRUE),
 ('The Batman',5,1,185000000,'02:56:00',
-'Bruce Wayne rastreia um assassino serial chamado Charada que expõe a corrupção em Gotham.',
-2022,
-'https://img.elo7.com.br/product/zoom/3FBA809/big-poster-filme-batman-2022-90x60-cm-lo002-poster-batman.jpg',
-TRUE),
+ 'Bruce Wayne rastreia um assassino serial chamado Charada que expõe a corrupção em Gotham.',
+ 2022,'https://img.elo7.com.br/product/zoom/3FBA809/big-poster-filme-batman-2022-90x60-cm-lo002-poster-batman.jpg','12','2D',TRUE),
 ('Superman',6,1,225000000,'02:30:00',
-'Clark Kent abraça seu legado kryptoniano enquanto enfrenta Lex Luthor.',
-2025,
-'https://ingresso-a.akamaihd.net/b2b/production/uploads/articles-content/8923869c-f8a6-4258-ba74-4170bf7fb202.jpg',
-TRUE),
+ 'Clark Kent abraça seu legado kryptoniano enquanto enfrenta Lex Luthor.',
+ 2025,'https://ingresso-a.akamaihd.net/b2b/production/uploads/articles-content/8923869c-f8a6-4258-ba74-4170bf7fb202.jpg','L','2D',TRUE),
 ('Pecadores',7,1,90000000,'02:17:00',
-'Dois irmãos retornam ao Mississippi para abrir um negócio, mas o sobrenatural bate à porta.',
-2025,
-'https://ingresso-a.akamaihd.net/prd/img/movie/pecadores/7f6c9699-002e-43a8-adb3-49d2055014fd.webp',
-TRUE),
+ 'Dois irmãos retornam ao Mississippi para abrir um negócio, mas o sobrenatural bate à porta.',
+ 2025,'https://ingresso-a.akamaihd.net/prd/img/movie/pecadores/7f6c9699-002e-43a8-adb3-49d2055014fd.webp','16','2D',TRUE),
 ('Frankenstein',8,1,120000000,'02:30:00',
-'Guillermo del Toro adapta o clássico de Mary Shelley sobre um cientista que cria vida.',
-2025,
-'https://s3.amazonaws.com/nightjarprod/content/uploads/sites/130/2025/08/31180656/frankenstein-2025-poster-691x1024.jpg',
-TRUE),
+ 'Guillermo del Toro adapta o clássico de Mary Shelley sobre um cientista que cria vida.',
+ 2025,'https://s3.amazonaws.com/nightjarprod/content/uploads/sites/130/2025/08/31180656/frankenstein-2025-poster-691x1024.jpg','14','2D',TRUE),
 ('Adrenalina',9,1,12000000,'01:28:00',
-'Envenenado por rivais, o assassino Chev Chelios precisa manter sua adrenalina alta para sobreviver.',
-2006,
-'https://br.web.img3.acsta.net/medias/nmedia/18/86/97/09/19870658.jpg',
-TRUE),
+ 'Envenenado por rivais, o assassino Chev Chelios precisa manter sua adrenalina alta para sobreviver.',
+ 2006,'https://br.web.img3.acsta.net/medias/nmedia/18/86/97/09/19870658.jpg','18','2D',TRUE),
 ('Moulin Rouge',10,5,50000000,'02:06:00',
-'Um jovem escritor se apaixona pela estrela do Moulin Rouge em um Paris boêmio.',
-2001,
-'https://uauposters.com.br/media/catalog/product/3/4/346820211103-uau-posters-moulin-rouge-filmes.jpg',
-TRUE),
+ 'Um jovem escritor se apaixona pela estrela do Moulin Rouge em um Paris boêmio.',
+ 2001,'https://uauposters.com.br/media/catalog/product/3/4/346820211103-uau-posters-moulin-rouge-filmes.jpg','12','2D',TRUE),
 ('Vingadores: Ultimato',11,1,356000000,'03:01:00',
-'Os Vingadores se unem para reverter os efeitos devastadores do Thanos.',
-2019,
-'https://img.elo7.com.br/product/zoom/259A7AA/big-poster-filme-vingadores-ultimato-lo001-tamanho-90x60-cm-poster-marvel.jpg',
-TRUE),
+ 'Os Vingadores se unem para reverter os efeitos devastadores do Thanos.',
+ 2019,'https://img.elo7.com.br/product/zoom/259A7AA/big-poster-filme-vingadores-ultimato-lo001-tamanho-90x60-cm-poster-marvel.jpg','12','2D',TRUE),
 ('Interestelar',12,1,165000000,'02:49:00',
-'Um ex-piloto viaja por um buraco de minhoca em busca de um novo lar para a humanidade.',
-2014,
-'https://br.web.img3.acsta.net/pictures/14/10/31/20/39/476171.jpg',
-TRUE),
+ 'Um ex-piloto viaja por um buraco de minhoca em busca de um novo lar para a humanidade.',
+ 2014,'https://br.web.img3.acsta.net/pictures/14/10/31/20/39/476171.jpg','L','2D',TRUE),
 ('John Wick',13,1,20000000,'01:41:00',
-'Um ex-assassino retorna à ativa para vingar a morte de seu cachorro, presente da esposa falecida.',
-2014,
-'https://img.elo7.com.br/product/zoom/265E435/big-poster-filme-john-wick-lo03-tamanho-90x60-cm-nerd.jpg',
-TRUE),
+ 'Um ex-assassino retorna à ativa para vingar a morte de seu cachorro, presente da esposa falecida.',
+ 2014,'https://img.elo7.com.br/product/zoom/265E435/big-poster-filme-john-wick-lo03-tamanho-90x60-cm-nerd.jpg','16','2D',TRUE),
 ('O Castelo Animado',2,3,24000000,'01:59:00',
-'Sophie é amaldiçoada e transformada em velha; busca quebrar o feitiço no castelo do mago Howl.',
-2004,
-'https://i.pinimg.com/474x/ec/f5/96/ecf596b4b836dba11873a07b12381088.jpg',
-TRUE),
+ 'Sophie é amaldiçoada e transformada em velha; busca quebrar o feitiço no castelo do mago Howl.',
+ 2004,'https://i.pinimg.com/474x/ec/f5/96/ecf596b4b836dba11873a07b12381088.jpg','L','Anime',TRUE),
 ('Homem-Aranha: Sem Volta Para Casa',11,1,200000000,'02:28:00',
-'Peter Parker pede ao Doutor Estranho para fazer o mundo esquecer sua identidade, fragmentando o multiverso.',
-2021,
-'https://cinecriticas.com.br/wp-content/uploads/2021/12/Cine1-12.jpg',
-TRUE),
+ 'Peter Parker pede ao Doutor Estranho para fazer o mundo esquecer sua identidade, fragmentando o multiverso.',
+ 2021,'https://cinecriticas.com.br/wp-content/uploads/2021/12/Cine1-12.jpg','12','2D',TRUE),
 ('Barbie',6,1,145000000,'01:54:00',
-'Barbie deixa Barbieland e vai ao mundo real para resolver uma crise existencial.',
-2023,
-'https://uauposters.com.br/media/catalog/product/cache/1/thumbnail/800x930/9df78eab33525d08d6e5fb8d27136e95/4/5/454520230615-uau-posters-barbie-2023-filmes-1.jpg',
-TRUE),
+ 'Barbie deixa Barbieland e vai ao mundo real para resolver uma crise existencial.',
+ 2023,'https://uauposters.com.br/media/catalog/product/cache/1/thumbnail/800x930/9df78eab33525d08d6e5fb8d27136e95/4/5/454520230615-uau-posters-barbie-2023-filmes-1.jpg','L','3D',TRUE),
 ('Deadpool',10,1,58000000,'01:48:00',
-'Wade Wilson se torna o mercenário de boca suja Deadpool após um experimento que lhe dá poderes de regeneração.',
-2016,
-'https://img.elo7.com.br/product/zoom/1E3BBFE/big-poster-do-filme-deadpool-tamanho-90x-0-cm-loot-op-011-geek.jpg',
-TRUE),
+ 'Wade Wilson se torna o mercenário de boca suja Deadpool após um experimento que lhe dá poderes de regeneração.',
+ 2016,'https://img.elo7.com.br/product/zoom/1E3BBFE/big-poster-do-filme-deadpool-tamanho-90x-0-cm-loot-op-011-geek.jpg','16','2D',TRUE),
 ('Duna',14,1,165000000,'02:35:00',
-'Paul Atreides lidera uma revolta no planeta mais perigoso do universo.',
-2021,
-'https://img.elo7.com.br/product/zoom/3E882A2/big-poster-filme-duna-tamanho-90x60-cm-duna.jpg',
-TRUE),
+ 'Paul Atreides lidera uma revolta no planeta mais perigoso do universo.',
+ 2021,'https://img.elo7.com.br/product/zoom/3E882A2/big-poster-filme-duna-tamanho-90x60-cm-duna.jpg','12','2D',TRUE),
 ('Matrix',6,1,63000000,'02:16:00',
-'Um hacker descobre que a realidade é uma simulação e se junta à resistência humana.',
-1999,
-'https://img.elo7.com.br/product/zoom/2679A17/big-poster-filme-matrix-lo02-tamanho-90x60-cm-poster-de-filme.jpg',
-TRUE),
+ 'Um hacker descobre que a realidade é uma simulação e se junta à resistência humana.',
+ 1999,'https://img.elo7.com.br/product/zoom/2679A17/big-poster-filme-matrix-lo02-tamanho-90x60-cm-poster-de-filme.jpg','14','2D',TRUE),
 ('KPop Demon Hunters',15,9,80000000,'01:45:00',
-'Um grupo de K-Pop mundialmente famoso equilibra a vida no palco com sua identidade secreta de caçadoras de demônios.',
-2025,
-'https://m.media-amazon.com/images/I/81Mtr7elTnL.jpg',
-TRUE);
+ 'Um grupo de K-Pop mundialmente famoso equilibra a vida no palco com sua identidade secreta de caçadoras de demônios.',
+ 2025,'https://m.media-amazon.com/images/I/81Mtr7elTnL.jpg','12','2D',TRUE);
 
--- Relações N:N (mesmas do original da professora)
+-- ── Relações N:N ──────────────────────────────────────────────────────────────
 
 INSERT INTO filme_produtora (id_filme, id_produtora) VALUES
 (1,1),(2,2),(3,3),(4,4),(5,5),(6,6),(7,7),(8,8),(9,9),(10,10),
@@ -349,17 +362,17 @@ INSERT INTO filme_ator (id_filme, id_ator) VALUES
 (1,1),(1,2),(1,3),(2,4),(2,5),(2,6),(3,7),(3,8),(3,9),(4,10),(4,11),
 (5,2),(5,12),(5,13),(6,14),(6,15),(6,16),(7,17),(7,18),(8,19),(8,20),(8,21),
 (9,22),(9,23),(10,24),(10,25),(11,26),(11,27),(11,28),(11,29),(11,30),
-(12,31),(12,32),(13,33),(13,34),(14,35),(14,36),(14,37),(15,38),(15,39),(15,40),
-(16,41),(16,42),(16,43),(17,44),(17,45),(18,46),(18,47),(18,19),(18,39),
-(19,33),(19,48),(19,49),(20,50),(20,51),(20,52);
+(12,31),(12,32),(13,33),(13,34),(14,35),(14,36),(15,37),(15,38),(15,39),
+(16,40),(16,41),(16,42),(17,43),(17,44),(18,45),(18,46),(18,19),(18,39),
+(19,33),(19,47),(19,48),(20,49),(20,50),(20,51);
 
 INSERT INTO ator_pais (id_ator, id_pais) VALUES
 (1,1),(2,2),(3,1),(4,3),(5,3),(6,3),(7,14),(8,1),(9,2),(10,1),
 (11,15),(12,1),(13,1),(14,1),(15,1),(16,16),(17,1),(18,1),(19,17),(20,16),
 (21,2),(22,2),(23,1),(24,16),(25,2),(26,1),(27,1),(28,1),(29,16),(30,1),
-(31,1),(32,1),(33,4),(34,14),(35,3),(36,3),(37,3),(38,2),(39,1),(40,2),
-(41,16),(42,4),(43,1),(44,1),(45,7),(46,1),(47,14),(48,1),(49,1),(50,1),
-(51,9),(52,1);
+(31,1),(32,1),(33,4),(34,14),(35,3),(36,3),(37,2),(38,1),(39,2),
+(40,16),(41,4),(42,1),(43,1),(44,1),(45,7),(46,1),(47,14),(48,1),(49,1),(50,1),
+(51,9);
 
 INSERT INTO diretor_pais (id_diretor, id_pais) VALUES
 (1,1),(2,3),(3,1),(4,2),(5,1),(6,1),(7,1),(8,11),(9,1),(10,1),
@@ -370,10 +383,25 @@ INSERT INTO produtora_pais (id_produtora, id_pais) VALUES
 (1,1),(2,3),(3,1),(4,1),(5,1),(6,1),(7,1),(8,1),(9,1),(10,1),
 (11,1),(12,1),(13,1),(14,1),(15,1);
 
--- ── Usuários de exemplo (senhas com bcrypt — crie via API ou use estes hashes) ──
--- Para criar usuários com senha correta, use o endpoint POST /auth/register
--- Os valores abaixo são apenas placeholders; substitua pelos hashes gerados pela API.
--- Exemplo rápido via curl:
+-- ── Sagas dos filmes de exemplo ───────────────────────────────────────────────
+
+INSERT INTO filme_saga (id_filme, id_saga) VALUES
+(1,1),   -- Crepúsculo → Crepúsculo
+(2,2),   -- A Princesa Mononoke → Ghibli Miyazaki
+(14,2),  -- O Castelo Animado → Ghibli Miyazaki
+(5,3),   -- The Batman → DC Extended Universe
+(6,3),   -- Superman → DC Extended Universe
+(11,4),  -- Vingadores: Ultimato → MCU
+(15,4),  -- Homem-Aranha: Sem Volta Para Casa → MCU
+(17,4),  -- Deadpool → MCU
+(19,5),  -- Matrix → Matrix
+(13,6),  -- John Wick → John Wick
+(18,7),  -- Duna → Duna
+(20,7);  -- (extra, para popular)
+
+-- ── Usuários de exemplo ───────────────────────────────────────────────────────
+-- Crie via endpoint POST /auth/register para gerar hashes bcrypt corretos.
+-- Exemplo:
 --   curl -X POST http://localhost:8000/auth/register \
 --        -H "Content-Type: application/json" \
---        -d '{"nome":"Admin","email":"admin@filminis.com","senha":"admin123"}'
+--        -d '{"nome":"Admin","email":"admin@filminis.com","senha":"admin123","apelido":"admin"}'
