@@ -1,135 +1,163 @@
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { homeService, filmeService } from '../services/api'
-import Footer from '../components/shared/Footer'
-import FilmCard from '../components/shared/FilmCard'
-import './LandingPage.css'
+import { useFilmes } from '../context/FilmesContext'
+import { useAuth } from '../context/AuthContext'
+import FilmCard from '../components/FilmCard'
+import '../styles/LandingPage.css'
+import '../styles/Shared.css'
 
 export default function LandingPage() {
+  const { filmes, loading } = useFilmes()
+  const { isLoggedIn, isFavorito, toggleFavorito } = useAuth()
   const navigate = useNavigate()
-  const [destaques,    setDestaques]    = useState([])
-  const [tendencias,   setTendencias]   = useState([])
-  const [recomendados, setRecomendados] = useState([])
-  const [heroIdx,      setHeroIdx]      = useState(0)
+  const [heroIdx, setHeroIdx] = useState(0)
+
+  const heroFilmes = filmes.slice(0, 5)
+  const trending = filmes.slice(0, 6)
+  const recommendations = filmes.slice(2, 5)
 
   useEffect(() => {
-    homeService.destaques()
-      .then(d => setDestaques(d.map(x => x.filme)))
-      .catch(() => {})
+    if (heroFilmes.length < 2) return
+    const t = setInterval(() => setHeroIdx(i => (i + 1) % heroFilmes.length), 6000)
+    return () => clearInterval(t)
+  }, [heroFilmes.length])
 
-    filmeService.listar({ limit: 6 })
-      .then(setTendencias)
-      .catch(() => {})
+  const hero = heroFilmes[heroIdx]
 
-    filmeService.listar({ limit: 3, skip: 3 })
-      .then(setRecomendados)
-      .catch(() => {})
-  }, [])
-
-  function interceptar(e) {
-    e.preventDefault()
-    navigate('/login')
+  if (loading) {
+    return (
+      <div className="loading-state">
+        <div className="spinner" />
+        <span>Carregando filmes...</span>
+      </div>
+    )
   }
 
-  const hero = destaques[heroIdx] ?? tendencias[0]
-
   return (
-    <>
-      <header className="landing-nav">
-        <div className="container landing-nav__inner">
-          <span className="landing-nav__logo">🎬 <strong>Holly</strong>Woo</span>
-          <nav aria-label="Menu da landing page">
-            <a href="#tendencias" onClick={interceptar}>Home</a>
-            <a href="#tendencias" onClick={interceptar}>Catálogo</a>
-            <a href="#tendencias" onClick={interceptar}>Favoritos</a>
-          </nav>
-          <button className="btn btn--ghost btn--sm" onClick={() => navigate('/login')}>Entrar</button>
-        </div>
-      </header>
-
-      <main>
-        {/* ── Hero ── */}
-        {hero && (
-          <section className="hero" style={{ backgroundImage: `url(${hero.banner ?? hero.poster})` }} aria-label={`Destaque: ${hero.titulo}`}>
-            <div className="hero__overlay" />
-            <div className="container hero__content">
-              <h1>{hero.titulo}</h1>
-              <p className="hero__sinopse">{hero.sinopse}</p>
-              <div className="hero__actions">
-                <button className="btn btn--primary" onClick={interceptar}>Detalhes ›</button>
-                <button className="btn btn--ghost hero__heart" onClick={interceptar} aria-label="Favoritar">♡</button>
+    <div>
+      {/* HERO */}
+      {hero && (
+        <section className="landing-hero" aria-label="Destaque">
+          <div
+            className="landing-hero-bg"
+            style={{ backgroundImage: `url(${hero.poster_bg || hero.poster})` }}
+          />
+          <div className="landing-hero-gradient" />
+          <div className="landing-hero-content">
+            <div className="landing-hero-text">
+              <h1 className="landing-hero-title">{hero.titulo}</h1>
+              <p className="landing-hero-synopsis">
+                {hero.sinopse?.substring(0, 120)}...
+              </p>
+              <div className="landing-hero-actions">
+                <button className="btn btn-primary" onClick={() => navigate(`/detalhes/${hero.id}`)}>
+                  Detalhes &rsaquo;
+                </button>
+                {isLoggedIn && (
+                  <button
+                    className={`btn-fav${isFavorito(hero.id) ? ' active' : ''}`}
+                    onClick={() => toggleFavorito(hero.id)}
+                    aria-label="Favoritar"
+                  >
+                    {isFavorito(hero.id) ? '♥' : '♡'}
+                  </button>
+                )}
               </div>
             </div>
-            {destaques.length > 1 && (
-              <div className="hero__dots">
-                {destaques.map((_, i) => (
-                  <button key={i}
-                    className={`hero__dot${i === heroIdx ? ' hero__dot--active' : ''}`}
-                    onClick={() => setHeroIdx(i)} aria-label={`Destaque ${i + 1}`} />
-                ))}
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* ── Tendências ── */}
-        <section id="tendencias" className="container landing-section">
-          <h2 className="section-title">Filmes em Tendência</h2>
-          <div className="landing-grid">
-            {tendencias.map(f => (
-              <FilmCard key={f.id_filme} filme={f} showHeart={false}
-                onToggleFav={() => navigate('/login')} />
+          </div>
+          <div className="landing-hero-dots" role="tablist" aria-label="Slides">
+            {heroFilmes.map((_, i) => (
+              <button
+                key={i}
+                className={`landing-hero-dot${i === heroIdx ? ' active' : ''}`}
+                onClick={() => setHeroIdx(i)}
+                role="tab"
+                aria-selected={i === heroIdx}
+                aria-label={`Slide ${i + 1}`}
+              />
             ))}
           </div>
         </section>
+      )}
 
-        {/* ── Banners CTA ── */}
-        <section className="container landing-banners" aria-label="Chamadas para ação">
-          <div className="landing-banner landing-banner--purple">
-            <div>
-              <h3>Ache os Melhores Filmes</h3>
-              <p className="landing-banner__sub">Visite as Opções</p>
-              <p>Nosso site oferece toda a informação e diversão que você merece</p>
-              <button className="btn btn--ghost btn--sm" onClick={() => navigate('/login')}>📋 Catálogo</button>
-            </div>
-            <span className="landing-banner__emoji">🎟️</span>
-          </div>
-
-          <div className="landing-banner landing-banner--dark">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Anna_Frozen_Disney.png/220px-Anna_Frozen_Disney.png"
-              alt="Personagem animado" className="landing-banner__char" />
-            <div>
-              <h3>Não Achou?</h3>
-              <p>Não conseguiu achar algum filme que queria? Solicite a adição do filme agora!</p>
-              <button className="btn btn--primary btn--sm" onClick={() => navigate('/login')}>+ Adicionar Filme</button>
-            </div>
+      <div className="landing-body">
+        {/* TRENDING */}
+        <section className="landing-trending">
+          <h2 className="section-title">Filmes em Tendência</h2>
+          <div className="landing-films-grid-6">
+            {trending.map(f => <FilmCard key={f.id} filme={f} />)}
           </div>
         </section>
 
-        {/* ── Recomendados ── */}
-        {recomendados.length > 0 && (
-          <section className="container landing-section">
-            <h2 className="section-title">Provavelmente Você vai Gostar</h2>
-            <div className="landing-recommend">
-              {recomendados.map(f => (
-                <article key={f.id_filme} className="recommend-card" onClick={() => navigate('/login')}>
-                  <img src={f.poster ?? ''} alt={f.titulo} />
-                  <div className="recommend-card__info">
-                    <strong>{f.titulo}</strong>
-                    <span className="recommend-card__badge">
-                      {f.classificacao && <em style={{ background:'#16a34a', color:'#fff', borderRadius:'4px', padding:'1px 5px', fontSize:'0.7rem' }}>{f.classificacao}</em>}
-                      {f.ano}
-                    </span>
-                    <button className="btn btn--primary btn--sm" onClick={() => navigate('/login')}>Detalhes ›</button>
-                  </div>
-                </article>
-              ))}
+        {/* PROMO BANNERS */}
+        <section className="landing-promo" aria-label="Promoções">
+          <div className="promo-card promo-card-purple">
+            <div className="promo-card-content">
+              <p className="promo-card-title">Ache os Melhores Filmes</p>
+              <p className="promo-card-subtitle">Visite as Opções</p>
+              <p className="promo-card-text">
+                Nosso site oferece toda a informação e diversão que você merece
+              </p>
+              <button
+                className="btn"
+                style={{ background: '#fff', color: '#7833e2', fontWeight: 800, fontSize: '0.85rem', marginTop: '8px' }}
+                onClick={() => navigate('/catalogo')}
+              >
+                🎬 Catálogo
+              </button>
             </div>
-          </section>
-        )}
-      </main>
+            <span className="promo-card-icon" aria-hidden="true">🎟️</span>
+          </div>
 
-      <Footer />
-    </>
+          <div className="promo-card promo-card-dark">
+            <div className="promo-card-content">
+              <p className="promo-card-title">Não Achou?</p>
+              <p className="promo-card-text">
+                Não conseguiu achar algum filme que queria? Solicite a adição do filme agora!
+              </p>
+              <button
+                className="btn btn-primary"
+                style={{ marginTop: '8px' }}
+                onClick={() => isLoggedIn ? navigate('/solicitar-adicao') : navigate('/login')}
+              >
+                + Adicionar Filme
+              </button>
+            </div>
+            <span className="promo-card-icon" aria-hidden="true">🎭</span>
+          </div>
+        </section>
+
+        {/* RECOMMENDATIONS */}
+        <section aria-label="Recomendações">
+          <h2 className="section-title">Provavelmente Você vai Gostar</h2>
+          <div className="landing-recommendations">
+            {recommendations.map(f => (
+              <article key={f.id} className="rec-card" onClick={() => navigate(`/detalhes/${f.id}`)}>
+                <img
+                  className="rec-card-poster"
+                  src={f.poster}
+                  alt={f.titulo}
+                  onError={e => { e.target.src = 'https://via.placeholder.com/80x100/2a2a2a/666' }}
+                />
+                <div className="rec-card-body">
+                  <p className="rec-card-title">{f.titulo}</p>
+                  <div className="rec-card-meta">
+                    <span className="badge-classif">{f.classificacao || 'L'}</span>
+                    <span style={{ color: '#aaa', fontSize: '0.85rem' }}>{f.ano}</span>
+                  </div>
+                  <button
+                    className="btn btn-primary"
+                    style={{ fontSize: '0.8rem', padding: '6px 14px' }}
+                    onClick={e => { e.stopPropagation(); navigate(`/detalhes/${f.id}`) }}
+                  >
+                    Detalhes &rsaquo;
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      </div>
+    </div>
   )
 }

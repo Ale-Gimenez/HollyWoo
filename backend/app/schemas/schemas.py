@@ -6,6 +6,28 @@ from typing import List, Optional
 
 from pydantic import BaseModel, EmailStr, field_validator
 
+# ─── Ano atual (usado na lógica de era do filme) ──────────────────────────────
+# Definido como constante para facilitar ajuste futuro
+_ANO_ATUAL = 2026
+_LIMIAR_CLASSICO = _ANO_ATUAL - 20   # <= 2006 → clássico
+_LIMIAR_NOVO     = _ANO_ATUAL - 5    # >= 2021 → novo
+
+
+def calcular_era(ano: Optional[int]) -> Optional[str]:
+    """
+    Retorna a era de um filme com base no ano de lançamento:
+      - 'classico'  → lançado há mais de 20 anos
+      - 'novo'      → lançado há 5 anos ou menos
+      - None        → filmes do meio (sem classificação)
+    """
+    if ano is None:
+        return None
+    if ano <= _LIMIAR_CLASSICO:
+        return "classico"
+    if ano >= _LIMIAR_NOVO:
+        return "novo"
+    return None
+
 
 # ─── Auxiliares simples ───────────────────────────────────────────────────────
 
@@ -18,11 +40,13 @@ class PaisOut(BaseModel):
     model_config = {"from_attributes": True}
     id_pais: int
     nome: str
+    img: Optional[str] = None
 
 class LinguagemOut(BaseModel):
     model_config = {"from_attributes": True}
     id_linguagem: int
     nome: str
+    img: Optional[str] = None
 
 class CategoriaOut(BaseModel):
     model_config = {"from_attributes": True}
@@ -33,22 +57,7 @@ class ProdutoraOut(BaseModel):
     model_config = {"from_attributes": True}
     id_produtora: int
     nome: str
-
-# ─── Saga ─────────────────────────────────────────────────────────────────────
-
-class SagaOut(BaseModel):
-    model_config = {"from_attributes": True}
-    id_saga: int
-    nome: str
-    descricao: Optional[str] = None
-
-class SagaCreate(BaseModel):
-    nome: str
-    descricao: Optional[str] = None
-
-class SagaUpdate(BaseModel):
-    nome: Optional[str] = None
-    descricao: Optional[str] = None
+    img: Optional[str] = None
 
 # ─── Ator / Diretor ───────────────────────────────────────────────────────────
 
@@ -57,12 +66,15 @@ class AtorOut(BaseModel):
     id_ator: int
     nome: str
     sobrenome: str
+    nome_personagem: Optional[str] = None
+    img: Optional[str] = None
 
 class DiretorOut(BaseModel):
     model_config = {"from_attributes": True}
     id_diretor: int
     nome: str
     sobrenome: str
+    img: Optional[str] = None
 
 # ─── Filme ────────────────────────────────────────────────────────────────────
 
@@ -75,8 +87,6 @@ class FilmeBase(BaseModel):
     poster: Optional[str] = None
     banner: Optional[str] = None
     trailer: Optional[str] = None
-    classificacao: Optional[str] = None   # "L","6","10","12","14","16","18"
-    estilo_visual: Optional[str] = None   # "3D","2D","Stop Motion","Anime"
 
 class FilmeCreate(FilmeBase):
     id_produtora_principal: Optional[int] = None
@@ -87,7 +97,6 @@ class FilmeCreate(FilmeBase):
     ids_atores: List[int] = []
     ids_diretores: List[int] = []
     ids_linguagens: List[int] = []
-    ids_sagas: List[int] = []
 
 class FilmeUpdate(BaseModel):
     """Todos os campos opcionais para PATCH."""
@@ -99,8 +108,6 @@ class FilmeUpdate(BaseModel):
     poster: Optional[str] = None
     banner: Optional[str] = None
     trailer: Optional[str] = None
-    classificacao: Optional[str] = None
-    estilo_visual: Optional[str] = None
     id_produtora_principal: Optional[int] = None
     id_pais_origem: Optional[int] = None
     ids_produtoras: Optional[List[int]] = None
@@ -109,7 +116,6 @@ class FilmeUpdate(BaseModel):
     ids_atores: Optional[List[int]] = None
     ids_diretores: Optional[List[int]] = None
     ids_linguagens: Optional[List[int]] = None
-    ids_sagas: Optional[List[int]] = None
 
 class FilmeOut(BaseModel):
     model_config = {"from_attributes": True}
@@ -122,9 +128,10 @@ class FilmeOut(BaseModel):
     poster: Optional[str]
     banner: Optional[str]
     trailer: Optional[str]
-    classificacao: Optional[str]
-    estilo_visual: Optional[str]
     flag: Optional[bool]
+    classificacao: Optional[str] = None
+    estilo_visual: Optional[str] = None
+    era: Optional[str] = None           # "classico" | "novo" | None
     pais_origem: Optional[PaisOut] = None
     produtoras: List[ProdutoraOut] = []
     paises: List[PaisOut] = []
@@ -132,7 +139,12 @@ class FilmeOut(BaseModel):
     atores: List[AtorOut] = []
     diretores: List[DiretorOut] = []
     linguagens: List[LinguagemOut] = []
-    sagas: List[SagaOut] = []
+
+    @classmethod
+    def from_orm_with_era(cls, filme) -> "FilmeOut":
+        obj = cls.model_validate(filme)
+        obj.era = calcular_era(obj.ano)
+        return obj
 
 class FilmeListOut(BaseModel):
     """Versão resumida para listagem."""
@@ -142,10 +154,17 @@ class FilmeListOut(BaseModel):
     ano: Optional[int]
     poster: Optional[str]
     flag: Optional[bool]
-    classificacao: Optional[str]
-    estilo_visual: Optional[str]
+    classificacao: Optional[str] = None
+    estilo_visual: Optional[str] = None
+    era: Optional[str] = None           # "classico" | "novo" | None
     pais_origem: Optional[PaisOut] = None
     categorias: List[CategoriaOut] = []
+
+    @classmethod
+    def from_orm_with_era(cls, filme) -> "FilmeListOut":
+        obj = cls.model_validate(filme)
+        obj.era = calcular_era(obj.ano)
+        return obj
 
 # ─── Usuário ──────────────────────────────────────────────────────────────────
 
@@ -183,7 +202,7 @@ class UsuarioOut(BaseModel):
     imagem: Optional[str]
     role: str
     data_criacao: Optional[datetime]
-    data_nascimento: Optional[date] = None
+
 
 class RoleUpdate(BaseModel):
     role: str
@@ -209,14 +228,6 @@ class TokenOut(BaseModel):
 class RefreshIn(BaseModel):
     refresh_token: str
 
-# ─── Favoritos ────────────────────────────────────────────────────────────────
-
-class FavoritoOut(BaseModel):
-    model_config = {"from_attributes": True}
-    id_favorito: int
-    id_filme: int
-    criado_em: Optional[datetime]
-    filme: FilmeListOut
 
 # ─── Destaques da Home ────────────────────────────────────────────────────────
 

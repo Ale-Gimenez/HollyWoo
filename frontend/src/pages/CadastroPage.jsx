@@ -1,109 +1,120 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { authService } from '../services/api'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import Toast from '../components/shared/Toast'
-import './AuthPages.css'
+import '../styles/AuthPages.css'
+import '../styles/Shared.css'
+
+function Logo() {
+  return (
+    <svg width="52" height="52" viewBox="0 0 36 36" fill="none">
+      <rect width="36" height="36" rx="8" fill="#7833e2"/>
+      <ellipse cx="12" cy="20" rx="4" ry="4.5" fill="#fff"/>
+      <ellipse cx="24" cy="20" rx="4" ry="4.5" fill="#fff"/>
+      <circle cx="12" cy="20" r="2" fill="#1a1a1a"/>
+      <circle cx="24" cy="20" r="2" fill="#1a1a1a"/>
+      <rect x="6" y="10" width="24" height="5" rx="2" fill="#b693ec"/>
+      <rect x="4" y="8" width="5" height="3" rx="1" fill="#fff" transform="rotate(-20 4 8)"/>
+      <rect x="27" y="8" width="5" height="3" rx="1" fill="#fff" transform="rotate(20 27 8)"/>
+    </svg>
+  )
+}
 
 export default function CadastroPage() {
-  const { login } = useAuth()
-  const navigate  = useNavigate()
-  const [form, setForm] = useState({
-    nome: '', apelido: '', data_nascimento: '', email: '', senha: '', confirmar: ''
-  })
-  const [erro,    setErro]    = useState('')
+  const { cadastrar } = useAuth()
+  const navigate = useNavigate()
+  const [form, setForm] = useState({ nome: '', username: '', email: '', senha: '', confirmar: '', dataNascimento: '' })
+  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  function set(field) {
-    return (e) => setForm(f => ({ ...f, [field]: e.target.value }))
-  }
+  function set(f, v) { setForm(p => ({ ...p, [f]: v })) }
 
   async function handleSubmit(e) {
     e.preventDefault()
-    setErro('')
-    if (form.senha !== form.confirmar) { setErro('As senhas não conferem'); return }
+    setError('')
+    if (form.senha !== form.confirmar) { setError('As senhas não coincidem.'); return }
+    if (form.senha.length < 6) { setError('Senha deve ter ao menos 6 caracteres.'); return }
     setLoading(true)
-    try {
-      const { confirmar, ...body } = form
-      await authService.register(body)
-      await login({ email: form.email, senha: form.senha })
-      navigate('/home')
-    } catch (err) {
-      setErro(err.message)
-    } finally {
-      setLoading(false)
-    }
+    const result = await cadastrar(form)
+    setLoading(false)
+    if (!result.ok) { setError(result.msg); return }
+    navigate('/')
   }
 
   return (
-    <main className="auth-bg">
-      <Toast message={erro} type="error" onClose={() => setErro('')} />
-
-      <section className="auth-card auth-card--wide" aria-label="Formulário de cadastro">
-        <div className="auth-card__logo">
-          <span className="auth-logo-icon">🎬</span>
-          <span className="auth-logo-text"><strong>Holly</strong>Woo</span>
-          <p className="auth-logo-sub">Diversão para os Pequenos</p>
+    <main className="auth-page">
+      <div className="auth-card auth-card-wide">
+        <div className="auth-logo-wrap" style={{ alignItems: 'center', marginBottom: '16px' }}>
+          <Logo />
+          <span className="auth-brand-name">HollyWoo</span>
+          <span className="auth-slogan">Diversão para os pequenos</span>
         </div>
 
-        <h1 className="auth-card__title">SE CADASTRE</h1>
+        <h1 className="cadastro-title">SE CADASTRE</h1>
 
-        <form onSubmit={handleSubmit} noValidate>
-          <div className="auth-form-grid">
-            <div className="input-group">
-              <label htmlFor="nome">Nome e Sobrenome</label>
-              <div className="input-field">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
-                <input id="nome" type="text" placeholder="Ex: Fulano DeTal" value={form.nome} onChange={set('nome')} required />
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <div className="form-row form-row-2">
+            <div className="form-group">
+              <label className="form-label" htmlFor="cad-nome">Nome e Sobrenome</label>
+              <div className="auth-input-wrap">
+                <span className="auth-input-icon">👤</span>
+                <input id="cad-nome" placeholder="Ex: Fulano DeTal" value={form.nome} onChange={e => set('nome', e.target.value)} required />
               </div>
             </div>
-
-            <div className="input-group">
-              <label htmlFor="apelido">Nome de Usuário</label>
-              <div className="input-field">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
-                <input id="apelido" type="text" placeholder="Ex: FulanoDeTal" value={form.apelido} onChange={set('apelido')} />
-              </div>
-            </div>
-
-            <div className="input-group">
-              <label htmlFor="nascimento">Data Nascimento</label>
-              <div className="input-field">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-                <input id="nascimento" type="date" value={form.data_nascimento} onChange={set('data_nascimento')} />
-              </div>
-            </div>
-
-            <div className="input-group">
-              <label htmlFor="cad-email">E-mail</label>
-              <div className="input-field">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-                <input id="cad-email" type="email" placeholder="Ex: Fulano@gmail.com" value={form.email} onChange={set('email')} required autoComplete="email" />
-              </div>
-            </div>
-
-            <div className="input-group">
-              <label htmlFor="cad-senha">Senha</label>
-              <div className="input-field">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                <input id="cad-senha" type="password" placeholder="Ex: 12345678" value={form.senha} onChange={set('senha')} required autoComplete="new-password" />
-              </div>
-            </div>
-
-            <div className="input-group">
-              <label htmlFor="confirmar">Confirmar Senha</label>
-              <div className="input-field">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                <input id="confirmar" type="password" placeholder="Ex: 12345678" value={form.confirmar} onChange={set('confirmar')} required autoComplete="new-password" />
+            <div className="form-group">
+              <label className="form-label" htmlFor="cad-user">Nome de Usuário</label>
+              <div className="auth-input-wrap">
+                <span className="auth-input-icon">👤</span>
+                <input id="cad-user" placeholder="Ex: FulanoDeTal" value={form.username} onChange={e => set('username', e.target.value)} required />
               </div>
             </div>
           </div>
 
-          <button type="submit" className="btn btn--primary auth-card__submit" disabled={loading}>
-            ▶ {loading ? 'Cadastrando...' : 'Cadastrar'}
+          <div className="form-row form-row-2">
+            <div className="form-group">
+              <label className="form-label" htmlFor="cad-nasc">Data Nascimento</label>
+              <div className="auth-input-wrap">
+                <span className="auth-input-icon">📅</span>
+                <input id="cad-nasc" type="date" value={form.dataNascimento} onChange={e => set('dataNascimento', e.target.value)} />
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="form-label" htmlFor="cad-email">E-mail</label>
+              <div className="auth-input-wrap">
+                <span className="auth-input-icon">✉</span>
+                <input id="cad-email" type="email" placeholder="Ex: Fulano@gmail.com" value={form.email} onChange={e => set('email', e.target.value)} required autoComplete="email" />
+              </div>
+            </div>
+          </div>
+
+          <div className="form-row form-row-2">
+            <div className="form-group">
+              <label className="form-label" htmlFor="cad-senha">Senha</label>
+              <div className="auth-input-wrap">
+                <span className="auth-input-icon">🔒</span>
+                <input id="cad-senha" type="password" placeholder="Mínimo 6 caracteres" value={form.senha} onChange={e => set('senha', e.target.value)} required />
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="form-label" htmlFor="cad-conf">Confirmar Senha</label>
+              <div className="auth-input-wrap">
+                <span className="auth-input-icon">🔒</span>
+                <input id="cad-conf" type="password" placeholder="Repita a senha" value={form.confirmar} onChange={e => set('confirmar', e.target.value)} required />
+              </div>
+            </div>
+          </div>
+
+          {error && <div className="inline-error">⚠ {error}</div>}
+
+          <button type="submit" className="btn btn-primary auth-submit" disabled={loading}>
+            {loading ? 'Criando conta...' : '▶ Cadastrar'}
           </button>
+
+          <p className="auth-hint">
+            Já possui cadastro?{' '}
+            <Link to="/login" className="auth-hint-link">Faça Login</Link>
+          </p>
         </form>
-      </section>
+      </div>
     </main>
   )
 }

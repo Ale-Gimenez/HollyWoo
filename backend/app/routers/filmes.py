@@ -8,10 +8,12 @@ from app.core.database import get_db
 from app.dependencies.auth import get_current_user, require_admin
 from app.models.models import (
     Ator, Categoria, Diretor, Filme, FilmeAtor, FilmeCategoria,
-    FilmeDiretor, FilmeLinguagem, FilmePais, FilmeProdutora, FilmeSaga,
-    Linguagem, Pais, Produtora, Saga, Usuario,
+    FilmeDiretor, FilmeLinguagem, FilmePais, FilmeProdutora,
+    Linguagem, Pais, Produtora, Usuario,
 )
-from app.schemas.schemas import FilmeCreate, FilmeListOut, FilmeOut, FilmeUpdate, MsgOut
+from app.schemas.schemas import (
+    FilmeCreate, FilmeListOut, FilmeOut, FilmeUpdate, MsgOut
+)
 
 router = APIRouter(prefix="/filmes", tags=["Filmes"])
 
@@ -26,7 +28,10 @@ def _parse_duracao(s: Optional[str]) -> Optional[dt_time]:
         sec = int(parts[2]) if len(parts) > 2 else 0
         return dt_time(h, m, sec)
     except Exception:
-        raise HTTPException(status_code=422, detail=f"Formato de duração inválido: '{s}'. Use HH:MM ou HH:MM:SS")
+        raise HTTPException(
+            status_code=422,
+            detail=f"Formato de duração inválido: '{s}'. Use HH:MM ou HH:MM:SS"
+        )
 
 def _set_relations(db: Session, filme: Filme, data: dict):
     """Atualiza todas as tabelas N:N do filme."""
@@ -37,7 +42,6 @@ def _set_relations(db: Session, filme: Filme, data: dict):
         "ids_atores":     (FilmeAtor,      "id_ator"),
         "ids_diretores":  (FilmeDiretor,   "id_diretor"),
         "ids_linguagens": (FilmeLinguagem, "id_linguagem"),
-        "ids_sagas":      (FilmeSaga,      "id_saga"),
     }
     fk_filme = "id_filme"
 
@@ -55,86 +59,80 @@ def _get_or_404(db: Session, filme_id: int) -> Filme:
         raise HTTPException(status_code=404, detail="Filme não encontrado")
     return f
 
+def _to_list_out(filmes) -> List[FilmeListOut]:
+    """Converte uma lista de ORM Filme para FilmeListOut com era calculada."""
+    return [FilmeListOut.from_orm_with_era(f) for f in filmes]
+
+def _to_out(filme) -> FilmeOut:
+    """Converte um ORM Filme para FilmeOut com era calculada."""
+    return FilmeOut.from_orm_with_era(filme)
+
 # ─── Rotas públicas ───────────────────────────────────────────────────────────
 
 @router.get("", response_model=List[FilmeListOut])
 def list_filmes(
-    titulo: Optional[str]          = Query(None, description="Busca por título, ator ou diretor"),
-    ano: Optional[int]             = Query(None),
-    categoria: Optional[int]       = Query(None, description="id_categoria"),
-    classificacao: Optional[str]   = Query(None, description="ex: L, 6, 10, 12, 14, 16, 18"),
-    estilo_visual: Optional[str]   = Query(None, description="ex: 3D, 2D, Stop Motion, Anime"),
-    linguagem: Optional[int]       = Query(None, description="id_linguagem"),
-    pais: Optional[int]            = Query(None, description="id_pais"),
-    saga: Optional[int]            = Query(None, description="id_saga"),
-    aprovados: bool                = Query(True, description="False = pendentes (só admin)"),
-    skip: int                      = Query(0, ge=0),
-    limit: int                     = Query(20, ge=1, le=100),
+    titulo: Optional[str] = Query(None, description="Busca por título"),
+    ano: Optional[int] = Query(None),
+    era: Optional[str] = Query(None, description="'classico', 'novo' ou None"),
+    categoria: Optional[int] = Query(None, description="id_categoria"),
+    ator: Optional[int] = Query(None, description="id_ator"),
+    diretor: Optional[int] = Query(None, description="id_diretor"),
+    pais: Optional[int] = Query(None, description="id_pais"),
+    aprovados: bool = Query(True, description="False = pendentes (só admin)"),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
 ):
+    from app.schemas.schemas import _LIMIAR_CLASSICO, _LIMIAR_NOVO
+
     q = db.query(Filme)
 
     if aprovados:
         q = q.filter(Filme.flag == True)
 
-    # busca unificada: título, ator ou diretor
     if titulo:
-        q = (
-            q.outerjoin(FilmeAtor,    FilmeAtor.id_filme    == Filme.id_filme)
-             .outerjoin(Ator,         Ator.id_ator          == FilmeAtor.id_ator)
-             .outerjoin(FilmeDiretor, FilmeDiretor.id_filme == Filme.id_filme)
-             .outerjoin(Diretor,      Diretor.id_diretor    == FilmeDiretor.id_diretor)
-             .filter(
-                 Filme.titulo.ilike(f"%{titulo}%") |
-                 Ator.nome.ilike(f"%{titulo}%")    |
-                 Diretor.nome.ilike(f"%{titulo}%")
-             )
-             .distinct()
-        )
-
+        q = q.filter(Filme.titulo.ilike(f"%{titulo}%"))
     if ano:
         q = q.filter(Filme.ano == ano)
+
+    # Filtro por era calculada dinamicamente no banco
+    if era == "classico":
+        q = q.filter(Filme.ano <= _LIMIAR_CLASSICO)
+    elif era == "novo":
+        q = q.filter(Filme.ano >= _LIMIAR_NOVO)
+    elif era == "medio":
+        q = q.filter(Filme.ano > _LIMIAR_CLASSICO, Filme.ano < _LIMIAR_NOVO)
 
     if categoria:
         q = q.join(FilmeCategoria, FilmeCategoria.id_filme == Filme.id_filme).filter(
             FilmeCategoria.id_categoria == categoria
         )
-
-    if classificacao:
-        q = q.filter(Filme.classificacao == classificacao)
-
-    if estilo_visual:
-        q = q.filter(Filme.estilo_visual == estilo_visual)
-
-    if linguagem:
-        q = q.join(FilmeLinguagem, FilmeLinguagem.id_filme == Filme.id_filme).filter(
-            FilmeLinguagem.id_linguagem == linguagem
+    if ator:
+        q = q.join(FilmeAtor, FilmeAtor.id_filme == Filme.id_filme).filter(
+            FilmeAtor.id_ator == ator
         )
-
+    if diretor:
+        q = q.join(FilmeDiretor, FilmeDiretor.id_filme == Filme.id_filme).filter(
+            FilmeDiretor.id_diretor == diretor
+        )
     if pais:
         q = q.join(FilmePais, FilmePais.id_filme == Filme.id_filme).filter(
             FilmePais.id_pais == pais
         )
 
-    if saga:
-        q = q.join(FilmeSaga, FilmeSaga.id_filme == Filme.id_filme).filter(
-            FilmeSaga.id_saga == saga
-        )
-
-    return q.offset(skip).limit(limit).all()
-
+    return _to_list_out(q.offset(skip).limit(limit).all())
 
 @router.get("/pendentes", response_model=List[FilmeListOut])
 def list_pendentes(
     db: Session = Depends(get_db),
     _: Usuario = Depends(require_admin),
 ):
-    return db.query(Filme).filter(Filme.flag == False).all()
+    return _to_list_out(db.query(Filme).filter(Filme.flag == False).all())
 
 
 @router.get("/{filme_id}", response_model=FilmeOut)
 def get_filme(filme_id: int, db: Session = Depends(get_db)):
-    return _get_or_404(db, filme_id)
+    return _to_out(_get_or_404(db, filme_id))
 
 # ─── Rotas autenticadas ───────────────────────────────────────────────────────
 
@@ -148,7 +146,6 @@ def create_filme(
     filme = Filme(
         titulo=data["titulo"],
         id_produtora_principal=data.get("id_produtora_principal"),
-        id_pais_origem=data.get("id_pais_origem"),
         orcamento=data.get("orcamento"),
         duracao=_parse_duracao(data.get("duracao")),
         sinopse=data.get("sinopse"),
@@ -156,18 +153,15 @@ def create_filme(
         poster=data.get("poster"),
         banner=data.get("banner"),
         trailer=data.get("trailer"),
-        classificacao=data.get("classificacao"),
-        estilo_visual=data.get("estilo_visual"),
-        flag=False,
+        flag=False,  # aguarda aprovação do admin
     )
     db.add(filme)
-    db.flush()
+    db.flush()  # obtém id_filme antes do commit
 
     _set_relations(db, filme, data)
     db.commit()
     db.refresh(filme)
-    return filme
-
+    return _to_out(filme)
 
 @router.patch("/{filme_id}", response_model=FilmeOut)
 def update_filme(
@@ -180,8 +174,8 @@ def update_filme(
     data = body.model_dump(exclude_none=True)
 
     scalar_fields = {
-        "titulo", "orcamento", "sinopse", "ano", "poster", "banner", "trailer",
-        "id_produtora_principal", "id_pais_origem", "classificacao", "estilo_visual",
+        "titulo", "orcamento", "sinopse", "ano",
+        "poster", "banner", "trailer", "id_produtora_principal"
     }
     for field in scalar_fields:
         if field in data:
@@ -193,8 +187,7 @@ def update_filme(
     _set_relations(db, filme, data)
     db.commit()
     db.refresh(filme)
-    return filme
-
+    return _to_out(filme)
 
 @router.put("/{filme_id}/aprovar", response_model=FilmeOut)
 def aprovar_filme(
@@ -206,8 +199,7 @@ def aprovar_filme(
     filme.flag = True
     db.commit()
     db.refresh(filme)
-    return filme
-
+    return _to_out(filme)
 
 @router.delete("/{filme_id}", response_model=MsgOut)
 def delete_filme(
@@ -216,7 +208,7 @@ def delete_filme(
     _: Usuario = Depends(require_admin),
 ):
     filme = _get_or_404(db, filme_id)
-    for Model in (FilmeProdutora, FilmePais, FilmeCategoria, FilmeAtor, FilmeDiretor, FilmeLinguagem, FilmeSaga):
+    for Model in (FilmeProdutora, FilmePais, FilmeCategoria, FilmeAtor, FilmeDiretor, FilmeLinguagem):
         db.query(Model).filter(Model.id_filme == filme_id).delete()
     db.delete(filme)
     db.commit()

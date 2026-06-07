@@ -1,53 +1,93 @@
-/**
- * context/AuthContext.jsx
- * Gerencia o estado global de autenticação.
- * Disponibiliza: user, isAdmin, isLoading, login, logout
- */
-
-import { createContext, useCallback, useContext, useEffect, useState } from 'react'
-import { authService, usuarioService } from '../services/api'
+import { createContext, useContext, useState, useEffect } from 'react'
+import { apiLogin, apiCadastrar, apiLogout, apiGetMe } from '../service/api'
 
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [user,      setUser]      = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [user, setUser] = useState(null)
+  const [favoritos, setFavoritos] = useState([])
+  const [loadingAuth, setLoadingAuth] = useState(true)
 
-  /* Carrega o perfil se houver token salvo */
+  // Ao montar, tenta restaurar sessão do token salvo
   useEffect(() => {
     const token = localStorage.getItem('access_token')
-    if (!token) { setIsLoading(false); return }
-
-    usuarioService.me()
-      .then(setUser)
+    if (!token) { setLoadingAuth(false); return }
+    apiGetMe()
+      .then(u => {
+        setUser(normalizeUser(u))
+      })
       .catch(() => {
         localStorage.removeItem('access_token')
         localStorage.removeItem('refresh_token')
       })
-      .finally(() => setIsLoading(false))
+      .finally(() => setLoadingAuth(false))
   }, [])
 
-  const login = useCallback(async ({ email, senha }) => {
-    const tokens = await authService.login({ email, senha })
-    localStorage.setItem('access_token',  tokens.access_token)
-    localStorage.setItem('refresh_token', tokens.refresh_token)
-    const me = await usuarioService.me()
-    setUser(me)
-    return me
-  }, [])
+  function normalizeUser(u) {
+    return {
+      id: u.id_usuario,
+      nome: u.nome + (u.sobrenome ? ` ${u.sobrenome}` : ''),
+      username: u.apelido || u.nome,
+      email: u.email,
+      role: u.role,
+      avatar: u.imagem || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.nome)}&background=7833e2&color=fff&size=150`,
+      dataNascimento: u.data_nascimento || '',
+      dataIngresso: u.data_criacao
+        ? new Date(u.data_criacao).toLocaleDateString('pt-BR')
+        : '',
+    }
+  }
 
-  const logout = useCallback(async () => {
-    const refreshToken = localStorage.getItem('refresh_token')
-    try { await authService.logout(refreshToken) } catch { /* ignora */ }
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('refresh_token')
-    setUser(null)
-  }, [])
-
+  const isLoggedIn = !!user
   const isAdmin = user?.role === 'admin'
 
+  async function login(email, senha) {
+    try {
+      await apiLogin(email, senha)
+      const me = await apiGetMe()
+      setUser(normalizeUser(me))
+      setFavoritos([])
+      return { ok: true, role: me.role }
+    } catch (err) {
+      return { ok: false, msg: err.message || 'E-mail ou senha inválidos.' }
+    }
+  }
+
+  async function cadastrar(form) {
+    try {
+      await apiCadastrar(form)
+      // Faz login automático após cadastro
+      const loginResult = await login(form.email, form.senha)
+      return loginResult
+    } catch (err) {
+      return { ok: false, msg: err.message || 'Erro ao cadastrar.' }
+    }
+  }
+
+  async function logout() {
+    await apiLogout()
+    setUser(null)
+    setFavoritos([])
+  }
+
+  function updateUser(data) {
+    setUser(prev => ({ ...prev, ...data }))
+  }
+
+  function isFavorito(id) { return favoritos.includes(id) }
+
+  function toggleFavorito(id) {
+    setFavoritos(prev =>
+      prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
+    )
+  }
+
   return (
-    <AuthContext.Provider value={{ user, isAdmin, isLoading, login, logout, setUser }}>
+    <AuthContext.Provider value={{
+      user, isLoggedIn, isAdmin, favoritos, loadingAuth,
+      login, cadastrar, logout, updateUser,
+      isFavorito, toggleFavorito,
+    }}>
       {children}
     </AuthContext.Provider>
   )
@@ -55,6 +95,6 @@ export function AuthProvider({ children }) {
 
 export function useAuth() {
   const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error('useAuth deve ser usado dentro de AuthProvider')
+  if (!ctx) throw new Error('useAuth must be used inside AuthProvider')
   return ctx
 }

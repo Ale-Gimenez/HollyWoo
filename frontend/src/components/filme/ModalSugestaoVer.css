@@ -1,9 +1,0 @@
-.sugestao-ver__lista {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px 24px;
-}
-.sugestao-ver__item { display: flex; flex-direction: column; gap: 2px; }
-.sugestao-ver__item--full { grid-column: 1 / -1; }
-.sugestao-ver__item dt { font-size: 0.78rem; font-weight: 700; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.5px; }
-.sugestao-ver__item dd { font-size: 0.92rem; color: var(--color-text); }

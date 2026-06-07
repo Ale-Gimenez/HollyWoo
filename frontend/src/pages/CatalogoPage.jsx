@@ -1,228 +1,238 @@
-import { useCallback, useEffect, useState } from 'react'
-import { filmeService, dadosService, favoritoService } from '../services/api'
-import { useAuth } from '../context/AuthContext'
-import Navbar from '../components/shared/Navbar'
-import Footer from '../components/shared/Footer'
-import FilmCard from '../components/shared/FilmCard'
-import Pagination from '../components/shared/Pagination'
-import Toast from '../components/shared/Toast'
-import './CatalogoPage.css'
+import { useState, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useFilmes } from '../context/FilmesContext'
+import FilmCard from '../components/FilmCard'
+import '../styles/CatalogoPage.css'
+import '../styles/Shared.css'
 
-const LIMIT = 8
-const CLASSIFICACOES = ['L','6','10','12','14','16','18']
-const ESTILOS        = ['2D','3D','Stop Motion','Anime']
+const GENEROS = ['Ação','Animação','Aventura','Comédia','Drama','Fantasia','Ficção Científica','Musical','Romance','Suspense','Terror']
+const CLASSIFICACOES = ['Livre','+6','+10','+12','+14']
+const TEMAS = [
+  { emoji: '🦕', label: 'Dinossauros' },
+  { emoji: '🚀', label: 'Espaço' },
+  { emoji: '🦸', label: 'Super-Heróis' },
+  { emoji: '🤖', label: 'Robôs' },
+  { emoji: '🐾', label: 'Animais' },
+  { emoji: '👸', label: 'Princesas' },
+  { emoji: '✨', label: 'Magia' },
+  { emoji: '🏴‍☠️', label: 'Piratas' },
+  { emoji: '👨‍👩‍👧', label: 'Família' },
+  { emoji: '🏎️', label: 'Carros' },
+]
+const ESTILOS = ['3D','Stop Motion','2D','Anime']
+const PER_PAGE = 8
 
 export default function CatalogoPage() {
-  const { user } = useAuth()
+  const { filmes, loading } = useFilmes()
+  const navigate = useNavigate()
+  const [search, setSearch] = useState('')
+  const [activeGeneros, setActiveGeneros] = useState([])
+  const [activeClassifs, setActiveClassifs] = useState([])
+  const [activeTemas, setActiveTemas] = useState([])
+  const [activeEstilos, setActiveEstilos] = useState([])
+  const [anoFiltro, setAnoFiltro] = useState('Todos')
+  const [page, setPage] = useState(1)
 
-  /* dados auxiliares */
-  const [categorias,  setCategorias]  = useState([])
-  const [sagas,       setSagas]       = useState([])
-
-  /* filtros */
-  const [busca,          setBusca]          = useState('')
-  const [selCategorias,  setSelCategorias]  = useState([])
-  const [selClassif,     setSelClassif]     = useState([])
-  const [selEstilos,     setSelEstilos]     = useState([])
-  const [filtroAno,      setFiltroAno]      = useState('')
-
-  /* filmes */
-  const [filmes,     setFilmes]     = useState([])
-  const [total,      setTotal]      = useState(0)
-  const [pagina,     setPagina]     = useState(1)
-  const [loading,    setLoading]    = useState(false)
-  const [erro,       setErro]       = useState('')
-
-  /* favoritos */
-  const [favSet, setFavSet] = useState(new Set())
-
-  /* toast */
-  const [toast, setToast] = useState({ msg: '', type: 'success' })
-
-  /* carrega aux */
-  useEffect(() => {
-    dadosService.categorias().then(setCategorias).catch(() => {})
-    dadosService.sagas().then(setSagas).catch(() => {})
-    if (user) {
-      favoritoService.listar().then(favs => setFavSet(new Set(favs.map(f => f.id_filme)))).catch(() => {})
-    }
-  }, [user])
-
-  /* carrega filmes */
-  const buscarFilmes = useCallback(() => {
-    setLoading(true)
-    setErro('')
-    const params = {
-      limit: LIMIT,
-      skip: (pagina - 1) * LIMIT,
-      ...(busca         && { titulo: busca }),
-      ...(filtroAno     && { ano: filtroAno }),
-      ...(selCategorias.length === 1 && { categoria: selCategorias[0] }),
-      ...(selClassif.length   === 1 && { classificacao: selClassif[0] }),
-      ...(selEstilos.length   === 1 && { estilo_visual: selEstilos[0] }),
-    }
-    filmeService.listar(params)
-      .then(data => {
-        setFilmes(data)
-        setTotal(Math.ceil(data.length / LIMIT) || 1)   // quando tiver paginação real no backend, usar o total
-      })
-      .catch(e => setErro(e.message))
-      .finally(() => setLoading(false))
-  }, [pagina, busca, filtroAno, selCategorias, selClassif, selEstilos])
-
-  useEffect(() => { buscarFilmes() }, [buscarFilmes])
-
-  /* toggle seleção de filtro multi */
-  function toggleMulti(setter, val) {
-    setter(prev => prev.includes(val) ? prev.filter(x => x !== val) : [...prev, val])
-    setPagina(1)
+  function toggleChip(arr, setArr, val) {
+    setArr(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val])
+    setPage(1)
   }
 
-  /* favoritar/desfavoritar */
-  async function handleToggleFav(id) {
-    if (!user) return
-    try {
-      if (favSet.has(id)) {
-        await favoritoService.remover(id)
-        setFavSet(s => { const n = new Set(s); n.delete(id); return n })
-        setToast({ msg: 'Removido dos favoritos', type: 'success' })
-      } else {
-        await favoritoService.adicionar(id)
-        setFavSet(s => new Set(s).add(id))
-        setToast({ msg: 'Adicionado aos favoritos!', type: 'success' })
-      }
-    } catch (e) {
-      setToast({ msg: e.message, type: 'error' })
+  function clearAll() {
+    setActiveGeneros([]); setActiveClassifs([])
+    setActiveTemas([]); setActiveEstilos([])
+    setSearch(''); setAnoFiltro('Todos'); setPage(1)
+  }
+
+  const filtered = useMemo(() => {
+    let list = filmes
+    if (search.trim()) {
+      const q = search.toLowerCase()
+      list = list.filter(f =>
+        f.titulo?.toLowerCase().includes(q) ||
+        (f.diretores || []).some(d => (typeof d === 'string' ? d : d.nome)?.toLowerCase().includes(q)) ||
+        (f.elenco || []).some(a => (typeof a === 'string' ? a : a.nome)?.toLowerCase().includes(q))
+      )
     }
+    if (activeGeneros.length) {
+      list = list.filter(f => (f.categorias || []).some(c => activeGeneros.includes(c)))
+    }
+    if (activeClassifs.length) {
+      list = list.filter(f => activeClassifs.includes(f.classificacao))
+    }
+    if (activeEstilos.length) {
+      list = list.filter(f => (f.estilo_visual || []).some(e => activeEstilos.includes(e)))
+    }
+    if (anoFiltro !== 'Todos') {
+      const yr = Number(anoFiltro)
+      list = list.filter(f => f.ano >= yr && f.ano < yr + 10)
+    }
+    return list
+  }, [filmes, search, activeGeneros, activeClassifs, activeTemas, activeEstilos, anoFiltro])
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE))
+  const pageFilmes = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE)
+
+  const anos = ['Todos', '2020', '2010', '2000', '1990']
+
+  if (loading) {
+    return (
+      <div className="loading-state">
+        <div className="spinner" />
+        <span>Carregando catálogo...</span>
+      </div>
+    )
   }
 
   return (
-    <>
-      <Navbar />
-      <Toast message={toast.msg} type={toast.type} onClose={() => setToast({ msg: '' })} />
+    <div className="catalogo-layout">
+      {/* SIDEBAR */}
+      <aside className="catalogo-sidebar" aria-label="Filtros">
+        <h2 className="catalogo-sidebar-title">Filtros</h2>
 
-      <div className="catalogo-layout">
-        {/* ── Sidebar de filtros ── */}
-        <aside className="catalogo-sidebar" aria-label="Filtros">
-          <div className="catalogo-sidebar__inner">
-            <h2 className="catalogo-sidebar__title">Filtros</h2>
+        <div>
+          <p className="filter-group-title">Gênero</p>
+          <div className="filter-chips">
+            {GENEROS.map(g => (
+              <button
+                key={g}
+                className={`chip filter-chip${activeGeneros.includes(g) ? ' active' : ''}`}
+                onClick={() => toggleChip(activeGeneros, setActiveGeneros, g)}
+              >
+                {activeGeneros.includes(g) && <span className="chip-remove">✕</span>}
+                {g}
+              </button>
+            ))}
+          </div>
+        </div>
 
-            {/* Gênero */}
-            <div className="filter-group">
-              <h3>Gênero</h3>
-              <div className="filter-tags">
-                {categorias.map(c => (
-                  <button key={c.id_categoria}
-                    className={`filter-tag${selCategorias.includes(c.id_categoria) ? ' filter-tag--active' : ''}`}
-                    onClick={() => toggleMulti(setSelCategorias, c.id_categoria)}>
-                    {selCategorias.includes(c.id_categoria) ? '✕ ' : ''}{c.nome}
-                  </button>
-                ))}
-              </div>
-            </div>
+        <div>
+          <p className="filter-group-title">Classificação Indicativa</p>
+          <div className="filter-chips">
+            {CLASSIFICACOES.map(c => (
+              <button
+                key={c}
+                className={`chip filter-chip${activeClassifs.includes(c) ? ' active' : ''}`}
+                onClick={() => toggleChip(activeClassifs, setActiveClassifs, c)}
+              >
+                {activeClassifs.includes(c) && <span className="chip-remove">✕</span>}
+                {c}
+              </button>
+            ))}
+          </div>
+        </div>
 
-            {/* Classificação */}
-            <div className="filter-group">
-              <h3>Classificação Indicativa</h3>
-              <div className="filter-tags">
-                {CLASSIFICACOES.map(cl => (
-                  <button key={cl}
-                    className={`filter-tag${selClassif.includes(cl) ? ' filter-tag--active' : ''}`}
-                    onClick={() => toggleMulti(setSelClassif, cl)}>
-                    {selClassif.includes(cl) ? '✕ ' : ''}{cl === 'L' ? 'Livre' : `+${cl}`}
-                  </button>
-                ))}
-              </div>
-            </div>
+        <div>
+          <p className="filter-group-title">Tema do Filme</p>
+          <div className="filter-chips">
+            {TEMAS.map(t => (
+              <button
+                key={t.label}
+                className={`chip filter-chip${activeTemas.includes(t.label) ? ' active' : ''}`}
+                onClick={() => toggleChip(activeTemas, setActiveTemas, t.label)}
+              >
+                {activeTemas.includes(t.label) && <span className="chip-remove">✕</span>}
+                {t.emoji} {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
-            {/* Estilo Visual */}
-            <div className="filter-group">
-              <h3>Estilo Visual</h3>
-              <div className="filter-tags">
-                {ESTILOS.map(es => (
-                  <button key={es}
-                    className={`filter-tag${selEstilos.includes(es) ? ' filter-tag--active' : ''}`}
-                    onClick={() => toggleMulti(setSelEstilos, es)}>
-                    {selEstilos.includes(es) ? '✕ ' : ''}{es}
-                  </button>
-                ))}
-              </div>
-            </div>
+        <div>
+          <p className="filter-group-title">Estilo Visual</p>
+          <div className="filter-chips">
+            {ESTILOS.map(e => (
+              <button
+                key={e}
+                className={`chip filter-chip${activeEstilos.includes(e) ? ' active' : ''}`}
+                onClick={() => toggleChip(activeEstilos, setActiveEstilos, e)}
+              >
+                {activeEstilos.includes(e) && <span className="chip-remove">✕</span>}
+                {e}
+              </button>
+            ))}
+          </div>
+        </div>
 
-            <button className="btn btn--ghost btn--sm" style={{ marginTop: '8px' }}
-              onClick={() => { setSelCategorias([]); setSelClassif([]); setSelEstilos([]); setFiltroAno(''); setBusca('') }}>
-              Limpar filtros
+        <button className="btn-clear-filters" onClick={clearAll}>Limpar filtros</button>
+      </aside>
+
+      {/* MAIN */}
+      <main>
+        <h1 className="catalogo-title">Catálogo de Filmes</h1>
+
+        <div className="search-bar" style={{ marginBottom: '20px' }}>
+          <span className="search-icon">🔍</span>
+          <input
+            type="search"
+            placeholder="Está procurando um filme, ator ou diretor em específico?"
+            value={search}
+            onChange={e => { setSearch(e.target.value); setPage(1) }}
+            aria-label="Buscar filmes"
+          />
+        </div>
+
+        <div className="catalogo-controls">
+          <p className="catalogo-count">
+            <strong>{filtered.length}</strong> filmes exibidos
+          </p>
+          <div className="year-filter">
+            <label className="year-filter-label" htmlFor="year-select">Filtrar por Ano:</label>
+            <select
+              id="year-select"
+              className="form-select year-select"
+              value={anoFiltro}
+              onChange={e => { setAnoFiltro(e.target.value); setPage(1) }}
+            >
+              {anos.map(a => <option key={a} value={a}>{a}</option>)}
+            </select>
+          </div>
+        </div>
+
+        {pageFilmes.length === 0 ? (
+          <div className="catalogo-empty">
+            <p className="catalogo-empty-icon">🎬</p>
+            <p>Nenhum filme encontrado com os filtros aplicados.</p>
+          </div>
+        ) : (
+          <div className="catalogo-grid">
+            {pageFilmes.map(f => <FilmCard key={f.id} filme={f} />)}
+          </div>
+        )}
+
+        {/* Paginação */}
+        {totalPages > 1 && (
+          <nav className="pagination" aria-label="Paginação">
+            <button
+              className="page-btn"
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              aria-label="Página anterior"
+            >
+              ‹
             </button>
-          </div>
-        </aside>
-
-        {/* ── Conteúdo ── */}
-        <main className="catalogo-main">
-          <h1 className="section-title">Catálogo de Filmes</h1>
-
-          {/* Search bar */}
-          <div className="catalogo-search">
-            <div className="input-field">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-              <input type="search" placeholder="Está procurando um filme, ator ou diretor em específico?"
-                value={busca} onChange={e => { setBusca(e.target.value); setPagina(1) }} />
-            </div>
-          </div>
-
-          {/* Barra de info */}
-          <div className="catalogo-info">
-            <span>{loading ? 'Carregando...' : `${filmes.length} filmes exibidos`}</span>
-            <label className="catalogo-ano">
-              Filtrar por Ano:
-              <select value={filtroAno} onChange={e => { setFiltroAno(e.target.value); setPagina(1) }}>
-                <option value="">Todos</option>
-                {Array.from({ length: 30 }, (_, i) => 2025 - i).map(y => (
-                  <option key={y} value={y}>{y}</option>
-                ))}
-              </select>
-            </label>
-          </div>
-
-          {/* Estado de carregamento */}
-          {loading && (
-            <div>
-              <div className="spinner" />
-              <p className="loading-text">Carregando catálogo...</p>
-            </div>
-          )}
-
-          {/* Erro */}
-          {!loading && erro && (
-            <div className="catalogo-erro">
-              <span>⚠️</span>
-              <div>
-                <strong>Erro: {erro}</strong>
-                <p>Catálogo de Filmes não encontrado</p>
-              </div>
-            </div>
-          )}
-
-          {/* Grid */}
-          {!loading && !erro && (
-            <>
-              <div className="catalogo-grid">
-                {filmes.map(f => (
-                  <FilmCard key={f.id_filme} filme={f}
-                    favoritado={favSet.has(f.id_filme)}
-                    onToggleFav={handleToggleFav}
-                    showHeart={!!user} />
-                ))}
-              </div>
-              {filmes.length === 0 && (
-                <p className="catalogo-vazio">Nenhum filme encontrado com esses filtros.</p>
-              )}
-              <Pagination current={pagina} total={total} onChange={setPagina} />
-            </>
-          )}
-        </main>
-      </div>
-
-      <Footer />
-    </>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
+              <button
+                key={n}
+                className={`page-btn${page === n ? ' active' : ''}`}
+                onClick={() => setPage(n)}
+                aria-label={`Página ${n}`}
+                aria-current={page === n ? 'page' : undefined}
+              >
+                {n}
+              </button>
+            ))}
+            <button
+              className="page-btn"
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              aria-label="Próxima página"
+            >
+              ›
+            </button>
+          </nav>
+        )}
+      </main>
+    </div>
   )
 }

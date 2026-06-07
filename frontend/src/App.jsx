@@ -1,59 +1,106 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
-import { useAuth } from './context/AuthContext'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { AuthProvider, useAuth } from './context/AuthContext'
+import { FilmesProvider } from './context/FilmesContext'
+import Header from './components/Header'
+import Footer from './components/Footer'
+import LandingPage from './pages/LandingPage'
+import LoginPage from './pages/LoginPage'
+import CadastroPage from './pages/CadastroPage'
+import CatalogoPage from './pages/CatalogoPage'
+import DetalhesPage from './pages/DetalhesPage'
+import FavoritosPage from './pages/FavoritosPage'
+import HomeAdminPage from './pages/HomeAdminPage'
+import AdicionarFilmePage from './pages/AdicionarFilmePage'
+import SugestoesPage from './pages/SugestoesPage'
+import SolicitarAdicaoPage from './pages/SolicitarAdicaoPage'
+import './index.css'
 
-import LandingPage     from './pages/LandingPage'
-import LoginPage       from './pages/LoginPage'
-import CadastroPage    from './pages/CadastroPage'
-import HomeUsrPage     from './pages/HomeUsrPage'
-import HomeAdmPage     from './pages/HomeAdmPage'
-import CatalogoPage    from './pages/CatalogoPage'
-import FilmePage       from './pages/FilmePage'
-import FavoritosPage   from './pages/FavoritosPage'
-import AdicionarPage   from './pages/AdicionarPage'
-import SugestoesPage   from './pages/SugestoesPage'
-
-/** Rota que exige login — redireciona para /login se não autenticado */
-function PrivateRoute({ children }) {
-  const { user, isLoading } = useAuth()
-  if (isLoading) return null
-  return user ? children : <Navigate to="/login" replace />
-}
-
-/** Rota exclusiva de admin */
-function AdminRoute({ children }) {
-  const { user, isAdmin, isLoading } = useAuth()
-  if (isLoading) return null
-  if (!user) return <Navigate to="/login" replace />
-  if (!isAdmin) return <Navigate to="/home" replace />
+function PrivateRoute({ children, adminOnly = false }) {
+  const { isLoggedIn, isAdmin, loadingAuth } = useAuth()
+  if (loadingAuth) return null
+  if (!isLoggedIn) return <Navigate to="/login" replace />
+  if (adminOnly && !isAdmin) return <Navigate to="/" replace />
   return children
 }
 
-export default function App() {
-  const { user, isAdmin } = useAuth()
+function AppRoutes() {
+  const { isAdmin, isLoggedIn, loadingAuth } = useAuth()
+
+  if (loadingAuth) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+        <div className="spinner" />
+      </div>
+    )
+  }
 
   return (
-    <Routes>
-      {/* Públicas */}
-      <Route path="/"        element={<LandingPage />} />
-      <Route path="/login"   element={<LoginPage />} />
-      <Route path="/cadastro" element={<CadastroPage />} />
+    <div className="page-wrapper">
+      <Header />
+      <main className="main-content">
+        <Routes>
+          {/* Public / shared */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/cadastro" element={<CadastroPage />} />
+          <Route path="/catalogo" element={<CatalogoPage />} />
+          <Route path="/detalhes/:id" element={<DetalhesPage />} />
 
-      {/* Usuário logado */}
-      <Route path="/home" element={
-        <PrivateRoute>
-          {isAdmin ? <HomeAdmPage /> : <HomeUsrPage />}
-        </PrivateRoute>
-      }/>
-      <Route path="/catalogo"      element={<PrivateRoute><CatalogoPage /></PrivateRoute>} />
-      <Route path="/filmes/:id"    element={<PrivateRoute><FilmePage /></PrivateRoute>} />
-      <Route path="/favoritos"     element={<PrivateRoute><FavoritosPage /></PrivateRoute>} />
+          {/* Landing / home root */}
+          <Route
+            path="/"
+            element={
+              isLoggedIn && isAdmin
+                ? <Navigate to="/home" replace />
+                : <LandingPage />
+            }
+          />
 
-      {/* Apenas admin */}
-      <Route path="/adicionar"  element={<AdminRoute><AdicionarPage /></AdminRoute>} />
-      <Route path="/sugestoes"  element={<AdminRoute><SugestoesPage /></AdminRoute>} />
+          {/* Admin only */}
+          <Route path="/home" element={
+            <PrivateRoute adminOnly>
+              <HomeAdminPage />
+            </PrivateRoute>
+          } />
+          <Route path="/adicionar" element={
+            <PrivateRoute adminOnly>
+              <AdicionarFilmePage />
+            </PrivateRoute>
+          } />
+          <Route path="/sugestoes" element={
+            <PrivateRoute adminOnly>
+              <SugestoesPage />
+            </PrivateRoute>
+          } />
 
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+          {/* User only */}
+          <Route path="/favoritos" element={
+            <PrivateRoute>
+              <FavoritosPage />
+            </PrivateRoute>
+          } />
+          <Route path="/solicitar-adicao" element={
+            <PrivateRoute>
+              <SolicitarAdicaoPage />
+            </PrivateRoute>
+          } />
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </main>
+      <Footer />
+    </div>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <FilmesProvider>
+          <AppRoutes />
+        </FilmesProvider>
+      </AuthProvider>
+    </BrowserRouter>
   )
 }

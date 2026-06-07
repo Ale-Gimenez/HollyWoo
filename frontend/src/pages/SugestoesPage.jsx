@@ -1,128 +1,114 @@
-import { useEffect, useState } from 'react'
-import { filmeService } from '../services/api'
-import Navbar from '../components/shared/Navbar'
-import Toast from '../components/shared/Toast'
-import ModalSugestaoVer from '../components/filme/ModalSugestaoVer'
-import './SugestoesPage.css'
+import { useState, useEffect } from 'react'
+import { useFilmes } from '../context/FilmesContext'
+import '../styles/Pages.css'
+import '../styles/Shared.css'
 
 export default function SugestoesPage() {
+  const { getPendentes, aprovarFilme, deleteFilme } = useFilmes()
+  const [search, setSearch] = useState('')
   const [pendentes, setPendentes] = useState([])
-  const [busca,     setBusca]     = useState('')
-  const [loading,   setLoading]   = useState(true)
-  const [toast,     setToast]     = useState({ msg: '', type: 'success' })
-  const [verFilme,  setVerFilme]  = useState(null)
+  const [loadingPage, setLoadingPage] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
-    filmeService.pendentes()
+    setLoadingPage(true)
+    getPendentes()
       .then(setPendentes)
-      .catch(() => {})
-      .finally(() => setLoading(false))
+      .catch(err => setError(err.message))
+      .finally(() => setLoadingPage(false))
   }, [])
 
   async function handleAprovar(id) {
     try {
-      await filmeService.aprovar(id)
-      setPendentes(prev => prev.filter(f => f.id_filme !== id))
-      setToast({ msg: 'Filme aprovado com sucesso!', type: 'success' })
-      setVerFilme(null)
-    } catch (e) {
-      setToast({ msg: e.message, type: 'error' })
+      await aprovarFilme(id)
+      setPendentes(prev => prev.filter(f => f.id !== id))
+    } catch (err) {
+      alert('Erro ao aprovar: ' + err.message)
     }
   }
 
-  async function handleRejeitar(id) {
+  async function handleRecusar(id) {
+    if (!confirm('Tem certeza que deseja recusar e excluir esta sugestão?')) return
     try {
-      await filmeService.deletar(id)
-      setPendentes(prev => prev.filter(f => f.id_filme !== id))
-      setToast({ msg: 'Sugestão rejeitada.', type: 'success' })
-      setVerFilme(null)
-    } catch (e) {
-      setToast({ msg: e.message, type: 'error' })
+      await deleteFilme(id)
+      setPendentes(prev => prev.filter(f => f.id !== id))
+    } catch (err) {
+      alert('Erro ao recusar: ' + err.message)
     }
   }
 
   const filtrados = pendentes.filter(f =>
-    f.titulo.toLowerCase().includes(busca.toLowerCase())
+    !search.trim() || f.titulo.toLowerCase().includes(search.toLowerCase())
   )
+
+  if (loadingPage) return <div className="loading-state"><div className="spinner" /><p>Carregando sugestões...</p></div>
+  if (error) return <div className="loading-state"><p style={{ color: '#f66' }}>Erro: {error}</p></div>
 
   return (
-    <>
-      <Navbar />
-      <Toast message={toast.msg} type={toast.type} onClose={() => setToast({ msg: '' })} />
+    <main className="sugestoes-page">
+      <h1 className="sugestoes-title">Sugestões Filmes</h1>
 
-      <main className="container sugestoes-page">
-        <h1 className="section-title">Sugestões Filmes</h1>
+      <div className="search-bar" style={{ marginBottom: '32px' }}>
+        <span className="search-icon">🔍</span>
+        <input
+          type="search"
+          placeholder="Está procurando um filme em específico?"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          aria-label="Buscar sugestões"
+        />
+      </div>
 
-        <div className="sugestoes-search">
-          <div className="input-field">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-            </svg>
-            <input type="search" placeholder="Está procurando um filme em específico?"
-              value={busca} onChange={e => setBusca(e.target.value)} />
-          </div>
+      <section className="sugestoes-section" aria-labelledby="adicoes-title">
+        <div className="sugestoes-section-header">
+          <h2 id="adicoes-title" className="sugestoes-section-title">
+            Adições Pendentes ({filtrados.length})
+          </h2>
         </div>
 
-        {loading && <div className="spinner" />}
-
-        {!loading && filtrados.length === 0 && (
-          <p className="catalogo-vazio">Nenhuma sugestão pendente.</p>
-        )}
-
-        {!loading && filtrados.length > 0 && (
-          <ul className="sugestoes-lista">
-            {filtrados.map(f => (
-              <li key={f.id_filme} className="sugestao-card">
-                <div className="sugestao-card__left">
-                  <div className="sugestao-card__avatar">
-                    {f.poster
-                      ? <img src={f.poster} alt={f.titulo} />
-                      : <span>🎬</span>
-                    }
-                  </div>
-                  <div>
-                    <strong>{f.titulo}</strong>
-                    <p className="sugestao-card__sub">
-                      {f.ano} · {f.categorias?.map(c => c.nome).join(', ') || '—'}
+        <div className="sugestoes-list">
+          {filtrados.length === 0 ? (
+            <p style={{ color: '#666', fontSize: '0.9rem' }}>Nenhuma adição pendente.</p>
+          ) : (
+            filtrados.map(f => (
+              <article key={f.id} className="sugestao-card">
+                <img
+                  src={f.poster}
+                  alt={f.titulo}
+                  className="sugestao-poster"
+                  onError={e => { e.target.src = 'https://via.placeholder.com/72x100/2a2a2a/666' }}
+                />
+                <div className="sugestao-info">
+                  <h3 className="sugestao-film-title">{f.titulo}</h3>
+                  <p className="sugestao-meta">
+                    Ano: {f.ano || '—'} · Solicitação de adição
+                  </p>
+                  {f.sinopse && (
+                    <p className="sugestao-changes" style={{ marginTop: 4 }}>
+                      {f.sinopse.substring(0, 120)}{f.sinopse.length > 120 ? '...' : ''}
                     </p>
-                  </div>
+                  )}
+                  <span className="sugestao-tipo-badge sugestao-tipo-adicao">Adição</span>
                 </div>
-                <div className="sugestao-card__actions">
-                  <button className="btn btn--success btn--sm btn--icon"
-                    onClick={() => setVerFilme(f)} aria-label="Ver sugestão">👁</button>
-                  <button className="btn btn--danger  btn--sm btn--icon"
-                    onClick={() => handleRejeitar(f.id_filme)} aria-label="Rejeitar">✕</button>
+                <div className="sugestao-actions">
+                  <button
+                    className="btn-icon btn-icon-green"
+                    title="Aprovar"
+                    aria-label="Aprovar"
+                    onClick={() => handleAprovar(f.id)}
+                  >✓</button>
+                  <button
+                    className="btn-icon btn-icon-red"
+                    title="Recusar"
+                    aria-label="Recusar"
+                    onClick={() => handleRecusar(f.id)}
+                  >✕</button>
                 </div>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {pendentes.length > 0 && (
-          <button className="btn btn--danger sugestoes-limpar"
-            onClick={() => {
-              pendentes.forEach(f => filmeService.deletar(f.id_filme).catch(() => {}))
-              setPendentes([])
-              setToast({ msg: 'Todas as sugestões foram removidas', type: 'success' })
-            }}>
-            🗑 Limpar Sugestões
-          </button>
-        )}
-      </main>
-
-      {verFilme && (
-        <ModalSugestaoVer
-          filme={verFilme}
-          onClose={() => setVerFilme(null)}
-          onAprovar={() => handleAprovar(verFilme.id_filme)}
-          onRejeitar={() => handleRejeitar(verFilme.id_filme)}
-        />
-      )}
-
-      <footer className="home-footer-simple">
-        <p>Copyright {new Date().getFullYear()} — Todos os direitos reservados</p>
-      </footer>
-    </>
+              </article>
+            ))
+          )}
+        </div>
+      </section>
+    </main>
   )
 }
-import './HomePages.css'
