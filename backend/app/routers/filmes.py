@@ -146,6 +146,7 @@ def create_filme(
     filme = Filme(
         titulo=data["titulo"],
         id_produtora_principal=data.get("id_produtora_principal"),
+        id_pais_origem=data.get("id_pais_origem"),
         orcamento=data.get("orcamento"),
         duracao=_parse_duracao(data.get("duracao")),
         sinopse=data.get("sinopse"),
@@ -175,7 +176,7 @@ def update_filme(
 
     scalar_fields = {
         "titulo", "orcamento", "sinopse", "ano",
-        "poster", "banner", "trailer", "id_produtora_principal"
+        "poster", "banner", "trailer", "id_produtora_principal", "id_pais_origem"
     }
     for field in scalar_fields:
         if field in data:

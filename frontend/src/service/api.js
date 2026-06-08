@@ -83,11 +83,17 @@ export async function apiLogout() {
 export async function apiRefreshToken() {
   const refresh_token = localStorage.getItem('refresh_token')
   if (!refresh_token) throw new Error('Sem refresh token')
-  const data = await fetch(`${BASE}/auth/refresh`, {
+  const res = await fetch(`${BASE}/auth/refresh`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ refresh_token }),
-  }).then(r => r.json())
+  })
+  if (!res.ok) {
+    localStorage.removeItem('access_token')
+    localStorage.removeItem('refresh_token')
+    throw new Error('Refresh token inválido ou expirado')
+  }
+  const data = await res.json()
   localStorage.setItem('access_token', data.access_token)
   localStorage.setItem('refresh_token', data.refresh_token)
   return data

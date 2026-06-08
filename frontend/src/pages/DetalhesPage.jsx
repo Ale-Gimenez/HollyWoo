@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useFilmes } from '../context/FilmesContext'
 import { useAuth } from '../context/AuthContext'
@@ -64,6 +64,31 @@ function PopupSugestoesFilme({ filme, onClose }) {
 
 function PopupSolicitarEdicao({ filme, onClose }) {
   const [form, setForm] = useState({ campo: '', sugestao: '' })
+  const [enviado, setEnviado] = useState(false)
+  const [erro, setErro] = useState('')
+
+  function handleEnviar() {
+    if (!form.campo.trim() || !form.sugestao.trim()) {
+      setErro('Preencha o campo e a sugestão antes de enviar.')
+      return
+    }
+    // TODO: integrar com endpoint de sugestões quando disponível
+    setEnviado(true)
+    setErro('')
+  }
+
+  if (enviado) {
+    return (
+      <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+        <div className="modal-box modal-box-sm" style={{ textAlign: 'center' }}>
+          <p style={{ fontSize: '2rem' }}>✅</p>
+          <h2 className="modal-title">Sugestão Enviada!</h2>
+          <p style={{ color: '#aaa', marginBottom: '16px' }}>Obrigado pela colaboração. Um admin irá revisar sua sugestão em breve.</p>
+          <button className="btn btn-primary" onClick={onClose}>Fechar</button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
@@ -77,8 +102,9 @@ function PopupSolicitarEdicao({ filme, onClose }) {
           <label className="form-label" htmlFor="sugestao-text">Sugestão</label>
           <textarea id="sugestao-text" className="form-textarea" placeholder="Descreva a mudança sugerida..." value={form.sugestao} onChange={e => setForm(p => ({ ...p, sugestao: e.target.value }))} rows={3} />
         </div>
+        {erro && <p style={{ color: '#f87171', fontSize: '0.85rem', marginTop: '6px' }}>{erro}</p>}
         <div className="modal-actions">
-          <button className="btn btn-primary" onClick={onClose}>🚀 Enviar Solicitação</button>
+          <button className="btn btn-primary" onClick={handleEnviar}>🚀 Enviar Solicitação</button>
           <button className="btn btn-outline" onClick={onClose}>✕ Cancelar</button>
         </div>
       </div>
@@ -89,15 +115,37 @@ function PopupSolicitarEdicao({ filme, onClose }) {
 export default function DetalhesPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { filmes, updateFilme, deleteFilme } = useFilmes()
+  const { filmes, getFilmeDetalhes, updateFilme, deleteFilme } = useFilmes()
   const { isAdmin, isLoggedIn, isFavorito, toggleFavorito } = useAuth()
 
-  const filme = filmes.find(f => String(f.id) === String(id))
+  const [filmeDetalhes, setFilmeDetalhes] = useState(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(true)
+
+  useEffect(() => {
+    setLoadingDetalhes(true)
+    setFilmeDetalhes(null)
+    getFilmeDetalhes(id)
+      .then(data => setFilmeDetalhes(data))
+      .catch(() => setFilmeDetalhes(null))
+      .finally(() => setLoadingDetalhes(false))
+  }, [id])
+
+  // Enquanto carrega os detalhes, usa o filme da listagem como fallback
+  const filme = filmeDetalhes || filmes.find(f => String(f.id) === String(id))
 
   const [showEdit, setShowEdit] = useState(false)
   const [showDelete, setShowDelete] = useState(false)
   const [showSugestoes, setShowSugestoes] = useState(false)
   const [showSolicitar, setShowSolicitar] = useState(false)
+
+  if (loadingDetalhes && !filme) {
+    return (
+      <div className="loading-state">
+        <div className="spinner" />
+        <p>Carregando detalhes...</p>
+      </div>
+    )
+  }
 
   if (!filme) {
     return (
@@ -113,9 +161,18 @@ export default function DetalhesPage() {
   const similares = filmes.filter(f => String(f.id) !== String(id)).slice(0, 6)
   const bgUrl = filme.poster_bg || filme.poster
 
-  const dur = typeof filme.duracao === 'string'
-    ? filme.duracao.replace(':', 'h ').replace(':', 'min')
-    : filme.duracao ? `${Math.floor(filme.duracao / 60)}h ${filme.duracao % 60}min` : ''
+  const dur = (() => {
+    if (!filme.duracao) return ''
+    if (typeof filme.duracao === 'string') {
+      // Backend retorna "HH:MM:SS" ou "HH:MM"
+      const parts = filme.duracao.split(':')
+      const h = parseInt(parts[0], 10)
+      const m = parseInt(parts[1] || '0', 10)
+      return h > 0 ? `${h}h ${m}min` : `${m}min`
+    }
+    // Caso numérico (segundos) — fallback
+    return `${Math.floor(filme.duracao / 60)}h ${filme.duracao % 60}min`
+  })()
 
   const pais = (filme.paises?.[0]) || ''
   const paisFlag = { 'Estados Unidos': '🇺🇸', 'Japão': '🇯🇵', 'Reino Unido': '🇬🇧', 'França': '🇫🇷', 'Brasil': '🇧🇷' }[pais] || '🌐'
@@ -154,7 +211,7 @@ export default function DetalhesPage() {
             {filme.orcamento > 0 && (
               <span className="detalhes-meta-item">
                 <span className="detalhes-orcamento-badge">$</span>
-                $ {Number(filme.orcamento).toFixed(4)}
+                $ {Number(filme.orcamento).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             )}
             {dur && (

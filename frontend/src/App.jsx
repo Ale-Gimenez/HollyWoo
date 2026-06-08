@@ -13,6 +13,7 @@ import HomeAdminPage from './pages/HomeAdminPage'
 import AdicionarFilmePage from './pages/AdicionarFilmePage'
 import SugestoesPage from './pages/SugestoesPage'
 import SolicitarAdicaoPage from './pages/SolicitarAdicaoPage'
+import DiagnosticoPage from './pages/DiagnosticoPage'
 import './index.css'
 
 function PrivateRoute({ children, adminOnly = false }) {
@@ -83,6 +84,9 @@ function AppRoutes() {
               <SolicitarAdicaoPage />
             </PrivateRoute>
           } />
+
+          {/* Diagnóstico temporário */}
+          <Route path="/diagnostico" element={<DiagnosticoPage />} />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />

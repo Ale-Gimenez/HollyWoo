@@ -32,11 +32,7 @@ pip install -r requirements.txt
 # Configure o banco de dados no .env
 # (edite o arquivo .env com suas credenciais MySQL)
 
-# Rode as migrações Alembic (opcional, cria as tabelas)
-cd app
-alembic upgrade head
-cd ..
-
+# Antes de iniciar o servidor coloque o banco
 # Inicie o servidor
 uvicorn app.main:app --reload --port 8000
 ```
@@ -46,7 +42,19 @@ Documentação automática: http://localhost:8000/docs
 
 ---
 
-### 2. Frontend
+### 2. Banco MySQL
+# Rode o seguinte comando (criar tabelas e população)
+mysql -u root -p < hollywoo-DDL-DML.sql
+
+Caso não der certo coloque o arquivo hollywoo-DDL-DML.sql no Workbench e rode clicando no raio
+
+| Role  | E-mail               | Senha    |
+|-------|----------------------|----------|
+| admin | admin@hollywoo.com   | admin123 |
+| user  | mary@email.com       | senha123 |
+
+
+### 3. Frontend
 
 ```bash
 cd frontend

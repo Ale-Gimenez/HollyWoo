@@ -2,17 +2,31 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useFilmes } from '../context/FilmesContext'
 import { useAuth } from '../context/AuthContext'
+import { apiGetDestaques } from '../service/api'
 import FilmCard from '../components/FilmCard'
 import '../styles/LandingPage.css'
 import '../styles/Shared.css'
 
 export default function LandingPage() {
-  const { filmes, loading } = useFilmes()
+  const { filmes, loading, normalizeDestaques } = useFilmes()
   const { isLoggedIn, isFavorito, toggleFavorito } = useAuth()
   const navigate = useNavigate()
   const [heroIdx, setHeroIdx] = useState(0)
+  const [heroFilmes, setHeroFilmes] = useState([])
 
-  const heroFilmes = filmes.slice(0, 5)
+  // Carrega destaques reais da home
+  useEffect(() => {
+    apiGetDestaques()
+      .then(data => {
+        const normalized = normalizeDestaques(data)
+        // Se não há destaques configurados, usa os primeiros filmes como fallback
+        setHeroFilmes(normalized.length > 0 ? normalized : filmes.slice(0, 5))
+      })
+      .catch(() => {
+        setHeroFilmes(filmes.slice(0, 5))
+      })
+  }, [filmes])
+
   const trending = filmes.slice(0, 6)
   const recommendations = filmes.slice(2, 5)
 

@@ -87,7 +87,7 @@ class Filme(Base):
     id_filme               = Column(Integer, primary_key=True, autoincrement=True)
     titulo                 = Column(String(255), nullable=False, unique=True)
     id_produtora_principal = Column(Integer, ForeignKey("produtora.id_produtora"))
-    id_pais_origem         = Column(Integer, ForeignKey("pais.id_pais"), nullable=False)
+    id_pais_origem         = Column(Integer, ForeignKey("pais.id_pais"), nullable=True)
     orcamento              = Column(Numeric(15, 2))
     duracao                = Column(Time)
     sinopse                = Column(Text, unique=True)

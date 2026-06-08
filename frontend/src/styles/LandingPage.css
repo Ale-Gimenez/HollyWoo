@@ -178,8 +178,8 @@
 /* Recommendations */
 .landing-recommendations {
   display: flex;
-  flex-direction: column;
-  gap: 16px;
+  flex-direction: row;
+  gap: 40px;
 }
 
 .rec-card {

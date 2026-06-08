@@ -7,53 +7,97 @@ import {
 const FilmesContext = createContext(null)
 
 /**
- * Normaliza um filme do backend para o formato esperado pelo frontend.
- * O backend retorna campos como id_filme, categorias como objetos {id_categoria, nome}, etc.
+ * Converte um filme do backend para o formato que o frontend usa.
+ *
+ * Backend (FilmeOut / FilmeListOut):
+ *   id_filme, titulo, ano, poster, banner, sinopse, trailer,
+ *   flag, classificacao, estilo_visual, era,
+ *   pais_origem: { id_pais, nome, img }
+ *   categorias:  [{ id_categoria, nome }]
+ *   linguagens:  [{ id_linguagem, nome, img }]
+ *   produtoras:  [{ id_produtora, nome, img }]
+ *   atores:      [{ id_ator, nome, sobrenome, nome_personagem, img }]
+ *   diretores:   [{ id_diretor, nome, sobrenome, img }]
+ *
+ * Frontend espera:
+ *   id, titulo, ano, poster, poster_bg, sinopse, trailer,
+ *   flag, classificacao, estilo_visual, era,
+ *   categorias: ['Animação', 'Aventura', ...]   ← strings
+ *   linguagens: ['Inglês', ...]                 ← strings
+ *   paises:     ['Estados Unidos', ...]         ← strings
+ *   produtora_principal: { nome }
+ *   elenco:  [{ nome, personagem, foto }]
+ *   diretores: [{ nome, cargo, foto }]
  */
 function normalizeFilme(f) {
   return {
-    id: f.id_filme,
+    // ─── Identidade ───────────────────────────────────────────────────────
+    id:     f.id_filme,
     titulo: f.titulo,
-    ano: f.ano,
-    duracao: f.duracao || null,
-    orcamento: f.orcamento ?? null,
-    poster: f.poster || '',
-    poster_bg: f.banner || '',
-    sinopse: f.sinopse || '',
-    categorias: (f.categorias || []).map(c => c.nome || c),
+    ano:    f.ano,
+    flag:   f.flag,
+
+    // ─── Mídia ────────────────────────────────────────────────────────────
+    poster:    f.poster   || '',
+    poster_bg: f.banner   || '',
+    trailer:   f.trailer  || '',
+    sinopse:   f.sinopse  || '',
+
+    // ─── Classificação e estilo ───────────────────────────────────────────
     classificacao: f.classificacao || 'Livre',
     estilo_visual: f.estilo_visual ? [f.estilo_visual] : [],
-    produtora_principal: f.produtora_principal
-      ? { nome: f.produtora_principal.nome }
-      : null,
-    paises: (f.paises || []).map(p => p.nome || p),
-    linguagens: (f.linguagens || []).map(l => l.nome || l),
-    diretores: (f.diretores || []).map(d => ({
-      nome: `${d.nome} ${d.sobrenome || ''}`.trim(),
-      foto: d.img || '',
-      cargo: 'Diretor',
-    })),
-    elenco: (f.elenco || []).map(a => ({
-      nome: `${a.nome} ${a.sobrenome || ''}`.trim(),
+    era:           f.era || null,
+    saga:          f.saga || null,
+
+    // ─── Listas como strings (o frontend filtra/exibe por string) ─────────
+    categorias: (f.categorias || []).map(c => c.nome ?? c),
+    linguagens: (f.linguagens || []).map(l => l.nome ?? l),
+    paises:     (f.paises     || []).map(p => p.nome ?? p),
+
+    // ─── Produtora principal ──────────────────────────────────────────────
+    // FilmeOut tem 'produtoras' (lista) e 'pais_origem' (objeto)
+    produtora_principal: (() => {
+      // Tenta pegar do campo direto ou do primeiro da lista
+      if (f.produtora_principal) return { nome: f.produtora_principal.nome }
+      if (f.produtoras && f.produtoras.length > 0) return { nome: f.produtoras[0].nome }
+      return null
+    })(),
+
+    // ─── Elenco (o frontend usa 'elenco', o backend retorna 'atores') ─────
+    elenco: (f.atores || []).map(a => ({
+      nome:       `${a.nome} ${a.sobrenome || ''}`.trim(),
       personagem: a.nome_personagem || '',
-      foto: a.img || '',
+      foto:       a.img || '',
     })),
-    trailer: f.trailer || '',
-    saga: f.saga || null,
-    classico: f.era === 'classico',
-    flag: f.flag,
-    era: f.era,
-    // IDs para formulários
+
+    // ─── Diretores ────────────────────────────────────────────────────────
+    diretores: (f.diretores || []).map(d => ({
+      nome:  `${d.nome} ${d.sobrenome || ''}`.trim(),
+      cargo: 'Diretor',
+      foto:  d.img || '',
+    })),
+
+    // ─── IDs para formulários de edição ───────────────────────────────────
     _ids: {
-      id_filme: f.id_filme,
-      ids_categorias: (f.categorias || []).map(c => c.id_categoria),
-      ids_paises: (f.paises || []).map(p => p.id_pais),
-      ids_linguagens: (f.linguagens || []).map(l => l.id_linguagem),
-      ids_diretores: (f.diretores || []).map(d => d.id_diretor),
-      ids_atores: (f.elenco || []).map(a => a.id_ator),
-      ids_produtoras: (f.produtoras || []).map(p => p.id_produtora),
+      id_filme:          f.id_filme,
+      id_pais_origem:    f.pais_origem?.id_pais ?? null,
+      ids_categorias:    (f.categorias  || []).map(c => c.id_categoria),
+      ids_paises:        (f.paises      || []).map(p => p.id_pais),
+      ids_linguagens:    (f.linguagens  || []).map(l => l.id_linguagem),
+      ids_diretores:     (f.diretores   || []).map(d => d.id_diretor),
+      ids_atores:        (f.atores      || []).map(a => a.id_ator),
+      ids_produtoras:    (f.produtoras  || []).map(p => p.id_produtora),
     },
   }
+}
+
+// ─── Destaques da home ────────────────────────────────────────────────────────
+// O endpoint /home/destaques retorna [{ id, ordem, filme: FilmeListOut }]
+// Precisamos extrair só o filme de cada destaque
+function normalizeDestaques(destaques) {
+  return (destaques || [])
+    .sort((a, b) => a.ordem - b.ordem)
+    .map(d => normalizeFilme(d.filme))
 }
 
 export function FilmesProvider({ children }) {
@@ -65,8 +109,11 @@ export function FilmesProvider({ children }) {
     setLoading(true)
     setError(null)
     try {
-      const data = await apiGetFilmes({ aprovados: true, limit: 100, ...params })
-      setFilmes(data.map(normalizeFilme))
+      const data = await apiGetFilmes({ limit: 100, ...params })
+      console.log('[FilmesContext] raw data[0]:', data[0])
+      const normalized = data.map(normalizeFilme)
+      console.log('[FilmesContext] normalized[0]:', normalized[0])
+      setFilmes(normalized)
     } catch (err) {
       setError(err.message)
       setFilmes([])
@@ -77,9 +124,18 @@ export function FilmesProvider({ children }) {
 
   useEffect(() => { fetchFilmes() }, [fetchFilmes])
 
+  async function getFilmeDetalhes(id) {
+    const data = await apiGetFilme(id)
+    return normalizeFilme(data)
+  }
+
+  async function getPendentes() {
+    const data = await apiGetPendentes()
+    return data.map(normalizeFilme)
+  }
+
   async function addFilme(formData) {
     const created = await apiCreateFilme(formData)
-    // Filme criado fica pendente (flag=false), não aparece no catálogo ainda
     return normalizeFilme(created)
   }
 
@@ -98,7 +154,6 @@ export function FilmesProvider({ children }) {
   async function aprovarFilme(id) {
     const updated = await apiAprovarFilme(id)
     const norm = normalizeFilme(updated)
-    // Adiciona ao catálogo após aprovação
     setFilmes(prev => {
       const exists = prev.find(f => String(f.id) === String(id))
       return exists
@@ -108,22 +163,17 @@ export function FilmesProvider({ children }) {
     return norm
   }
 
-  async function getPendentes() {
-    const data = await apiGetPendentes()
-    return data.map(normalizeFilme)
-  }
-
-  async function getFilmeDetalhes(id) {
-    const data = await apiGetFilme(id)
-    return normalizeFilme(data)
-  }
-
   return (
     <FilmesContext.Provider value={{
       filmes, loading, error,
       fetchFilmes,
-      addFilme, updateFilme, deleteFilme,
-      aprovarFilme, getPendentes, getFilmeDetalhes,
+      getFilmeDetalhes,
+      getPendentes,
+      addFilme,
+      updateFilme,
+      deleteFilme,
+      aprovarFilme,
+      normalizeDestaques,
     }}>
       {children}
     </FilmesContext.Provider>
