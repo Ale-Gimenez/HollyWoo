@@ -63,18 +63,12 @@ function PopupSugestoesFilme({ filme, onClose }) {
 }
 
 function PopupSolicitarEdicao({ filme, onClose }) {
-  const [form, setForm] = useState({ campo: '', sugestao: '' })
   const [enviado, setEnviado] = useState(false)
-  const [erro, setErro] = useState('')
 
-  function handleEnviar() {
-    if (!form.campo.trim() || !form.sugestao.trim()) {
-      setErro('Preencha o campo e a sugestão antes de enviar.')
-      return
-    }
+  function handleEnviar(data) {
     // TODO: integrar com endpoint de sugestões quando disponível
+    console.log('Sugestão de edição enviada:', data)
     setEnviado(true)
-    setErro('')
   }
 
   if (enviado) {
@@ -92,21 +86,14 @@ function PopupSolicitarEdicao({ filme, onClose }) {
 
   return (
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="modal-box modal-box-sm">
-        <h2 className="modal-title">Solicitar Edição: {filme.titulo}</h2>
-        <div className="form-group" style={{ marginBottom: '14px' }}>
-          <label className="form-label" htmlFor="campo-editar">Campo a editar</label>
-          <input id="campo-editar" className="form-input" placeholder="Ex: Título, Ano, Sinopse..." value={form.campo} onChange={e => setForm(p => ({ ...p, campo: e.target.value }))} />
-        </div>
-        <div className="form-group">
-          <label className="form-label" htmlFor="sugestao-text">Sugestão</label>
-          <textarea id="sugestao-text" className="form-textarea" placeholder="Descreva a mudança sugerida..." value={form.sugestao} onChange={e => setForm(p => ({ ...p, sugestao: e.target.value }))} rows={3} />
-        </div>
-        {erro && <p style={{ color: '#f87171', fontSize: '0.85rem', marginTop: '6px' }}>{erro}</p>}
-        <div className="modal-actions">
-          <button className="btn btn-primary" onClick={handleEnviar}>🚀 Enviar Solicitação</button>
-          <button className="btn btn-outline" onClick={onClose}>✕ Cancelar</button>
-        </div>
+      <div className="modal-box" style={{ maxWidth: '780px' }}>
+        <h2 className="modal-title">Editar Filme: {filme.titulo}</h2>
+        <FilmForm
+          initial={filme}
+          onSubmit={handleEnviar}
+          onCancel={onClose}
+          submitLabel="Solicitar Edição"
+        />
       </div>
     </div>
   )

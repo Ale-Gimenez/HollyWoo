@@ -82,49 +82,57 @@ export default function FilmForm({ initial = {}, onSubmit, onCancel, submitLabel
 
   return (
     <form className="film-form" onSubmit={handleSubmit}>
-      {/* Upload zones */}
+      {/* Upload zones com input de URL visível */}
       <div className="film-form-upload-row">
-        <div>
+        <div className="film-form-upload-col">
           <p className="film-form-upload-label">Poster</p>
-          <label className="film-form-upload-zone" htmlFor="input-poster">
+          <div className="film-form-upload-zone">
             {form.poster ? (
               <>
-                <img src={form.poster} alt="Poster" className="film-form-upload-preview" onError={e => { e.target.style.display = 'none' }} />
-                <span className="film-form-upload-edit-btn" role="button" aria-label="Editar poster">✏</span>
+                <img
+                  src={form.poster}
+                  alt="Poster"
+                  className="film-form-upload-preview"
+                  onError={e => { e.target.style.display = 'none' }}
+                />
+                <span className="film-form-upload-edit-btn" aria-label="Editar poster">✏</span>
               </>
             ) : (
               <span className="film-form-upload-icon">⬆</span>
             )}
-            <input
-              id="input-poster"
-              type="url"
-              placeholder="URL do poster"
-              value={form.poster}
-              onChange={e => set('poster', e.target.value)}
-              style={{ position: 'absolute', opacity: 0, width: '100%', height: '100%', cursor: 'pointer' }}
-            />
-          </label>
+          </div>
+          <input
+            type="url"
+            className="form-input film-form-url-input"
+            placeholder="Cole a URL do poster aqui"
+            value={form.poster}
+            onChange={e => set('poster', e.target.value)}
+          />
         </div>
-        <div>
+        <div className="film-form-upload-col">
           <p className="film-form-upload-label">Banner</p>
-          <label className="film-form-upload-zone" htmlFor="input-banner">
+          <div className="film-form-upload-zone">
             {form.poster_bg ? (
               <>
-                <img src={form.poster_bg} alt="Banner" className="film-form-upload-preview" onError={e => { e.target.style.display = 'none' }} />
-                <span className="film-form-upload-edit-btn" role="button" aria-label="Editar banner">✏</span>
+                <img
+                  src={form.poster_bg}
+                  alt="Banner"
+                  className="film-form-upload-preview"
+                  onError={e => { e.target.style.display = 'none' }}
+                />
+                <span className="film-form-upload-edit-btn" aria-label="Editar banner">✏</span>
               </>
             ) : (
               <span className="film-form-upload-icon">⬆</span>
             )}
-            <input
-              id="input-banner"
-              type="url"
-              placeholder="URL do banner"
-              value={form.poster_bg}
-              onChange={e => set('poster_bg', e.target.value)}
-              style={{ position: 'absolute', opacity: 0, width: '100%', height: '100%', cursor: 'pointer' }}
-            />
-          </label>
+          </div>
+          <input
+            type="url"
+            className="form-input film-form-url-input"
+            placeholder="Cole a URL do banner aqui"
+            value={form.poster_bg}
+            onChange={e => set('poster_bg', e.target.value)}
+          />
         </div>
       </div>
 
@@ -215,9 +223,7 @@ export default function FilmForm({ initial = {}, onSubmit, onCancel, submitLabel
         </div>
         <div className="form-group">
           <label className="form-label" htmlFor="f-atores">Atores</label>
-          <select id="f-atores" className="form-select">
-            <option value="">Escolha várias opções</option>
-          </select>
+          <input id="f-atores" className="form-input" placeholder="Ex: Shakira, Ginnifer Goodwin" value={form.atores_raw} onChange={e => set('atores_raw', e.target.value)} />
         </div>
       </div>
 

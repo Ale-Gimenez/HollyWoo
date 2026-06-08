@@ -18,6 +18,11 @@ filminis_integrado/
 
 ### 1. Backend
 
+## Onde pegar Imagens
+https://wall.alphacoders.com/big.php?i=1274275
+https://www.adorocinema.com/filmes/filme-196960/fotos/
+
+
 ```bash
 cd backend
 

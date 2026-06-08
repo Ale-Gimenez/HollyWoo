@@ -11,11 +11,17 @@
   margin-bottom: 4px;
 }
 
+.film-form-upload-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .film-form-upload-label {
   font-weight: 700;
   font-size: 0.9rem;
   color: #fff;
-  margin-bottom: 8px;
+  margin-bottom: 0;
 }
 
 .film-form-upload-zone {
@@ -26,7 +32,6 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  cursor: pointer;
   transition: border-color var(--transition), background var(--transition);
   position: relative;
   overflow: hidden;
@@ -70,6 +75,11 @@
   font-size: 1.6rem;
   color: var(--text-muted);
   z-index: 1;
+}
+
+.film-form-url-input {
+  font-size: 0.82rem;
+  padding: 8px 12px;
 }
 
 .film-form-row-4 {

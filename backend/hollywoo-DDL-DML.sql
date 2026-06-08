@@ -362,9 +362,9 @@ INSERT INTO filme (titulo, id_produtora_principal, id_pais_origem, orcamento, du
  1, 1, 175000000, '01:35:00',
  'Quando Riley se muda para São Francisco, as emoções que vivem em sua mente — Alegria, Medo, Raiva, Nojinho e Tristeza — lutam para mantê-la feliz enquanto ela enfrenta uma grande mudança em sua vida.',
  2015,
- 'https://m.media-amazon.com/images/I/81IwXJGQ8aL._AC_SL1500_.jpg',
- 'https://wallpapercave.com/wp/wp1917849.jpg',
- 'https://www.youtube.com/embed/yRUAzGQ3nSY',
+ 'https://br.web.img3.acsta.net/c_310_420/pictures/15/05/14/14/20/365361.jpg',
+ 'https://images4.alphacoders.com/709/thumb-1920-709841.jpg',
+ 'https://youtu.be/w2YRoV--CHo?si=x2cwSanfbdBlQoWo',
  'L', '3D', TRUE),
 
 -- 2
@@ -372,9 +372,9 @@ INSERT INTO filme (titulo, id_produtora_principal, id_pais_origem, orcamento, du
  1, 1, 200000000, '01:40:00',
  'Riley entra na adolescência e as emoções originais se veem às voltas com novas chegantes: Ansiedade, Inveja, Tédio e Vergonha, que chegam para complicar tudo.',
  2024,
- 'https://m.media-amazon.com/images/I/81VBbMsKwIL._AC_SL1500_.jpg',
- 'https://wallpapercave.com/wp/wp12879628.jpg',
- 'https://www.youtube.com/embed/LEjhY15eCx0',
+ 'https://br.web.img2.acsta.net/c_310_420/pictures/23/11/09/18/04/2076862.jpg',
+ 'https://images4.alphacoders.com/136/thumb-1920-1368203.jpeg',
+ 'https://youtu.be/yAZxx8t9zig?si=7rtLNn8Q-5lM-G3g',
  'L', '3D', FALSE),
 
 -- 3
@@ -382,9 +382,9 @@ INSERT INTO filme (titulo, id_produtora_principal, id_pais_origem, orcamento, du
  3, 1, 60000000, '01:30:00',
  'Um ogro solitário chamado Shrek embarca em uma aventura para resgatar a Princesa Fiona de uma torre guardada por um dragão, contando com a companhia de um burro falante pelo caminho.',
  2001,
- 'https://m.media-amazon.com/images/I/81V4Kk-GG7L._AC_SL1200_.jpg',
- 'https://wallpapercave.com/wp/wp2064749.jpg',
- 'https://www.youtube.com/embed/W37DlG1i61s',
+ 'https://br.web.img3.acsta.net/c_310_420/medias/nmedia/18/91/54/04/20150812.jpg',
+ 'https://images.alphacoders.com/500/thumb-1920-500304.jpg',
+ 'https://youtu.be/TMIsxOsuwNA?si=qCV-xgxIlRKt9tS0',
  'L', '3D', TRUE),
 
 -- 4
@@ -392,9 +392,9 @@ INSERT INTO filme (titulo, id_produtora_principal, id_pais_origem, orcamento, du
  3, 1, 150000000, '01:33:00',
  'Shrek e Fiona viajam para o reino Far Far Away para conhecer os pais de Fiona. As coisas se complicam quando o Rei tenta acabar com o relacionamento deles com a ajuda do Gato de Botas.',
  2004,
- 'https://m.media-amazon.com/images/I/71p9LxHBooL._AC_SL1024_.jpg',
- 'https://wallpapercave.com/wp/wp2064749.jpg',
- 'https://www.youtube.com/embed/1k9oJMI51LU',
+ 'https://br.web.img3.acsta.net/c_310_420/medias/nmedia/18/97/04/22/20504502.jpg',
+ 'https://images7.alphacoders.com/127/thumb-1920-1274275.jpg',
+ 'https://youtu.be/oW-vf54cUes?si=g2F-Gp2Nou5ARTAb',
  'L', '3D', TRUE),
 
 -- 5
