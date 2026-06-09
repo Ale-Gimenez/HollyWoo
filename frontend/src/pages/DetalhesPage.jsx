@@ -29,34 +29,147 @@ function PopupDeletar({ titulo, onConfirm, onCancel }) {
   )
 }
 
+function PopupVerSugestao({ sugestao, filmeAtual, onAprovar, onRecusar, onClose }) {
+  const campos = [
+    { label: 'Título', atual: filmeAtual.titulo, proposto: sugestao.titulo },
+    { label: 'Ano', atual: filmeAtual.ano, proposto: sugestao.ano },
+    { label: 'Sinopse', atual: filmeAtual.sinopse, proposto: sugestao.sinopse },
+    { label: 'Classificação', atual: filmeAtual.classificacao, proposto: sugestao.classificacao },
+    { label: 'Poster', atual: filmeAtual.poster, proposto: sugestao.poster },
+    { label: 'Trailer', atual: filmeAtual.trailer, proposto: sugestao.trailer },
+  ].filter(c => c.proposto && String(c.proposto) !== String(c.atual || ''))
+
+  return (
+    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal-box" style={{ maxWidth: '600px' }}>
+        <h2 className="modal-title">Sugestão de {sugestao.nome}</h2>
+        <p style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '20px' }}>
+          Mudanças propostas para: <strong style={{ color: '#fff' }}>{filmeAtual.titulo}</strong>
+        </p>
+        {campos.length === 0 ? (
+          <p style={{ color: '#888' }}>Nenhuma alteração detectada.</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '24px' }}>
+            {campos.map((c, i) => (
+              <div key={i} style={{ background: '#252525', borderRadius: '10px', padding: '14px 16px' }}>
+                <p style={{ fontWeight: 800, color: 'var(--purple-light)', fontSize: '0.8rem', marginBottom: '8px', textTransform: 'uppercase' }}>{c.label}</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <p style={{ fontSize: '0.72rem', color: '#888', marginBottom: '4px' }}>Atual</p>
+                    <p style={{ fontSize: '0.85rem', color: '#ccc', wordBreak: 'break-word' }}>{c.atual || '—'}</p>
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '0.72rem', color: '#4caf50', marginBottom: '4px' }}>Proposto</p>
+                    <p style={{ fontSize: '0.85rem', color: '#fff', wordBreak: 'break-word' }}>{c.proposto}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button className="btn btn-primary" onClick={onAprovar}>✓ Aceitar Alterações</button>
+          <button className="btn btn-delete" onClick={onRecusar}>✕ Recusar</button>
+          <button className="btn btn-outline" onClick={onClose}>Fechar</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function PopupSugestoesFilme({ filme, onClose }) {
-  const sugestoes = [
-    { id: 1, nome: 'Matheus Soares', avatar: 'https://i.pravatar.cc/40?img=12', mudancas: 'Título, Ano, Linguagens' },
-    { id: 2, nome: 'Gabriella Esturrari', avatar: 'https://i.pravatar.cc/40?img=25', mudancas: 'Título, Ano, Classificação' },
-  ]
+  const [sugestaoVendo, setSugestaoVendo] = useState(null)
+  const [sugestoes, setSugestoes] = useState([
+    { id: 1, nome: 'Matheus Soares', avatar: 'https://i.pravatar.cc/40?img=12',
+      titulo: filme.titulo + ' (Edit)', ano: filme.ano ? filme.ano + 1 : null,
+      sinopse: 'Sinopse alternativa proposta pelo usuário com mais detalhes sobre a trama do filme.',
+      classificacao: '14', poster: filme.poster, trailer: filme.trailer },
+    { id: 2, nome: 'Gabriella Esturrari', avatar: 'https://i.pravatar.cc/40?img=25',
+      titulo: null, ano: filme.ano ? filme.ano - 1 : null,
+      classificacao: '16', sinopse: null, poster: null, trailer: null },
+  ])
+
+  function getMudancasTexto(s) {
+    const campos = []
+    if (s.titulo && s.titulo !== filme.titulo) campos.push('Título')
+    if (s.ano && String(s.ano) !== String(filme.ano)) campos.push('Ano')
+    if (s.sinopse && s.sinopse !== filme.sinopse) campos.push('Sinopse')
+    if (s.classificacao && s.classificacao !== filme.classificacao) campos.push('Classificação')
+    if (s.poster && s.poster !== filme.poster) campos.push('Poster')
+    if (s.trailer && s.trailer !== filme.trailer) campos.push('Trailer')
+    return campos.length > 0 ? campos.join(', ') : 'Sem alterações detectadas'
+  }
+
+  function handleAprovar() {
+    setSugestoes(prev => prev.filter(s => s.id !== sugestaoVendo.id))
+    setSugestaoVendo(null)
+  }
+
+  function handleRecusar() {
+    setSugestoes(prev => prev.filter(s => s.id !== sugestaoVendo.id))
+    setSugestaoVendo(null)
+  }
+
+  if (sugestaoVendo) {
+    return (
+      <PopupVerSugestao
+        sugestao={sugestaoVendo}
+        filmeAtual={filme}
+        onAprovar={handleAprovar}
+        onRecusar={handleRecusar}
+        onClose={() => setSugestaoVendo(null)}
+      />
+    )
+  }
 
   return (
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal-box">
-        <h2 className="modal-title">Sugestões Filme: {filme.titulo}</h2>
-        <div className="popup-sugestoes-list">
-          {sugestoes.map(s => (
-            <div key={s.id} className="popup-sugestoes-item">
-              <div className="popup-sugestoes-info">
-                <img src={s.avatar} alt={s.nome} className="circle-avatar" width={36} height={36} />
-                <div className="popup-sugestoes-text">
-                  <p className="popup-sugestoes-name">{s.nome}</p>
-                  <p className="popup-sugestoes-changes">Mudanças Propostas: {s.mudancas}</p>
+        <h2 className="modal-title">Sugestões: {filme.titulo}</h2>
+        {sugestoes.length === 0 ? (
+          <p style={{ color: '#888', marginBottom: '20px' }}>Nenhuma sugestão pendente para este filme.</p>
+        ) : (
+          <div className="popup-sugestoes-list">
+            {sugestoes.map(s => (
+              <div
+                key={s.id}
+                className="popup-sugestoes-item"
+                style={{ cursor: 'pointer' }}
+                onClick={() => setSugestaoVendo(s)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={e => e.key === 'Enter' && setSugestaoVendo(s)}
+              >
+                <div className="popup-sugestoes-info">
+                  <img src={s.avatar} alt={s.nome} className="circle-avatar" width={36} height={36} />
+                  <div className="popup-sugestoes-text">
+                    <p className="popup-sugestoes-name">{s.nome}</p>
+                    <p className="popup-sugestoes-changes">Mudanças Propostas: {getMudancasTexto(s)}</p>
+                  </div>
+                </div>
+                <div className="popup-sugestoes-btns" onClick={e => e.stopPropagation()}>
+                  <button
+                    className="btn-icon btn-icon-green"
+                    title="Ver sugestão"
+                    aria-label="Ver"
+                    onClick={() => setSugestaoVendo(s)}
+                  >👁</button>
+                  <button
+                    className="btn-icon btn-icon-red"
+                    title="Recusar"
+                    aria-label="Recusar"
+                    onClick={() => setSugestoes(prev => prev.filter(x => x.id !== s.id))}
+                  >✕</button>
                 </div>
               </div>
-              <div className="popup-sugestoes-btns">
-                <button className="btn-icon btn-icon-green" title="Ver sugestão" aria-label="Ver">👁</button>
-                <button className="btn-icon btn-icon-red" title="Recusar" aria-label="Recusar">✕</button>
-              </div>
-            </div>
-          ))}
-        </div>
-        <button className="btn btn-delete" style={{ fontSize: '0.85rem' }}>🗑 Limpar Sugestões</button>
+            ))}
+          </div>
+        )}
+        <button
+          className="btn btn-delete"
+          style={{ fontSize: '0.85rem' }}
+          onClick={() => setSugestoes([])}
+        >🗑 Limpar Sugestões</button>
       </div>
     </div>
   )
@@ -184,7 +297,8 @@ export default function DetalhesPage() {
           <h1 className="detalhes-title">{filme.titulo}</h1>
 
           <div className="detalhes-meta">
-            {pais && <span className="detalhes-meta-item">{paisFlag} {filme.ano}</span>}
+            {pais && <span className="detalhes-meta-item">{paisFlag} {pais}</span>}
+            {filme.ano && <span className="detalhes-meta-item">📅 {filme.ano}</span>}
             {filme.classificacao && (
               <span className="badge-classif">{filme.classificacao}</span>
             )}
@@ -198,13 +312,29 @@ export default function DetalhesPage() {
             {filme.orcamento > 0 && (
               <span className="detalhes-meta-item">
                 <span className="detalhes-orcamento-badge">$</span>
-                $ {Number(filme.orcamento).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                {Number(filme.orcamento).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             )}
             {dur && (
               <span className="detalhes-meta-item">⏱ {dur}</span>
             )}
           </div>
+
+          {(filme.categorias?.length > 0) && (
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {filme.categorias.map((cat, i) => (
+                <span key={i} style={{
+                  background: 'rgba(120,51,226,0.35)',
+                  border: '1px solid rgba(120,51,226,0.5)',
+                  borderRadius: '20px',
+                  padding: '3px 12px',
+                  fontSize: '0.78rem',
+                  color: '#d4b8ff',
+                  fontWeight: 700,
+                }}>{cat}</span>
+              ))}
+            </div>
+          )}
 
           {filme.sinopse && (
             <p className="detalhes-synopsis">{filme.sinopse}</p>

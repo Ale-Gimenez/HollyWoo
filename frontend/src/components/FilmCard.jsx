@@ -38,9 +38,9 @@ export default function FilmCard({ filme, showInfo = true }) {
           </button>
         )}
 
-        {filme.classico !== undefined && (
-          <div className={`film-card-badge ${filme.classico ? 'classico' : 'novo'}`}>
-            {filme.classico ? 'Clássico' : 'Novo'}
+        {filme.era && (
+          <div className={`film-card-badge ${filme.era === 'classico' ? 'classico' : 'novo'}`}>
+            {filme.era === 'classico' ? 'Clássico' : 'Novo'}
           </div>
         )}
       </div>

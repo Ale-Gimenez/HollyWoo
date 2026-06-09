@@ -153,12 +153,18 @@ class FilmeListOut(BaseModel):
     titulo: str
     ano: Optional[int]
     poster: Optional[str]
+    banner: Optional[str] = None
+    sinopse: Optional[str] = None
+    duracao: Optional[time] = None
+    orcamento: Optional[Decimal] = None
     flag: Optional[bool]
     classificacao: Optional[str] = None
     estilo_visual: Optional[str] = None
     era: Optional[str] = None           # "classico" | "novo" | None
     pais_origem: Optional[PaisOut] = None
     categorias: List[CategoriaOut] = []
+    linguagens: List[LinguagemOut] = []
+    produtoras: List[ProdutoraOut] = []
 
     @classmethod
     def from_orm_with_era(cls, filme) -> "FilmeListOut":

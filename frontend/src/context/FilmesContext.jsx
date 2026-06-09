@@ -49,6 +49,10 @@ function normalizeFilme(f) {
     era:           f.era || null,
     saga:          f.saga || null,
 
+    // ─── Campos extras agora presentes em FilmeListOut também ────────────
+    duracao:   f.duracao  || null,
+    orcamento: f.orcamento != null ? Number(f.orcamento) : null,
+
     // ─── Listas como strings (o frontend filtra/exibe por string) ─────────
     categorias: (f.categorias || []).map(c => c.nome ?? c),
     linguagens: (f.linguagens || []).map(l => l.nome ?? l),

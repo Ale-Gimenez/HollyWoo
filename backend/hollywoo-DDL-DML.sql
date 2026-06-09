@@ -264,7 +264,7 @@ INSERT INTO produtora (nome, img) VALUES
 ('Walt Disney Animation',    'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Disney_wordmark.svg/320px-Disney_wordmark.svg.png'), -- 2
 ('DreamWorks Animation',     'https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/DreamWorks_Animation_SKG_logo.svg/320px-DreamWorks_Animation_SKG_logo.svg.png'), -- 3
 ('Studio Ghibli',            'https://upload.wikimedia.org/wikipedia/en/thumb/c/ca/Studio_Ghibli_logo.svg/320px-Studio_Ghibli_logo.svg.png'), -- 4
-('Illumination',             'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Illumination_logo.svg/320px-Illumination_logo.svg.png'), -- 5
+('Illumination',             'https://upload.wikimedia.org/wikipedia/commons/thumb/3/thirty/Illumination_logo.svg/320px-Illumination_logo.svg.png'), -- 5
 ('Blue Sky Studios',         'https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Blue_Sky_Studios_logo.svg/320px-Blue_Sky_Studios_logo.svg.png'), -- 6
 ('Sony Pictures Animation',  'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Sony_Pictures_Animation_logo.svg/320px-Sony_Pictures_Animation_logo.svg.png'), -- 7
 ('Netflix Animation',        'https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Netflix_2015_logo.svg/320px-Netflix_2015_logo.svg.png'), -- 8
@@ -351,7 +351,7 @@ INSERT INTO ator (nome, sobrenome, nome_personagem, img) VALUES
 ('Idina',        'Menzel',     'Elsa',             'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Idina_Menzel_2013.jpg/240px-Idina_Menzel_2013.jpg'),
 ('Ming-Na',      'Wen',        'Mulan',            'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Ming-Na_Wen_2019.jpg/240px-Ming-Na_Wen_2019.jpg'),
 ('Jackie',       'Chan',       'Mestre Tigre',     'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Jackie_Chan_2016.jpg/240px-Jackie_Chan_2016.jpg'),
-('Luisa',        'Moreno',     'Lupe',             'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/240px-No-Image-Placeholder.svg.png');
+('Luisa',        'Moreno',     'Lupe',             'https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Placeholder_female_superstar.jpg/240px-Placeholder_female_superstar.jpg');
 
 -- ── Filmes (todos infantis, classificação L ou +6) ────────────────────────────
 
@@ -362,9 +362,9 @@ INSERT INTO filme (titulo, id_produtora_principal, id_pais_origem, orcamento, du
  1, 1, 175000000, '01:35:00',
  'Quando Riley se muda para São Francisco, as emoções que vivem em sua mente — Alegria, Medo, Raiva, Nojinho e Tristeza — lutam para mantê-la feliz enquanto ela enfrenta uma grande mudança em sua vida.',
  2015,
- 'https://br.web.img3.acsta.net/c_310_420/pictures/15/05/14/14/20/365361.jpg',
- 'https://images4.alphacoders.com/709/thumb-1920-709841.jpg',
- 'https://youtu.be/w2YRoV--CHo?si=x2cwSanfbdBlQoWo',
+ 'https://m.media-amazon.com/images/I/81IwXJGQ8aL._AC_SL1500_.jpg',
+ 'https://wallpapercave.com/wp/wp1917849.jpg',
+ 'https://www.youtube.com/embed/yRUAzGQ3nSY',
  'L', '3D', TRUE),
 
 -- 2
@@ -372,9 +372,9 @@ INSERT INTO filme (titulo, id_produtora_principal, id_pais_origem, orcamento, du
  1, 1, 200000000, '01:40:00',
  'Riley entra na adolescência e as emoções originais se veem às voltas com novas chegantes: Ansiedade, Inveja, Tédio e Vergonha, que chegam para complicar tudo.',
  2024,
- 'https://br.web.img2.acsta.net/c_310_420/pictures/23/11/09/18/04/2076862.jpg',
- 'https://images4.alphacoders.com/136/thumb-1920-1368203.jpeg',
- 'https://youtu.be/yAZxx8t9zig?si=7rtLNn8Q-5lM-G3g',
+ 'https://m.media-amazon.com/images/I/81VBbMsKwIL._AC_SL1500_.jpg',
+ 'https://wallpapercave.com/wp/wp12879628.jpg',
+ 'https://www.youtube.com/embed/LEjhY15eCx0',
  'L', '3D', FALSE),
 
 -- 3
@@ -382,9 +382,9 @@ INSERT INTO filme (titulo, id_produtora_principal, id_pais_origem, orcamento, du
  3, 1, 60000000, '01:30:00',
  'Um ogro solitário chamado Shrek embarca em uma aventura para resgatar a Princesa Fiona de uma torre guardada por um dragão, contando com a companhia de um burro falante pelo caminho.',
  2001,
- 'https://br.web.img3.acsta.net/c_310_420/medias/nmedia/18/91/54/04/20150812.jpg',
- 'https://images.alphacoders.com/500/thumb-1920-500304.jpg',
- 'https://youtu.be/TMIsxOsuwNA?si=qCV-xgxIlRKt9tS0',
+ 'https://m.media-amazon.com/images/I/81V4Kk-GG7L._AC_SL1200_.jpg',
+ 'https://wallpapercave.com/wp/wp2064749.jpg',
+ 'https://www.youtube.com/embed/W37DlG1i61s',
  'L', '3D', TRUE),
 
 -- 4
@@ -392,9 +392,9 @@ INSERT INTO filme (titulo, id_produtora_principal, id_pais_origem, orcamento, du
  3, 1, 150000000, '01:33:00',
  'Shrek e Fiona viajam para o reino Far Far Away para conhecer os pais de Fiona. As coisas se complicam quando o Rei tenta acabar com o relacionamento deles com a ajuda do Gato de Botas.',
  2004,
- 'https://br.web.img3.acsta.net/c_310_420/medias/nmedia/18/97/04/22/20504502.jpg',
- 'https://images7.alphacoders.com/127/thumb-1920-1274275.jpg',
- 'https://youtu.be/oW-vf54cUes?si=g2F-Gp2Nou5ARTAb',
+ 'https://m.media-amazon.com/images/I/71p9LxHBooL._AC_SL1024_.jpg',
+ 'https://wallpapercave.com/wp/wp2064749.jpg',
+ 'https://www.youtube.com/embed/1k9oJMI51LU',
  'L', '3D', TRUE),
 
 -- 5
@@ -433,7 +433,7 @@ INSERT INTO filme (titulo, id_produtora_principal, id_pais_origem, orcamento, du
  'Luca e seu amigo Alberto são criaturas marinhas que assumem forma humana ao sair da água. Os dois passam um verão incrível em uma cidade italiana ensolarada, mas seu segredo ameaça ser descoberto a qualquer momento.',
  2021,
  'https://m.media-amazon.com/images/I/91U62E6+WbL._AC_SL1500_.jpg',
- 'https://wallpapercave.com/wp/wp9316825.jpg',
+ 'https://wallpapercave.com/wp/wp8832768.jpg',
  'https://www.youtube.com/embed/mYfJxlgR2jw',
  'L', '3D', FALSE),
 
@@ -452,7 +452,7 @@ INSERT INTO filme (titulo, id_produtora_principal, id_pais_origem, orcamento, du
  4, 2, 24000000, '01:59:00',
  'Sophie tem sua vida transformada quando a malvada Bruxa do Charco a transforma em uma velha de noventa anos. Ela encontra refúgio no castelo andante do misterioso mago Howl e começa uma incrível jornada mágica.',
  2004,
- 'https://m.media-amazon.com/images/I/81LfLGpFRXL._AC_SL1500_.jpg',
+ 'https://i.pinimg.com/474x/ec/f5/96/ecf596b4b836dba11873a07b12381088.jpg',
  'https://wallpapercave.com/wp/wp1917846.jpg',
  'https://www.youtube.com/embed/iwROgK94zcM',
  'L', 'Anime', TRUE),
@@ -462,7 +462,7 @@ INSERT INTO filme (titulo, id_produtora_principal, id_pais_origem, orcamento, du
  4, 2, 20000000, '02:13:00',
  'Ashitaka parte em uma jornada épica para encontrar a cura de uma maldição e se vê no meio de um conflito brutal entre os deuses da floresta e os humanos que destroem a natureza.',
  1997,
- 'https://m.media-amazon.com/images/I/81LjkLn0+gL._AC_SL1500_.jpg',
+ 'https://i0.wp.com/studioghibli.com.br/wp-content/uploads/2025/03/Poster-Princesa-Mononoke-IMAX-scaled.jpeg',
  'https://wallpapercave.com/wp/wp3395261.jpg',
  'https://www.youtube.com/embed/4OiMa4kptAE',
  '+6', 'Anime', TRUE),
@@ -483,7 +483,7 @@ INSERT INTO filme (titulo, id_produtora_principal, id_pais_origem, orcamento, du
  'Mario e Luigi são irmãos encanadores transportados para um mundo mágico. Mario precisa atravessar o Reino dos Cogumelos para salvar seu irmão das garras do malvado Bowser e resgatar a Princesa Peach.',
  2023,
  'https://m.media-amazon.com/images/I/71SqkgZzXDL._AC_SL1024_.jpg',
- 'https://wallpapercave.com/wp/wp12186581.jpg',
+ 'https://wallpapercave.com/wp/wp11705534.jpg',
  'https://www.youtube.com/embed/quHOQPMdX74',
  'L', '3D', FALSE),
 
@@ -514,7 +514,7 @@ INSERT INTO filme (titulo, id_produtora_principal, id_pais_origem, orcamento, du
  2013,
  'https://m.media-amazon.com/images/I/81P6HDPQTBL._AC_SL1500_.jpg',
  'https://wallpapercave.com/wp/wp2006533.jpg',
- 'https://www.youtube.com/embed/0phuofa-G9E',
+ 'https://www.youtube.com/embed/TbQm5doF_Uc',
  'L', '3D', TRUE),
 
 -- 17
@@ -532,8 +532,8 @@ INSERT INTO filme (titulo, id_produtora_principal, id_pais_origem, orcamento, du
  3, 1, 90000000, '01:40:00',
  'Um grupo de vilões notórios tenta se tornar bons para evitar a prisão. Liderados pelo carismático Mr. Wolf, eles empreendem missões que testam sua capacidade de fazer o bem e surpreendem a todos ao redor.',
  2022,
- 'https://m.media-amazon.com/images/I/71JneSaU1iL._AC_SL1200_.jpg',
- 'https://wallpapercave.com/wp/wp9831624.jpg',
+ 'https://ingresso-a.akamaihd.net/prd/img/movie/pecadores/7f6c9699-002e-43a8-adb3-49d2055014fd.webp',
+ 'https://wallpapercave.com/wp/wp11705534.jpg',
  'https://www.youtube.com/embed/wAUM6RJwNGU',
  'L', '3D', FALSE),
 
@@ -542,7 +542,7 @@ INSERT INTO filme (titulo, id_produtora_principal, id_pais_origem, orcamento, du
  3, 1, 85000000, '01:35:00',
  'Um menino e seu cachorro trocam de corpo misteriosamente e precisam descobrir como reverter a mágica antes que seja tarde demais, vivendo a vida um do outro de formas cada vez mais divertidas e reveladoras.',
  2026,
- 'https://m.media-amazon.com/images/I/81I+mOFEK9L._AC_SL1500_.jpg',
+ 'https://ingresso-a.akamaihd.net/b2b/production/uploads/articles-content/8923869c-f8a6-4258-ba74-4170bf7fb202.jpg',
  'https://wallpapercave.com/wp/wp2002267.jpg',
  'https://www.youtube.com/embed/7I8fVb8fXD0',
  'L', '3D', FALSE),
@@ -553,8 +553,8 @@ INSERT INTO filme (titulo, id_produtora_principal, id_pais_origem, orcamento, du
  'Uma jovem descobre que tem poderes mágicos e precisa aprender a controlá-los enquanto enfrenta um vilão que quer roubar a magia de todas as crianças do mundo. Uma história de coragem, amizade e autoconhecimento.',
  2026,
  'https://m.media-amazon.com/images/I/81FkRi6+7TL._AC_SL1500_.jpg',
- 'https://wallpapercave.com/wp/wp14155080.jpg',
- 'https://www.youtube.com/embed/XtYR1pQMJV4',
+ 'https://wallpapercave.com/wp/wp8832768.jpg',
+ 'https://www.youtube.com/embed/mYfJxlgR2jw',
  'L', '3D', FALSE);
 
 -- ── Relações filme × produtora ─────────────────────────────────────────────────
@@ -665,3 +665,323 @@ INSERT INTO usuario (nome, sobrenome, apelido, email, senha, data_nascimento, ro
  'mary@gmail.com',
  '$2b$12$92IXUNpkjO8FVzDHx9LzNO4tO4V2c3PkW1CqYXWq5HE6HVKpHJTJa',
  '2009-08-12', 'user');
+
+-- ============================================================
+--  ADIÇÕES — tabela tema, novos filmes (21–32), diretores,
+--  atores e todas as relações
+--  Nenhum dado original foi alterado
+-- ============================================================
+
+-- ── Tabela de temas ───────────────────────────────────────────────────────────
+
+CREATE TABLE tema (
+    id_tema  INT PRIMARY KEY AUTO_INCREMENT,
+    nome     VARCHAR(100) NOT NULL UNIQUE,
+    emoji    VARCHAR(10)
+);
+
+CREATE TABLE filme_tema (
+    id_filme_tema INT PRIMARY KEY AUTO_INCREMENT,
+    id_filme      INT NOT NULL,
+    id_tema       INT NOT NULL,
+    UNIQUE KEY uq_filme_tema (id_filme, id_tema),
+    FOREIGN KEY (id_filme) REFERENCES filme(id_filme),
+    FOREIGN KEY (id_tema)  REFERENCES tema(id_tema)
+);
+
+INSERT INTO tema (nome, emoji) VALUES
+('Dinossauros', '🦕'),   -- 1
+('Espaço',      '🚀'),   -- 2
+('Super-Heróis','🦸'),   -- 3
+('Robôs',       '🤖'),   -- 4
+('Animais',     '🐾'),   -- 5
+('Princesas',   '👸'),   -- 6
+('Magia',       '✨'),   -- 7
+('Piratas',     '☠️'),   -- 8
+('Família',     '👨‍👩‍👧'),  -- 9
+('Carros',      '🚗');   -- 10
+
+-- ── Temas dos filmes existentes (1–20) ───────────────────────────────────────
+
+INSERT INTO filme_tema (id_filme, id_tema) VALUES
+(1,9),(2,9),
+(3,7),(3,5),(4,7),(4,5),
+(5,5),(6,1),(6,5),(7,5),
+(8,9),(9,5),
+(10,7),(10,9),(11,7),(11,5),
+(12,2),(12,9),
+(13,7),(13,9),
+(14,6),(14,7),(15,6),(15,7),(16,6),(16,7),(17,6),
+(18,5),(18,9),(19,5),(19,7),(19,9),(20,7),(20,9);
+
+-- ── Sagas novas ───────────────────────────────────────────────────────────────
+-- Sagas existentes terminam em id=8
+
+INSERT INTO saga (nome, descricao) VALUES
+('Os Incríveis',              'Franquia da Pixar sobre uma família de super-heróis que tentam viver como pessoas comuns'),          -- 9
+('Carros',                    'Franquia da Pixar ambientada em um mundo habitado por carros falantes e conscientes'),               -- 10
+('Como Treinar o Seu Dragão', 'Franquia da DreamWorks sobre a amizade entre o jovem viking Soluço e o dragão Banguela'),           -- 11
+('Trolls',                    'Franquia da DreamWorks com os coloridos Trolls e suas aventuras musicais'),                          -- 12
+('Toy Story',                 'Franquia da Pixar sobre os brinquedos de Andy que ganham vida quando os humanos não estão olhando'); -- 13
+
+-- ── Novos diretores (IDs 21–30) ──────────────────────────────────────────────
+
+INSERT INTO diretor (nome, sobrenome, img) VALUES
+('Henry',   'Selick',    'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Henry_Selick_2009.jpg/240px-Henry_Selick_2009.jpg'),             -- 21
+('Andrew',  'Stanton',   'https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Andrew_Stanton_%282012%29.jpg/240px-Andrew_Stanton_%282012%29.jpg'), -- 22
+('Brad',    'Bird',      'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Brad_Bird_2018.jpg/240px-Brad_Bird_2018.jpg'),                    -- 23
+('John',    'Lasseter',  'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/John_Lasseter.jpg/240px-John_Lasseter.jpg'),                      -- 24
+('Peter',   'Sohn',      'https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Peter_Sohn_%282015%29.jpg/240px-Peter_Sohn_%282015%29.jpg'),       -- 25
+('Ron',     'Clements',  'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Ron_Clements_2016.jpg/240px-Ron_Clements_2016.jpg'),              -- 26
+('Tim',     'Burton',    'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Tim_Burton_2019.jpg/240px-Tim_Burton_2019.jpg'),                   -- 27
+('Walt',    'Dohrn',     'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/240px-No-Image-Placeholder.svg.png'),    -- 28
+('Eric',    'Bergeron',  'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/240px-No-Image-Placeholder.svg.png'),    -- 29
+('Chris',   'Sanders',   'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Chris_Sanders_%282010%29.jpg/240px-Chris_Sanders_%282010%29.jpg'); -- 30
+
+INSERT INTO diretor_pais (id_diretor, id_pais) VALUES
+(21,1),(22,1),(23,1),(24,1),(25,1),(26,1),(27,1),(28,1),(29,1),(30,1);
+
+-- ── Novos atores (IDs 43–72) ─────────────────────────────────────────────────
+
+INSERT INTO ator (nome, sobrenome, nome_personagem, img) VALUES
+-- Coraline (43-45)
+('Dakota',       'Fanning',        'Coraline Jones',      'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Dakota_Fanning_2012.jpg/240px-Dakota_Fanning_2012.jpg'),
+('Teri',         'Hatcher',        'Mãe / Outra Mãe',     'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Teri_Hatcher_2011.jpg/240px-Teri_Hatcher_2011.jpg'),
+('Keith',        'David',          'Gato',                'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Keith_David_2016.jpg/240px-Keith_David_2016.jpg'),
+-- WALL-E (46-48)
+('Ben',          'Burtt',          'WALL-E',              'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/240px-No-Image-Placeholder.svg.png'),
+('Elissa',       'Knight',         'EVE',                 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/240px-No-Image-Placeholder.svg.png'),
+('Jeff',         'Garlin',         'Capitão',             'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Jeff_Garlin_2012.jpg/240px-Jeff_Garlin_2012.jpg'),
+-- Os Incríveis (49-52)
+('Craig',        'T. Nelson',      'Bob Parr / Mr. Incrível', 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Craig_T._Nelson_2013.jpg/240px-Craig_T._Nelson_2013.jpg'),
+('Holly',        'Hunter',         'Helen Parr / Elastigirl', 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Holly_Hunter_%282009%29.jpg/240px-Holly_Hunter_%282009%29.jpg'),
+('Samuel L.',    'Jackson',        'Frozone',             'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Samuel_L_Jackson_2019.jpg/240px-Samuel_L_Jackson_2019.jpg'),
+('Jason',        'Lee',            'Syndrome',            'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Jason_Lee_2011.jpg/240px-Jason_Lee_2011.jpg'),
+-- Carros (53-55)
+('Owen',         'Wilson',         'Relâmpago McQueen',   'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Owen_Wilson_2011.jpg/240px-Owen_Wilson_2011.jpg'),
+('Paul',         'Newman',         'Doc Hudson',          'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Paul_Newman_-_1963.jpg/240px-Paul_Newman_-_1963.jpg'),
+('Larry',        'the Cable Guy',  'Mater',               'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/240px-No-Image-Placeholder.svg.png'),
+-- O Bom Dinossauro (56-58)
+('Raymond',      'Ochoa',          'Arlo',                'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/240px-No-Image-Placeholder.svg.png'),
+('Jack',         'McGraw',         'Spot',                'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/240px-No-Image-Placeholder.svg.png'),
+('Jeffrey',      'Wright',         'Poppa Henry',         'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Jeffrey_Wright_2015.jpg/240px-Jeffrey_Wright_2015.jpg'),
+-- Planeta do Tesouro (59-61)
+('Joseph',       'Gordon-Levitt',  'Jim Hawkins',         'https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Joseph_Gordon-Levitt_2013.jpg/240px-Joseph_Gordon-Levitt_2013.jpg'),
+('Brian',        'Murray',         'John Silver',         'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/240px-No-Image-Placeholder.svg.png'),
+('Emma',         'Thompson',       'Capitã Amelia',       'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Emma_Thompson_2018.jpg/240px-Emma_Thompson_2018.jpg'),
+-- A Noiva Cadáver (62-64)
+('Helena Bonham','Carter',         'Emily',               'https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Helena_Bonham_Carter_%28Berlin_Film_Festival_2012%29.jpg/240px-Helena_Bonham_Carter_%28Berlin_Film_Festival_2012%29.jpg'),
+('Johnny',       'Depp',           'Victor Van Dort',     'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Johnny_Depp_2020.jpg/240px-Johnny_Depp_2020.jpg'),
+('Emily',        'Watson',         'Victoria Everglot',   'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/240px-No-Image-Placeholder.svg.png'),
+-- Trolls 3 (65-67)
+('Anna',         'Kendrick',       'Poppy',               'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Anna_Kendrick_2019.jpg/240px-Anna_Kendrick_2019.jpg'),
+('Justin',       'Timberlake',     'Branch',              'https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Justin_Timberlake_-_Cannes_2013_%28cropped%29.jpg/240px-Justin_Timberlake_-_Cannes_2013_%28cropped%29.jpg'),
+('Zooey',        'Deschanel',      'Bridget',             'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Zooey_Deschanel_2012.jpg/240px-Zooey_Deschanel_2012.jpg'),
+-- O Espanta Tubarões (68-70)
+('Will',         'Smith',          'Oscar',               'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Will_Smith_2011.jpg/240px-Will_Smith_2011.jpg'),
+('Robert',       'De Niro',        'Don Lino',            'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Robert_De_Niro_2011.jpg/240px-Robert_De_Niro_2011.jpg'),
+('Renée',        'Zellweger',      'Angie',               'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Rene_Zellweger_at_the_2019_Oscars.jpg/240px-Rene_Zellweger_at_the_2019_Oscars.jpg'),
+-- Como Treinar o Seu Dragão (71-72)
+('Jay',          'Baruchel',       'Soluço',              'https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Jay_Baruchel_2012.jpg/240px-Jay_Baruchel_2012.jpg'),
+('Gerard',       'Butler',         'Stoico',              'https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Gerard_Butler_2011_%28cropped%29.jpg/240px-Gerard_Butler_2011_%28cropped%29.jpg');
+
+INSERT INTO ator_pais (id_ator, id_pais) VALUES
+(43,1),(44,1),(45,1),
+(46,1),(47,1),(48,1),
+(49,1),(50,1),(51,1),(52,1),
+(53,1),(54,1),(55,1),
+(56,1),(57,1),(58,1),
+(59,1),(60,3),(61,3),
+(62,3),(63,1),(64,3),
+(65,1),(66,1),(67,1),
+(68,1),(69,1),(70,1),
+(71,6),(72,3);
+
+-- ── Novos filmes (IDs 21–32) ─────────────────────────────────────────────────
+
+INSERT INTO filme (titulo, id_produtora_principal, id_pais_origem, orcamento, duracao, sinopse, ano, poster, banner, trailer, classificacao, estilo_visual, flag) VALUES
+
+-- 21
+('Coraline e a Porta Secreta',
+ 9, 1, 60000000, '01:40:00',
+ 'Coraline descobre uma porta secreta em sua nova casa que leva a um mundo paralelo aparentemente perfeito — com uma "outra mãe" que parece ideal. Mas por trás desse mundo encantador esconde-se um perigo terrível.',
+ 2009,
+ 'https://wallpapercave.com/wp/wp4500989.jpg',
+ 'https://wallpapercave.com/wp/wp4500998.jpg',
+ 'https://www.youtube.com/embed/lSfaRmyuCYM',
+ '+6', 'Stop Motion', TRUE),
+
+-- 22
+('WALL-E',
+ 1, 1, 180000000, '01:38:00',
+ 'WALL-E é um robô solitário deixado na Terra para limpar o lixo acumulado pela humanidade. Quando a robô EVE chega em missão de exploração, os dois se apaixonam e embarcam em uma aventura épica pelo espaço.',
+ 2008,
+ 'https://wallpapercave.com/wp/wp1888388.jpg',
+ 'https://wallpapercave.com/wp/wp1888392.jpg',
+ 'https://www.youtube.com/embed/alIq_wG9FNk',
+ 'L', '3D', TRUE),
+
+-- 23
+('Os Incríveis',
+ 1, 1, 92000000, '01:55:00',
+ 'Bob Parr, o ex-super-herói Mr. Incrível, vive uma vida comum forçado pela lei que proibiu os super-poderes. Quando uma missão secreta o chama de volta à ação, toda a sua família acaba envolvida no resgate do mundo.',
+ 2004,
+ 'https://wallpapercave.com/wp/wp1888440.jpg',
+ 'https://wallpapercave.com/wp/wp1888444.jpg',
+ 'https://www.youtube.com/embed/2zU4gFCNEqM',
+ 'L', '3D', TRUE),
+
+-- 24
+('Carros',
+ 1, 1, 120000000, '01:56:00',
+ 'Relâmpago McQueen é um carro de corrida arrogante que, após um acidente, acaba preso na pequena cidade de Radiator Springs. Lá ele aprende lições valiosas sobre amizade, humildade e o que realmente importa na vida.',
+ 2006,
+ 'https://wallpapercave.com/wp/wp1888453.jpg',
+ 'https://wallpapercave.com/wp/wp1888458.jpg',
+ 'https://www.youtube.com/embed/9yjAMBAnI1E',
+ 'L', '3D', TRUE),
+
+-- 25
+('O Bom Dinossauro',
+ 1, 1, 175000000, '01:33:00',
+ 'Em um mundo onde os dinossauros nunca foram extintos, o jovem Arlo acidentalmente acaba longe de casa e precisa fazer uma improvável amizade com um menino humano chamado Spot para encontrar o caminho de volta.',
+ 2015,
+ 'https://wallpapercave.com/wp/wp2064751.jpg',
+ 'https://wallpapercave.com/wp/wp2064756.jpg',
+ 'https://www.youtube.com/embed/lMpFbAGZJxE',
+ 'L', '3D', FALSE),
+
+-- 26
+('Planeta do Tesouro',
+ 2, 1, 140000000, '01:35:00',
+ 'Jim Hawkins, um jovem rebelde, parte em uma aventura pelo cosmos a bordo de um navio estelar para encontrar o lendário Planeta do Tesouro. Durante a jornada, ele precisa distinguir amigos de traidores.',
+ 2002,
+ 'https://wallpapercave.com/wp/wp3630459.jpg',
+ 'https://wallpapercave.com/wp/wp3630463.jpg',
+ 'https://www.youtube.com/embed/HBJ2HaFJAgs',
+ 'L', '2D', FALSE),
+
+-- 27
+('A Noiva Cadáver',
+ 10, 3, 40000000, '01:17:00',
+ 'Victor Van Dort pratica seus votos de casamento na floresta e acidentalmente se casa com Emily, uma noiva morta que volta do além. Enquanto tenta retornar ao mundo dos vivos, ele se divide entre dois mundos completamente diferentes.',
+ 2005,
+ 'https://wallpapercave.com/wp/wp1888481.jpg',
+ 'https://wallpapercave.com/wp/wp1888485.jpg',
+ 'https://www.youtube.com/embed/svdaGQgFBsA',
+ 'L', 'Stop Motion', TRUE),
+
+-- 28
+('Trolls 3: Juntos Novamente',
+ 3, 1, 95000000, '01:32:00',
+ 'Poppy e Branch descobrem que Branch tem irmãos de banda perdidos — os BroZone — e partem em uma missão para reunir o grupo antes que um vilão poderoso destrua a música para sempre. Uma aventura recheada de música e amizade.',
+ 2023,
+ 'https://wallpapercave.com/wp/wp14020071.jpg',
+ 'https://wallpapercave.com/wp/wp14020074.jpg',
+ 'https://www.youtube.com/embed/Y7pMkHxDfaU',
+ 'L', '3D', FALSE),
+
+-- 29
+('O Espanta Tubarões',
+ 3, 1, 75000000, '01:30:00',
+ 'Oscar, um peixe modesto que trabalha em um posto de limpeza no recife, acidentalmente se torna famoso como o "Espanta Tubarões". Para manter a mentira, ele precisa da ajuda improvável de Lenny, um tubarão vegetariano.',
+ 2004,
+ 'https://wallpapercave.com/wp/wp1888500.jpg',
+ 'https://wallpapercave.com/wp/wp1888506.jpg',
+ 'https://www.youtube.com/embed/mHkZ44q3nwc',
+ 'L', '3D', FALSE),
+
+-- 30
+('Kung Fu Panda 2',
+ 3, 1, 150000000, '01:30:00',
+ 'Po e os Furiosos Cinco enfrentam o lorde Shen, um pavão com a ambição de conquistar a China com uma arma devastadora. Ao mesmo tempo, Po busca descobrir sua verdadeira origem e encontrar a paz interior.',
+ 2011,
+ 'https://wallpapercave.com/wp/wp2064749.jpg',
+ 'https://wallpapercave.com/wp/wp2064752.jpg',
+ 'https://www.youtube.com/embed/cLmYyYIDXCM',
+ 'L', '3D', FALSE),
+
+-- 31
+('Como Treinar o Seu Dragão',
+ 3, 1, 165000000, '01:38:00',
+ 'Soluço é um jovem viking que não consegue ser o guerreiro que seu pai deseja. Quando captura acidentalmente o lendário dragão Banguela, os dois formam uma improvável amizade que desafia séculos de ódio entre vikings e dragões.',
+ 2010,
+ 'https://wallpapercave.com/wp/wp1917849.jpg',
+ 'https://wallpapercave.com/wp/wp1917853.jpg',
+ 'https://www.youtube.com/embed/oKiYuIsPxYk',
+ 'L', '3D', TRUE),
+
+-- 32
+('ParaNorman',
+ 9, 1, 60000000, '01:32:00',
+ 'Norman é um garoto que consegue ver e falar com os mortos. Quando sua cidade é ameaçada por uma antiga maldição que ressuscita zumbis, só ele pode salvar todos — usando seu dom especial e a ajuda de amigos improváveis.',
+ 2012,
+ 'https://wallpapercave.com/wp/wp2076641.jpg',
+ 'https://wallpapercave.com/wp/wp2076645.jpg',
+ 'https://www.youtube.com/embed/TLFmFSRxXCI',
+ '+6', 'Stop Motion', FALSE);
+
+-- ── Relações dos novos filmes ─────────────────────────────────────────────────
+
+INSERT INTO filme_produtora (id_filme, id_produtora) VALUES
+(21,9),(22,1),(23,1),(24,1),(25,1),(26,2),(27,10),(28,3),(29,3),(30,3),(31,3),(32,9);
+
+INSERT INTO filme_diretor (id_filme, id_diretor) VALUES
+(21,21),(22,22),(23,23),(24,24),(25,25),(26,26),(27,27),(28,28),(29,29),(30,4),(31,30),(32,21);
+
+INSERT INTO filme_ator (id_filme, id_ator) VALUES
+(21,43),(21,44),(21,45),
+(22,46),(22,47),(22,48),
+(23,49),(23,50),(23,51),(23,52),
+(24,53),(24,54),(24,55),
+(25,56),(25,57),(25,58),
+(26,59),(26,60),(26,61),
+(27,62),(27,63),(27,64),
+(28,65),(28,66),(28,67),
+(29,68),(29,69),(29,70),
+(30,10),(30,11),(30,12),
+(31,71),(31,72),
+(32,43);
+
+INSERT INTO filme_linguagem (id_filme, id_linguagem) VALUES
+(21,1),(21,3),(22,1),(22,3),(23,1),(23,3),(24,1),(24,3),
+(25,1),(25,3),(26,1),(26,3),(27,1),(27,3),(28,1),(28,3),
+(29,1),(29,3),(30,1),(30,3),(31,1),(31,3),(32,1),(32,3);
+
+-- IDs categoria: 1=Animação, 2=Aventura, 3=Comédia, 4=Fantasia, 5=Musical, 6=Família, 7=Ficção Científica
+INSERT INTO filme_categoria (id_filme, id_categoria) VALUES
+(21,1),(21,4),(21,6),
+(22,1),(22,2),(22,6),(22,7),
+(23,1),(23,2),(23,3),(23,6),
+(24,1),(24,2),(24,3),(24,6),
+(25,1),(25,2),(25,6),
+(26,1),(26,2),(26,6),(26,7),
+(27,1),(27,4),(27,5),(27,6),
+(28,1),(28,3),(28,5),(28,6),
+(29,1),(29,3),(29,6),
+(30,1),(30,2),(30,3),(30,6),
+(31,1),(31,2),(31,4),(31,6),
+(32,1),(32,3),(32,4),(32,6);
+
+INSERT INTO filme_pais (id_filme, id_pais) VALUES
+(21,1),(22,1),(23,1),(24,1),(25,1),(26,1),
+(27,3),(27,1),(28,1),(29,1),(30,1),(31,1),(32,1);
+
+INSERT INTO filme_saga (id_filme, id_saga) VALUES
+(23,9),(24,10),(28,12),(30,4),(31,11);
+
+-- Temas: 1=Dinossauros, 2=Espaço, 3=Super-Heróis, 4=Robôs, 5=Animais,
+--        6=Princesas, 7=Magia, 8=Piratas, 9=Família, 10=Carros
+INSERT INTO filme_tema (id_filme, id_tema) VALUES
+(21,7),(21,9),
+(22,2),(22,4),(22,9),
+(23,3),(23,9),
+(24,10),(24,9),
+(25,1),(25,5),(25,9),
+(26,8),(26,2),(26,9),
+(27,7),(27,9),
+(28,9),(28,7),
+(29,5),(29,9),
+(30,5),(30,9),
+(31,5),(31,9),
+(32,7),(32,9);

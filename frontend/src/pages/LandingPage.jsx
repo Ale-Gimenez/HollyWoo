@@ -61,7 +61,9 @@ export default function LandingPage() {
             <div className="landing-hero-text">
               <h1 className="landing-hero-title">{hero.titulo}</h1>
               <p className="landing-hero-synopsis">
-                {hero.sinopse?.substring(0, 120)}...
+                {hero.sinopse
+                  ? hero.sinopse.substring(0, 150) + (hero.sinopse.length > 150 ? '...' : '')
+                  : 'Clique em Detalhes para saber mais sobre este filme.'}
               </p>
               <div className="landing-hero-actions">
                 <button className="btn btn-primary" onClick={() => navigate(`/detalhes/${hero.id}`)}>
