@@ -408,21 +408,18 @@ export default function DetalhesPage() {
           {/* Saga */}
           <section aria-labelledby="saga-title">
             <h2 id="saga-title" className="section-title">Da Saga</h2>
-            {filme.saga ? (
-              <div className="saga-card">
-                <img
-                  src={filme.saga.poster || filme.poster}
-                  alt={filme.saga.titulo_saga}
-                  className="saga-poster"
-                  onError={e => { e.target.src = 'https://via.placeholder.com/80x110/2a2a2a/666' }}
-                />
-                <div className="saga-info">
-                  <p className="saga-title">{filme.saga.titulo_saga}</p>
-                  <p className="saga-year">{filme.saga.ano_lancamento}</p>
-                  <button className="btn btn-primary" style={{ fontSize: '0.82rem', marginTop: '6px' }}>
-                    Detalhes &rsaquo;
-                  </button>
-                </div>
+            {filme.sagas && filme.sagas.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {filme.sagas.map(saga => (
+                  <div key={saga.id} className="saga-card">
+                    <div className="saga-info">
+                      <p className="saga-title">{saga.nome}</p>
+                      {saga.descricao && (
+                        <p className="saga-year" style={{ marginTop: '4px' }}>{saga.descricao}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : (
               <p style={{ color: '#666', fontSize: '0.9rem' }}>Não pertence a uma saga.</p>

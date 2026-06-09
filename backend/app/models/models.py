@@ -108,6 +108,8 @@ class Filme(Base):
     atores       = relationship("Ator",      secondary="filme_ator",       viewonly=True)
     diretores    = relationship("Diretor",   secondary="filme_diretor",    viewonly=True)
     linguagens   = relationship("Linguagem", secondary="filme_linguagem",  viewonly=True)
+    temas        = relationship("Tema",      secondary="filme_tema",       viewonly=True)
+    sagas        = relationship("Saga",      secondary="filme_saga",       viewonly=True)
 
 
 class FilmeProdutora(Base):
@@ -150,6 +152,34 @@ class FilmeLinguagem(Base):
     id_filme_linguagem = Column(Integer, primary_key=True, autoincrement=True)
     id_filme     = Column(Integer, ForeignKey("filme.id_filme"),         nullable=False)
     id_linguagem = Column(Integer, ForeignKey("linguagem.id_linguagem"), nullable=False)
+
+
+class Tema(Base):
+    __tablename__ = "tema"
+    id_tema = Column(Integer, primary_key=True, autoincrement=True)
+    nome    = Column(String(100), nullable=False, unique=True)
+    emoji   = Column(String(10))
+
+
+class FilmeTema(Base):
+    __tablename__ = "filme_tema"
+    id_filme_tema = Column(Integer, primary_key=True, autoincrement=True)
+    id_filme = Column(Integer, ForeignKey("filme.id_filme"), nullable=False)
+    id_tema  = Column(Integer, ForeignKey("tema.id_tema"),   nullable=False)
+
+
+class Saga(Base):
+    __tablename__ = "saga"
+    id_saga   = Column(Integer, primary_key=True, autoincrement=True)
+    nome      = Column(String(255), nullable=False, unique=True)
+    descricao = Column(Text)
+
+
+class FilmeSaga(Base):
+    __tablename__ = "filme_saga"
+    id_filme_saga = Column(Integer, primary_key=True, autoincrement=True)
+    id_filme      = Column(Integer, ForeignKey("filme.id_filme"), nullable=False)
+    id_saga       = Column(Integer, ForeignKey("saga.id_saga"),   nullable=False)
 
 
 # ─── Usuário ──────────────────────────────────────────────────────────────────

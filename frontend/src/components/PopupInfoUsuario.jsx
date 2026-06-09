@@ -52,7 +52,7 @@ export default function PopupInfoUsuario({ onClose, onLogout }) {
                     placeholder="E-mail"
                   />
                 </div>
-                <button className="btn btn-primary" style={{ fontSize: '0.85rem', padding: '8px 16px', marginTop: '4px' }} onClick={handleSave}>
+                <button className="btn btn-primary btn-sm" style={{ marginTop: '4px' }} onClick={handleSave}>
                   Salvar
                 </button>
               </>
@@ -88,11 +88,11 @@ export default function PopupInfoUsuario({ onClose, onLogout }) {
 
         <div className="popup-info-actions">
           {!editando && (
-            <button className="btn btn-edit" style={{ fontSize: '0.85rem', padding: '8px 16px' }} onClick={() => setEditando(true)}>
+            <button className="btn btn-edit btn-sm" onClick={() => setEditando(true)}>
               ✏️ Editar
             </button>
           )}
-          <button className="btn btn-cancel" style={{ fontSize: '0.85rem', padding: '8px 16px' }} onClick={onLogout}>
+          <button className="btn btn-cancel btn-sm" onClick={onLogout}>
             → Logout
           </button>
         </div>

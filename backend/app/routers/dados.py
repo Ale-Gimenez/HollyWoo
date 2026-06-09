@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.models.models import Ator, Categoria, Diretor, Linguagem, Pais, Produtora
-from app.schemas.schemas import AtorOut, CategoriaOut, DiretorOut, LinguagemOut, PaisOut, ProdutoraOut
+from app.models.models import Ator, Categoria, Diretor, Linguagem, Pais, Produtora, Saga
+from app.schemas.schemas import AtorOut, CategoriaOut, DiretorOut, LinguagemOut, PaisOut, ProdutoraOut, SagaOut
 
 router = APIRouter(prefix="/dados", tags=["Dados auxiliares"])
 
@@ -30,3 +30,7 @@ def get_atores(db: Session = Depends(get_db)):
 @router.get("/diretores", response_model=list[DiretorOut])
 def get_diretores(db: Session = Depends(get_db)):
     return db.query(Diretor).order_by(Diretor.sobrenome).all()
+
+@router.get("/sagas", response_model=list[SagaOut])
+def get_sagas(db: Session = Depends(get_db)):
+    return db.query(Saga).order_by(Saga.nome).all()

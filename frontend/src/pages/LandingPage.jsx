@@ -122,7 +122,7 @@ export default function LandingPage() {
                 🎬 Catálogo
               </button>
             </div>
-            <span className="promo-card-icon" aria-hidden="true">🎟️</span>
+            <img src="/tickets.png" alt="" className="promo-card-img" aria-hidden="true" />
           </div>
 
           <div className="promo-card promo-card-dark">
@@ -139,7 +139,7 @@ export default function LandingPage() {
                 + Adicionar Filme
               </button>
             </div>
-            <span className="promo-card-icon" aria-hidden="true">🎭</span>
+            <img src="/menina.webp" alt="" className="promo-card-img" aria-hidden="true" />
           </div>
         </section>
 

@@ -59,6 +59,18 @@ class ProdutoraOut(BaseModel):
     nome: str
     img: Optional[str] = None
 
+class TemaOut(BaseModel):
+    model_config = {"from_attributes": True}
+    id_tema: int
+    nome: str
+    emoji: Optional[str] = None
+
+class SagaOut(BaseModel):
+    model_config = {"from_attributes": True}
+    id_saga: int
+    nome: str
+    descricao: Optional[str] = None
+
 # ─── Ator / Diretor ───────────────────────────────────────────────────────────
 
 class AtorOut(BaseModel):
@@ -97,6 +109,7 @@ class FilmeCreate(FilmeBase):
     ids_atores: List[int] = []
     ids_diretores: List[int] = []
     ids_linguagens: List[int] = []
+    ids_sagas: List[int] = []
 
 class FilmeUpdate(BaseModel):
     """Todos os campos opcionais para PATCH."""
@@ -116,6 +129,7 @@ class FilmeUpdate(BaseModel):
     ids_atores: Optional[List[int]] = None
     ids_diretores: Optional[List[int]] = None
     ids_linguagens: Optional[List[int]] = None
+    ids_sagas: Optional[List[int]] = None
 
 class FilmeOut(BaseModel):
     model_config = {"from_attributes": True}
@@ -139,6 +153,8 @@ class FilmeOut(BaseModel):
     atores: List[AtorOut] = []
     diretores: List[DiretorOut] = []
     linguagens: List[LinguagemOut] = []
+    temas: List[TemaOut] = []
+    sagas: List[SagaOut] = []
 
     @classmethod
     def from_orm_with_era(cls, filme) -> "FilmeOut":
@@ -165,6 +181,8 @@ class FilmeListOut(BaseModel):
     categorias: List[CategoriaOut] = []
     linguagens: List[LinguagemOut] = []
     produtoras: List[ProdutoraOut] = []
+    temas: List[TemaOut] = []
+    sagas: List[SagaOut] = []
 
     @classmethod
     def from_orm_with_era(cls, filme) -> "FilmeListOut":

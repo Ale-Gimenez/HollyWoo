@@ -65,13 +65,13 @@
 }
 
 .btn-entrar {
-  border: 1px solid var(--text-secondary);
+  border: 2px solid var(--text-secondary);
   background: transparent;
   color: var(--text-primary);
-  padding: 6px 20px;
-  border-radius: var(--border-radius-pill);
-  font-weight: 700;
-  font-size: 0.9rem;
+  padding: 10px 22px;
+  border-radius: 16px;
+  font-weight: 800;
+  font-size: 0.95rem;
   transition: background var(--transition), border-color var(--transition);
 }
 

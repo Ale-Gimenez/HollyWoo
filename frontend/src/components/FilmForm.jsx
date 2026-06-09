@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { useFilmes } from '../context/FilmesContext'
 import '../styles/FilmForm.css'
 import '../styles/Shared.css'
 
@@ -9,7 +10,72 @@ const PAISES_OPTS = ['Estados Unidos','Japão','Reino Unido','França','Alemanha
 const CLASSIFICACOES = ['Livre','+6','+10','+12','+14','+16','+18']
 const ESTILOS = ['Vida Real','3D','2D','Stop Motion','Anime']
 
+/* ─── Multi-select dropdown com checkboxes ─────────────────────────────── */
+function MultiSelect({ id, label, options, value = [], onChange, placeholder = 'Escolha opções' }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    function handleClick(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  function toggle(opt) {
+    if (value.includes(opt)) {
+      onChange(value.filter(v => v !== opt))
+    } else {
+      onChange([...value, opt])
+    }
+  }
+
+  const display = value.length === 0
+    ? placeholder
+    : value.join(', ')
+
+  return (
+    <div className="multiselect-wrapper" ref={ref}>
+      {label && <label className="form-label" htmlFor={id}>{label}</label>}
+      <button
+        type="button"
+        id={id}
+        className="multiselect-trigger"
+        onClick={() => setOpen(o => !o)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        <span className={`multiselect-display${value.length === 0 ? ' placeholder' : ''}`}>
+          {display}
+        </span>
+        <span className="multiselect-arrow">{open ? '▲' : '▼'}</span>
+      </button>
+      {open && (
+        <ul className="multiselect-dropdown" role="listbox" aria-multiselectable="true">
+          {options.map(opt => {
+            const checked = value.includes(opt)
+            return (
+              <li
+                key={opt}
+                role="option"
+                aria-selected={checked}
+                className={`multiselect-option${checked ? ' selected' : ''}`}
+                onClick={() => toggle(opt)}
+              >
+                <span className="multiselect-checkbox">{checked ? '✓' : ''}</span>
+                {opt}
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </div>
+  )
+}
+
 export default function FilmForm({ initial = {}, onSubmit, onCancel, submitLabel = 'Adicionar' }) {
+  const { sagas } = useFilmes()
   const [form, setForm] = useState({
     titulo: initial.titulo || '',
     ano: initial.ano || '',
@@ -18,16 +84,16 @@ export default function FilmForm({ initial = {}, onSubmit, onCancel, submitLabel
     poster: initial.poster || '',
     poster_bg: initial.poster_bg || '',
     sinopse: initial.sinopse || '',
-    categorias: initial.categorias ? [initial.categorias[0] || ''] : [''],
+    categorias: Array.isArray(initial.categorias) && initial.categorias.length > 0 ? initial.categorias : [],
     classificacao: initial.classificacao || '',
-    estilo_visual: initial.estilo_visual ? [initial.estilo_visual[0] || ''] : [''],
+    estilo_visual: Array.isArray(initial.estilo_visual) && initial.estilo_visual.length > 0 ? initial.estilo_visual : [],
     produtora_principal: initial.produtora_principal?.nome || initial.produtora_principal || '',
-    paises: initial.paises ? [initial.paises[0] || ''] : [''],
-    linguagens: initial.linguagens ? [initial.linguagens[0] || ''] : [''],
+    paises: Array.isArray(initial.paises) && initial.paises.length > 0 ? initial.paises : [],
+    linguagens: Array.isArray(initial.linguagens) && initial.linguagens.length > 0 ? initial.linguagens : [],
     diretores_raw: (initial.diretores || []).map(d => typeof d === 'string' ? d : d.nome).join(', '),
     atores_raw: (initial.elenco || []).map(a => typeof a === 'string' ? a : a.nome).join(', '),
     trailer: initial.trailer || '',
-    saga_raw: initial.saga?.titulo_saga || '',
+    ids_sagas: (initial.sagas || []).map(s => s.id),
   })
 
   const [errors, setErrors] = useState({})
@@ -75,14 +141,14 @@ export default function FilmForm({ initial = {}, onSubmit, onCancel, submitLabel
       diretores,
       elenco,
       trailer: form.trailer || '',
-      saga: null,
+      ids_sagas: form.ids_sagas,
       classico: Number(form.ano) < 2015,
     })
   }
 
   return (
     <form className="film-form" onSubmit={handleSubmit}>
-      {/* Upload zones com input de URL visível */}
+      {/* Upload zones */}
       <div className="film-form-upload-row">
         <div className="film-form-upload-col">
           <p className="film-form-upload-label">Poster</p>
@@ -144,32 +210,41 @@ export default function FilmForm({ initial = {}, onSubmit, onCancel, submitLabel
           {errors.titulo && <span className="form-error">{errors.titulo}</span>}
         </div>
         <div className="form-group">
-          <label className="form-label" htmlFor="f-pais">País</label>
-          <input id="f-pais" className="form-input" placeholder="Ex: Estados Unidos" value={form.paises[0] || ''} onChange={e => set('paises', [e.target.value])} />
+          <MultiSelect
+            id="f-paises"
+            label="País"
+            options={PAISES_OPTS}
+            value={form.paises}
+            onChange={val => set('paises', val)}
+            placeholder="Selecione países"
+          />
         </div>
         <div className="form-group">
           <label className="form-label" htmlFor="f-duracao">Duração</label>
-          <input id="f-duracao" className="form-input" placeholder="Ex: 1h 20min" value={form.duracao} onChange={e => set('duracao', e.target.value)} />
+          <input id="f-duracao" className="form-input" placeholder="Ex: 01:30:00" value={form.duracao} onChange={e => set('duracao', e.target.value)} />
         </div>
         <div className="form-group">
           <label className="form-label" htmlFor="f-diretor">Diretor</label>
-          <input id="f-diretor" className="form-input" placeholder="Ex: Jonny Deep" value={form.diretores_raw} onChange={e => set('diretores_raw', e.target.value)} />
+          <input id="f-diretor" className="form-input" placeholder="Ex: Jonny Deep, Outro" value={form.diretores_raw} onChange={e => set('diretores_raw', e.target.value)} />
         </div>
       </div>
 
       {/* Row 2: Gênero, Produtora, Ano, Trailer */}
       <div className="film-form-row-4">
         <div className="form-group">
-          <label className="form-label" htmlFor="f-genero">Gênero</label>
-          <select id="f-genero" className="form-select" value={form.categorias[0] || ''} onChange={e => set('categorias', [e.target.value])}>
-            <option value="">Fantasia</option>
-            {GENEROS.map(g => <option key={g} value={g}>{g}</option>)}
-          </select>
+          <MultiSelect
+            id="f-genero"
+            label="Gênero"
+            options={GENEROS}
+            value={form.categorias}
+            onChange={val => set('categorias', val)}
+            placeholder="Selecione gêneros"
+          />
         </div>
         <div className="form-group">
           <label className="form-label" htmlFor="f-produtora">Produtora</label>
           <select id="f-produtora" className="form-select" value={form.produtora_principal} onChange={e => set('produtora_principal', e.target.value)}>
-            <option value="">Disney</option>
+            <option value="">Selecione</option>
             {PRODUTORAS.map(p => <option key={p} value={p}>{p}</option>)}
           </select>
         </div>
@@ -180,31 +255,41 @@ export default function FilmForm({ initial = {}, onSubmit, onCancel, submitLabel
         </div>
         <div className="form-group">
           <label className="form-label" htmlFor="f-trailer">Trailer</label>
-          <input id="f-trailer" className="form-input" placeholder="Ex: http://imagens.com.br" value={form.trailer} onChange={e => set('trailer', e.target.value)} />
+          <input id="f-trailer" className="form-input" placeholder="Ex: https://youtube.com/..." value={form.trailer} onChange={e => set('trailer', e.target.value)} />
         </div>
       </div>
 
       {/* Row 3: Saga, Estilo Visual, Linguagens */}
       <div className="film-form-row-3">
         <div className="form-group">
-          <label className="form-label" htmlFor="f-saga">Saga</label>
-          <select id="f-saga" className="form-select">
-            <option value="">Escolha várias opções</option>
-          </select>
+          <MultiSelect
+            id="f-saga"
+            label="Saga"
+            options={sagas.map(s => s.nome)}
+            value={sagas.filter(s => form.ids_sagas.includes(s.id_saga)).map(s => s.nome)}
+            onChange={val => set('ids_sagas', sagas.filter(s => val.includes(s.nome)).map(s => s.id_saga))}
+            placeholder="Selecione uma saga"
+          />
         </div>
         <div className="form-group">
-          <label className="form-label" htmlFor="f-estilo">Estilo Visual</label>
-          <select id="f-estilo" className="form-select" value={form.estilo_visual[0] || ''} onChange={e => set('estilo_visual', [e.target.value])}>
-            <option value="">Vida Real</option>
-            {ESTILOS.map(e => <option key={e} value={e}>{e}</option>)}
-          </select>
+          <MultiSelect
+            id="f-estilo"
+            label="Estilo Visual"
+            options={ESTILOS}
+            value={form.estilo_visual}
+            onChange={val => set('estilo_visual', val)}
+            placeholder="Selecione estilos"
+          />
         </div>
         <div className="form-group">
-          <label className="form-label" htmlFor="f-linguagens">Linguagens</label>
-          <select id="f-linguagens" className="form-select" value={form.linguagens[0] || ''} onChange={e => set('linguagens', [e.target.value])}>
-            <option value="">Escolha várias opções</option>
-            {LINGUAGENS_OPTS.map(l => <option key={l} value={l}>{l}</option>)}
-          </select>
+          <MultiSelect
+            id="f-linguagens"
+            label="Linguagens"
+            options={LINGUAGENS_OPTS}
+            value={form.linguagens}
+            onChange={val => set('linguagens', val)}
+            placeholder="Selecione idiomas"
+          />
         </div>
       </div>
 
@@ -212,7 +297,7 @@ export default function FilmForm({ initial = {}, onSubmit, onCancel, submitLabel
       <div className="film-form-row-3">
         <div className="form-group">
           <label className="form-label" htmlFor="f-orcamento">Orçamento</label>
-          <input id="f-orcamento" className="form-input" placeholder="Ex: $ 30.0000" type="number" value={form.orcamento} onChange={e => set('orcamento', e.target.value)} />
+          <input id="f-orcamento" className="form-input" placeholder="Ex: 30000000" type="number" value={form.orcamento} onChange={e => set('orcamento', e.target.value)} />
         </div>
         <div className="form-group">
           <label className="form-label" htmlFor="f-classif">Classificação Indicativa</label>

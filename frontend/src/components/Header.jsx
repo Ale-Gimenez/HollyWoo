@@ -6,16 +6,7 @@ import '../styles/Header.css'
 
 function Logo() {
   return (
-    <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="36" height="36" rx="8" fill="#7833e2"/>
-      <ellipse cx="12" cy="20" rx="4" ry="4.5" fill="#fff"/>
-      <ellipse cx="24" cy="20" rx="4" ry="4.5" fill="#fff"/>
-      <circle cx="12" cy="20" r="2" fill="#1a1a1a"/>
-      <circle cx="24" cy="20" r="2" fill="#1a1a1a"/>
-      <rect x="6" y="10" width="24" height="5" rx="2" fill="#b693ec"/>
-      <rect x="4" y="8" width="5" height="3" rx="1" fill="#fff" transform="rotate(-20 4 8)"/>
-      <rect x="27" y="8" width="5" height="3" rx="1" fill="#fff" transform="rotate(20 27 8)"/>
-    </svg>
+    <img src="/logoprin.png" alt="HollyWoo" width="36" height="36" style={{ objectFit: 'contain' }} />
   )
 }
 

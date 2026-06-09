@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import {
   apiGetFilmes, apiGetFilme, apiCreateFilme,
   apiUpdateFilme, apiDeleteFilme, apiAprovarFilme, apiGetPendentes,
+  apiGetSagas,
 } from '../service/api'
 
 const FilmesContext = createContext(null)
@@ -57,6 +58,8 @@ function normalizeFilme(f) {
     categorias: (f.categorias || []).map(c => c.nome ?? c),
     linguagens: (f.linguagens || []).map(l => l.nome ?? l),
     paises:     (f.paises     || []).map(p => p.nome ?? p),
+    temas:      (f.temas      || []).map(t => t.nome ?? t),
+    sagas:      (f.sagas      || []).map(s => ({ id: s.id_saga, nome: s.nome, descricao: s.descricao })),
 
     // ─── Produtora principal ──────────────────────────────────────────────
     // FilmeOut tem 'produtoras' (lista) e 'pais_origem' (objeto)
@@ -91,6 +94,7 @@ function normalizeFilme(f) {
       ids_diretores:     (f.diretores   || []).map(d => d.id_diretor),
       ids_atores:        (f.atores      || []).map(a => a.id_ator),
       ids_produtoras:    (f.produtoras  || []).map(p => p.id_produtora),
+      ids_sagas:         (f.sagas       || []).map(s => s.id_saga),
     },
   }
 }
@@ -106,6 +110,7 @@ function normalizeDestaques(destaques) {
 
 export function FilmesProvider({ children }) {
   const [filmes, setFilmes] = useState([])
+  const [sagas, setSagas] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -126,7 +131,17 @@ export function FilmesProvider({ children }) {
     }
   }, [])
 
+  const fetchSagas = useCallback(async () => {
+    try {
+      const data = await apiGetSagas()
+      setSagas(data)
+    } catch (err) {
+      console.error('[FilmesContext] erro ao buscar sagas:', err)
+    }
+  }, [])
+
   useEffect(() => { fetchFilmes() }, [fetchFilmes])
+  useEffect(() => { fetchSagas() }, [fetchSagas])
 
   async function getFilmeDetalhes(id) {
     const data = await apiGetFilme(id)
@@ -169,8 +184,9 @@ export function FilmesProvider({ children }) {
 
   return (
     <FilmesContext.Provider value={{
-      filmes, loading, error,
+      filmes, sagas, loading, error,
       fetchFilmes,
+      fetchSagas,
       getFilmeDetalhes,
       getPendentes,
       addFilme,

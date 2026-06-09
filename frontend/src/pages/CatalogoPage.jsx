@@ -1,12 +1,19 @@
-import { useState, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useFilmes } from '../context/FilmesContext'
 import FilmCard from '../components/FilmCard'
+import Toast from '../components/Toast'
 import '../styles/CatalogoPage.css'
 import '../styles/Shared.css'
 
-const GENEROS = ['Ação','Animação','Aventura','Comédia','Drama','Fantasia','Ficção Científica','Musical','Romance','Suspense','Terror']
-const CLASSIFICACOES = ['Livre','+6','+10','+12','+14']
+// Categorias reais do banco (tabela `categoria`)
+const GENEROS = [
+  'Animação', 'Aventura', 'Comédia', 'Fantasia',
+  'Musical', 'Família', 'Ficção Científica',
+]
+
+const CLASSIFICACOES = ['L', '+6', '+10', '+12', '+14', '+16', '+18']
+
+// Temas reais do banco (tabela `tema`)
 const TEMAS = [
   { emoji: '🦕', label: 'Dinossauros' },
   { emoji: '🚀', label: 'Espaço' },
@@ -15,23 +22,27 @@ const TEMAS = [
   { emoji: '🐾', label: 'Animais' },
   { emoji: '👸', label: 'Princesas' },
   { emoji: '✨', label: 'Magia' },
-  { emoji: '🏴‍☠️', label: 'Piratas' },
+  { emoji: '☠️', label: 'Piratas' },
   { emoji: '👨‍👩‍👧', label: 'Família' },
-  { emoji: '🏎️', label: 'Carros' },
+  { emoji: '🚗', label: 'Carros' },
 ]
-const ESTILOS = ['3D','Stop Motion','2D','Anime']
+
+// Estilos reais do banco (coluna `estilo_visual`)
+const ESTILOS = ['3D', '2D', 'Stop Motion', 'Anime']
+
 const PER_PAGE = 8
 
 export default function CatalogoPage() {
   const { filmes, loading } = useFilmes()
-  const navigate = useNavigate()
-  const [search, setSearch] = useState('')
-  const [activeGeneros, setActiveGeneros] = useState([])
+  const [search, setSearch]                 = useState('')
+  const [activeGeneros, setActiveGeneros]   = useState([])
   const [activeClassifs, setActiveClassifs] = useState([])
-  const [activeTemas, setActiveTemas] = useState([])
-  const [activeEstilos, setActiveEstilos] = useState([])
-  const [anoFiltro, setAnoFiltro] = useState('Todos')
-  const [page, setPage] = useState(1)
+  const [activeTemas, setActiveTemas]       = useState([])
+  const [activeEstilos, setActiveEstilos]   = useState([])
+  const [anoFiltro, setAnoFiltro]           = useState('Todos')
+  const [page, setPage]                     = useState(1)
+  const [toast, setToast]                   = useState(null)
+  const prevFilteredCount = useRef(null)
 
   function toggleChip(arr, setArr, val) {
     setArr(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val])
@@ -46,6 +57,8 @@ export default function CatalogoPage() {
 
   const filtered = useMemo(() => {
     let list = filmes
+
+    // Busca por texto
     if (search.trim()) {
       const q = search.toLowerCase()
       list = list.filter(f =>
@@ -54,26 +67,67 @@ export default function CatalogoPage() {
         (f.elenco || []).some(a => (typeof a === 'string' ? a : a.nome)?.toLowerCase().includes(q))
       )
     }
+
+    // Filtro por gênero/categoria (vem da tabela `categoria` via `filme_categoria`)
     if (activeGeneros.length) {
-      list = list.filter(f => (f.categorias || []).some(c => activeGeneros.includes(c)))
+      list = list.filter(f =>
+        (f.categorias || []).some(c => activeGeneros.includes(c))
+      )
     }
+
+    // Filtro por classificação indicativa
     if (activeClassifs.length) {
-      list = list.filter(f => activeClassifs.includes(f.classificacao))
+      list = list.filter(f => {
+        const classif = f.classificacao || 'L'
+        return activeClassifs.includes(classif)
+      })
     }
+
+    // Filtro por tema (vem da tabela `tema` via `filme_tema`)
+    if (activeTemas.length) {
+      list = list.filter(f =>
+        (f.temas || []).some(t => activeTemas.includes(t))
+      )
+    }
+
+    // Filtro por estilo visual (coluna `estilo_visual` no filme)
     if (activeEstilos.length) {
-      list = list.filter(f => (f.estilo_visual || []).some(e => activeEstilos.includes(e)))
+      list = list.filter(f => {
+        const estilo = f.estilo_visual
+        if (!estilo) return false
+        const estilos = Array.isArray(estilo) ? estilo : [estilo]
+        return estilos.some(e =>
+          activeEstilos.some(a => e?.toLowerCase().trim() === a.toLowerCase().trim())
+        )
+      })
     }
+
+    // Filtro por década
     if (anoFiltro !== 'Todos') {
       const yr = Number(anoFiltro)
-      list = list.filter(f => f.ano >= yr && f.ano < yr + 10)
+      list = list.filter(f => f.ano != null && f.ano >= yr && f.ano < yr + 10)
     }
+
     return list
   }, [filmes, search, activeGeneros, activeClassifs, activeTemas, activeEstilos, anoFiltro])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE))
   const pageFilmes = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE)
 
-  const anos = ['Todos', '2020', '2010', '2000', '1990']
+  // Dispara toast de erro quando a busca textual não encontrar nada
+  useEffect(() => {
+    if (loading) return
+    const buscando = search.trim().length > 0
+    if (buscando && filtered.length === 0 && prevFilteredCount.current !== 0) {
+      setToast({ message: `404 — Nenhum filme encontrado para "${search.trim()}"`, type: 'error' })
+    }
+    prevFilteredCount.current = filtered.length
+  }, [filtered, search, loading])
+
+  const anos = ['Todos', '2020', '2010', '2000', '1990', '1980']
+
+  const hasFilters = activeGeneros.length || activeClassifs.length ||
+    activeTemas.length || activeEstilos.length || anoFiltro !== 'Todos' || search.trim()
 
   if (loading) {
     return (
@@ -86,9 +140,27 @@ export default function CatalogoPage() {
 
   return (
     <div className="catalogo-layout">
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
       {/* SIDEBAR */}
       <aside className="catalogo-sidebar" aria-label="Filtros">
-        <h2 className="catalogo-sidebar-title">Filtros</h2>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h2 className="catalogo-sidebar-title">Filtros</h2>
+          {hasFilters && (
+            <button
+              className="btn-clear-filters"
+              onClick={clearAll}
+              style={{ margin: 0, padding: '4px 10px', fontSize: '0.78rem' }}
+            >
+              Limpar
+            </button>
+          )}
+        </div>
 
         <div>
           <p className="filter-group-title">Gênero</p>
@@ -153,8 +225,6 @@ export default function CatalogoPage() {
             ))}
           </div>
         </div>
-
-        <button className="btn-clear-filters" onClick={clearAll}>Limpar filtros</button>
       </aside>
 
       {/* MAIN */}
@@ -184,15 +254,58 @@ export default function CatalogoPage() {
               value={anoFiltro}
               onChange={e => { setAnoFiltro(e.target.value); setPage(1) }}
             >
-              {anos.map(a => <option key={a} value={a}>{a}</option>)}
+              {anos.map(a => (
+                <option key={a} value={a}>{a === 'Todos' ? 'Todos' : `${a}s`}</option>
+              ))}
             </select>
           </div>
         </div>
+
+        {/* Chips ativos */}
+        {hasFilters && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+            {activeGeneros.map(g => (
+              <span key={g} className="chip filter-chip active" style={{ fontSize: '0.78rem', cursor: 'pointer' }}
+                onClick={() => toggleChip(activeGeneros, setActiveGeneros, g)}>
+                {g} <span className="chip-remove">✕</span>
+              </span>
+            ))}
+            {activeClassifs.map(c => (
+              <span key={c} className="chip filter-chip active" style={{ fontSize: '0.78rem', cursor: 'pointer' }}
+                onClick={() => toggleChip(activeClassifs, setActiveClassifs, c)}>
+                {c} <span className="chip-remove">✕</span>
+              </span>
+            ))}
+            {activeTemas.map(t => (
+              <span key={t} className="chip filter-chip active" style={{ fontSize: '0.78rem', cursor: 'pointer' }}
+                onClick={() => toggleChip(activeTemas, setActiveTemas, t)}>
+                {TEMAS.find(x => x.label === t)?.emoji} {t} <span className="chip-remove">✕</span>
+              </span>
+            ))}
+            {activeEstilos.map(e => (
+              <span key={e} className="chip filter-chip active" style={{ fontSize: '0.78rem', cursor: 'pointer' }}
+                onClick={() => toggleChip(activeEstilos, setActiveEstilos, e)}>
+                {e} <span className="chip-remove">✕</span>
+              </span>
+            ))}
+            {anoFiltro !== 'Todos' && (
+              <span className="chip filter-chip active" style={{ fontSize: '0.78rem', cursor: 'pointer' }}
+                onClick={() => { setAnoFiltro('Todos'); setPage(1) }}>
+                {anoFiltro}s <span className="chip-remove">✕</span>
+              </span>
+            )}
+          </div>
+        )}
 
         {pageFilmes.length === 0 ? (
           <div className="catalogo-empty">
             <p className="catalogo-empty-icon">🎬</p>
             <p>Nenhum filme encontrado com os filtros aplicados.</p>
+            {hasFilters && (
+              <button className="btn-clear-filters" onClick={clearAll} style={{ marginTop: '12px' }}>
+                Limpar filtros
+              </button>
+            )}
           </div>
         ) : (
           <div className="catalogo-grid">
@@ -200,36 +313,20 @@ export default function CatalogoPage() {
           </div>
         )}
 
-        {/* Paginação */}
         {totalPages > 1 && (
           <nav className="pagination" aria-label="Paginação">
-            <button
-              className="page-btn"
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1}
-              aria-label="Página anterior"
-            >
-              ‹
-            </button>
+            <button className="page-btn" onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1} aria-label="Página anterior">‹</button>
             {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
-              <button
-                key={n}
+              <button key={n}
                 className={`page-btn${page === n ? ' active' : ''}`}
                 onClick={() => setPage(n)}
                 aria-label={`Página ${n}`}
                 aria-current={page === n ? 'page' : undefined}
-              >
-                {n}
-              </button>
+              >{n}</button>
             ))}
-            <button
-              className="page-btn"
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              aria-label="Próxima página"
-            >
-              ›
-            </button>
+            <button className="page-btn" onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages} aria-label="Próxima página">›</button>
           </nav>
         )}
       </main>

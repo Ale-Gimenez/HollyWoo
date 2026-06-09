@@ -50,12 +50,12 @@
   background: #333;
   border: none;
   color: #aaa;
-  border-radius: 8px;
-  padding: 8px;
+  border-radius: 12px;
+  padding: 10px 16px;
   cursor: pointer;
-  font-size: 0.82rem;
+  font-size: 0.88rem;
   font-family: inherit;
-  font-weight: 600;
+  font-weight: 700;
   transition: background var(--transition), color var(--transition);
 }
 

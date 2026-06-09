@@ -194,6 +194,10 @@ export async function apiGetDiretores() {
   return request('/dados/diretores')
 }
 
+export async function apiGetSagas() {
+  return request('/dados/sagas')
+}
+
 // ─── Destaques da Home ────────────────────────────────────────────────────────
 
 export async function apiGetDestaques() {

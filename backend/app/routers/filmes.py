@@ -9,7 +9,7 @@ from app.dependencies.auth import get_current_user, require_admin
 from app.models.models import (
     Ator, Categoria, Diretor, Filme, FilmeAtor, FilmeCategoria,
     FilmeDiretor, FilmeLinguagem, FilmePais, FilmeProdutora,
-    Linguagem, Pais, Produtora, Usuario,
+    FilmeSaga, Linguagem, Pais, Produtora, Saga, Usuario,
 )
 from app.schemas.schemas import (
     FilmeCreate, FilmeListOut, FilmeOut, FilmeUpdate, MsgOut
@@ -42,6 +42,7 @@ def _set_relations(db: Session, filme: Filme, data: dict):
         "ids_atores":     (FilmeAtor,      "id_ator"),
         "ids_diretores":  (FilmeDiretor,   "id_diretor"),
         "ids_linguagens": (FilmeLinguagem, "id_linguagem"),
+        "ids_sagas":      (FilmeSaga,      "id_saga"),
     }
     fk_filme = "id_filme"
 
@@ -209,7 +210,7 @@ def delete_filme(
     _: Usuario = Depends(require_admin),
 ):
     filme = _get_or_404(db, filme_id)
-    for Model in (FilmeProdutora, FilmePais, FilmeCategoria, FilmeAtor, FilmeDiretor, FilmeLinguagem):
+    for Model in (FilmeProdutora, FilmePais, FilmeCategoria, FilmeAtor, FilmeDiretor, FilmeLinguagem, FilmeSaga):
         db.query(Model).filter(Model.id_filme == filme_id).delete()
     db.delete(filme)
     db.commit()
