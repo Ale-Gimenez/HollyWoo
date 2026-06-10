@@ -212,3 +212,47 @@
   background: var(--purple-mid, #7833e2);
   color: #fff;
 }
+
+/* ─── Multiselect com busca ─────────────────────────────────────────────── */
+.multiselect-dropdown-wrapper {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #252525;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  z-index: 200;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  overflow: hidden;
+}
+
+.multiselect-search-wrap {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.multiselect-search {
+  width: 100%;
+  background: #1a1a1a;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: #fff;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.multiselect-search:focus {
+  border-color: var(--purple-mid, #7833e2);
+}
+
+.multiselect-dropdown-wrapper .multiselect-dropdown {
+  position: static;
+  max-height: 200px;
+  overflow-y: auto;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}

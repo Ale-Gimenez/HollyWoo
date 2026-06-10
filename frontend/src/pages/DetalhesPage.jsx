@@ -7,7 +7,22 @@ import FilmForm from '../components/FilmForm'
 import '../styles/DetalhesPage.css'
 import '../styles/Shared.css'
 
-const LANG_FLAGS = { 'Inglês': '🇺🇸', 'Português': '🇧🇷', 'Espanhol': '🇪🇸', 'Japonês': '🇯🇵', 'Francês': '🇫🇷', 'Italiano': '🇮🇹', 'Alemão': '🇩🇪', 'Coreano': '🇰🇷', 'Mandarim': '🇨🇳' }
+// Mapeamento de nome de linguagem → emoji de bandeira (fallback)
+const LANG_FLAGS_EMOJI = {
+  'Inglês': '🇺🇸', 'Português': '🇧🇷', 'Espanhol': '🇪🇸',
+  'Japonês': '🇯🇵', 'Francês': '🇫🇷', 'Italiano': '🇮🇹',
+  'Alemão': '🇩🇪', 'Coreano': '🇰🇷', 'Mandarim': '🇨🇳',
+  'Árabe': '🇸🇦', 'Hindi': '🇮🇳', 'Russo': '🇷🇺',
+}
+
+// Mapeamento de nome de país → emoji de bandeira (fallback)
+const PAIS_FLAGS_EMOJI = {
+  'Estados Unidos': '🇺🇸', 'Japão': '🇯🇵', 'Reino Unido': '🇬🇧',
+  'França': '🇫🇷', 'Brasil': '🇧🇷', 'Itália': '🇮🇹',
+  'Alemanha': '🇩🇪', 'Espanha': '🇪🇸', 'Coreia do Sul': '🇰🇷',
+  'China': '🇨🇳', 'Canadá': '🇨🇦', 'Austrália': '🇦🇺',
+  'Índia': '🇮🇳', 'México': '🇲🇽', 'Argentina': '🇦🇷',
+}
 
 function PopupDeletar({ titulo, onConfirm, onCancel }) {
   return (
@@ -73,6 +88,7 @@ function PopupSugestoesFilme({ filme, onClose }) {
     if (s.ids_categorias?.length) campos.push('Categorias')
     if (s.ids_linguagens?.length) campos.push('Linguagens')
     if (s.ids_paises?.length)     campos.push('Países')
+    if (s.ids_sagas?.length)      campos.push('Sagas')
     return campos.length > 0 ? campos.join(', ') : 'Sem alterações detectadas'
   }
 
@@ -82,6 +98,9 @@ function PopupSugestoesFilme({ filme, onClose }) {
       const nomes = lista.filter(i => ids.includes(i[idKey])).map(i => i.nome)
       return nomes.length ? nomes.join(', ') : null
     }
+
+    const paisesAtuais = (filme.paises || []).map(p => typeof p === 'string' ? p : p.nome).join(', ')
+    const linguagensAtuais = (filme.linguagens || []).map(l => typeof l === 'string' ? l : l.nome).join(', ')
 
     const campos = [
       { label: 'Título',        atual: filme.titulo,         proposto: sugestaoVendo.titulo },
@@ -101,12 +120,12 @@ function PopupSugestoesFilme({ filme, onClose }) {
       },
       {
         label: 'Linguagens',
-        atual: filme.linguagens?.join(', ') || '—',
+        atual: linguagensAtuais || '—',
         proposto: resolveNomes(sugestaoVendo.ids_linguagens, dadosAuxiliares.linguagens, 'id_linguagem'),
       },
       {
         label: 'Países',
-        atual: filme.paises?.join(', ') || '—',
+        atual: paisesAtuais || '—',
         proposto: resolveNomes(sugestaoVendo.ids_paises, dadosAuxiliares.paises, 'id_pais'),
       },
       {
@@ -181,7 +200,7 @@ function PopupSugestoesFilme({ filme, onClose }) {
                     alt={s.nome_usuario} className="circle-avatar" width={36} height={36} />
                   <div className="popup-sugestoes-text">
                     <p className="popup-sugestoes-name">{s.nome_usuario}</p>
-                    <p className="popup-sugestoes-changes">Mudanças Propostas: {getMudancasTexto(s)}</p>
+                    <p className="popup-sugestoes-changes">Mudanças: {getMudancasTexto(s)}</p>
                   </div>
                 </div>
                 <div className="popup-sugestoes-btns" onClick={e => e.stopPropagation()}>
@@ -265,6 +284,8 @@ export default function DetalhesPage() {
 
   const [filmeDetalhes, setFilmeDetalhes] = useState(null)
   const [loadingDetalhes, setLoadingDetalhes] = useState(true)
+  const [deleteError, setDeleteError] = useState(null)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     setLoadingDetalhes(true)
@@ -275,7 +296,6 @@ export default function DetalhesPage() {
       .finally(() => setLoadingDetalhes(false))
   }, [id])
 
-  // Enquanto carrega os detalhes, usa o filme da listagem como fallback
   const filme = filmeDetalhes || filmes.find(f => String(f.id) === String(id))
 
   const [showEdit, setShowEdit] = useState(false)
@@ -309,23 +329,31 @@ export default function DetalhesPage() {
   const dur = (() => {
     if (!filme.duracao) return ''
     if (typeof filme.duracao === 'string') {
-      // Backend retorna "HH:MM:SS" ou "HH:MM"
       const parts = filme.duracao.split(':')
       const h = parseInt(parts[0], 10)
       const m = parseInt(parts[1] || '0', 10)
       return h > 0 ? `${h}h ${m}min` : `${m}min`
     }
-    // Caso numérico (segundos) — fallback
     return `${Math.floor(filme.duracao / 60)}h ${filme.duracao % 60}min`
   })()
 
-  const pais = (filme.paises?.[0]) || ''
-  const paisFlag = { 'Estados Unidos': '🇺🇸', 'Japão': '🇯🇵', 'Reino Unido': '🇬🇧', 'França': '🇫🇷', 'Brasil': '🇧🇷' }[pais] || '🌐'
+  // País: suporta objeto {nome, img} ou string
+  const primeiroPais = filme.paises?.[0]
+  const paisNome = typeof primeiroPais === 'string' ? primeiroPais : primeiroPais?.nome || ''
+  const paisImg  = typeof primeiroPais === 'object' && primeiroPais?.img ? primeiroPais.img : null
+  const paisFlag = paisImg ? null : (PAIS_FLAGS_EMOJI[paisNome] || '🌐')
 
-  function handleDelete() {
-    deleteFilme(filme.id)
-      .then(() => navigate('/catalogo'))
-      .catch(err => console.error('Erro ao deletar:', err))
+  async function handleDelete() {
+    setDeleting(true)
+    setDeleteError(null)
+    try {
+      await deleteFilme(filme.id)
+      navigate('/catalogo')
+    } catch (err) {
+      setDeleteError(err.message || 'Erro ao deletar filme.')
+      setDeleting(false)
+      setShowDelete(false)
+    }
   }
 
   function handleEdit(data) {
@@ -339,6 +367,17 @@ export default function DetalhesPage() {
 
   return (
     <>
+      {deleteError && (
+        <div style={{
+          position: 'fixed', top: 80, left: '50%', transform: 'translateX(-50%)',
+          background: '#2a0a0a', border: '1px solid #cc0000', borderRadius: 10,
+          padding: '12px 24px', color: '#ff6b6b', zIndex: 9999, fontSize: '0.9rem'
+        }}>
+          ⊙ {deleteError}
+          <button onClick={() => setDeleteError(null)} style={{ marginLeft: 12, background: 'none', border: 'none', color: '#ff6b6b', cursor: 'pointer' }}>✕</button>
+        </div>
+      )}
+
       {/* HERO */}
       <section className="detalhes-hero" aria-label={`Detalhes de ${filme.titulo}`}>
         <div className="detalhes-hero-bg" style={{ backgroundImage: `url(${bgUrl})` }} />
@@ -347,7 +386,16 @@ export default function DetalhesPage() {
           <h1 className="detalhes-title">{filme.titulo}</h1>
 
           <div className="detalhes-meta">
-            {pais && <span className="detalhes-meta-item">{paisFlag} {pais}</span>}
+            {/* País com imagem do banco ou emoji fallback */}
+            {paisNome && (
+              <span className="detalhes-meta-item" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                {paisImg
+                  ? <img src={paisImg} alt={paisNome} style={{ width: 22, height: 16, objectFit: 'cover', borderRadius: 2 }} onError={e => { e.target.style.display='none' }} />
+                  : <span>{paisFlag}</span>
+                }
+                {paisNome}
+              </span>
+            )}
             {filme.ano && <span className="detalhes-meta-item">📅 {filme.ano}</span>}
             {filme.classificacao && (
               <span className="badge-classif">{filme.classificacao}</span>
@@ -390,15 +438,25 @@ export default function DetalhesPage() {
             <p className="detalhes-synopsis">{filme.sinopse}</p>
           )}
 
+          {/* Linguagens com imagem do banco ou emoji fallback */}
           {(filme.linguagens?.length > 0) && (
             <div>
               <p className="detalhes-lang-label">Linguagens:</p>
               <div className="lang-flags">
-                {filme.linguagens.map((l, i) => (
-                  <span key={i} className="lang-flag" title={l}>
-                    {LANG_FLAGS[l] || '🌐'}
-                  </span>
-                ))}
+                {filme.linguagens.map((l, i) => {
+                  const nome = typeof l === 'string' ? l : l.nome
+                  const img  = typeof l === 'object' && l.img ? l.img : null
+                  const emoji = LANG_FLAGS_EMOJI[nome] || '🌐'
+                  return (
+                    <span key={i} className="lang-flag" title={nome} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      {img
+                        ? <img src={img} alt={nome} style={{ width: 24, height: 18, objectFit: 'cover', borderRadius: 2 }} onError={e => { e.target.style.display='none'; e.target.nextSibling && (e.target.nextSibling.style.display='inline') }} />
+                        : null
+                      }
+                      <span style={{ display: img ? 'none' : 'inline' }}>{emoji}</span>
+                    </span>
+                  )
+                })}
               </div>
             </div>
           )}
@@ -408,7 +466,9 @@ export default function DetalhesPage() {
               <>
                 <button className="btn btn-edit" onClick={() => setShowEdit(true)}>✏️ Editar</button>
                 <button className="btn btn-suggest" onClick={() => setShowSugestoes(true)}>🚀 Sugestões</button>
-                <button className="btn btn-delete" onClick={() => setShowDelete(true)}>🗑 Apagar</button>
+                <button className="btn btn-delete" onClick={() => setShowDelete(true)} disabled={deleting}>
+                  {deleting ? '⏳ Deletando...' : '🗑 Apagar'}
+                </button>
               </>
             ) : isLoggedIn ? (
               <>
@@ -435,24 +495,28 @@ export default function DetalhesPage() {
           {/* Diretores */}
           <section aria-labelledby="diretores-title">
             <h2 id="diretores-title" className="section-title">Diretores</h2>
-            <div className="person-grid">
-              {(filme.diretores || []).slice(0, 3).map((d, i) => {
-                const nome = typeof d === 'string' ? d : d.nome
-                const foto = typeof d === 'string' ? null : d.foto
-                return (
-                  <div key={i} className="person-card">
-                    <img
-                      src={foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(nome)}&background=7833e2&color=fff&size=80`}
-                      alt={nome}
-                      className="circle-avatar person-avatar"
-                      onError={e => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(nome)}&background=7833e2&color=fff&size=80` }}
-                    />
-                    <p className="person-name">{nome}</p>
-                    <p className="person-role">Diretor</p>
-                  </div>
-                )
-              })}
-            </div>
+            {(filme.diretores || []).length === 0 ? (
+              <p style={{ color: '#666', fontSize: '0.9rem' }}>Nenhum diretor cadastrado.</p>
+            ) : (
+              <div className="person-grid">
+                {(filme.diretores || []).slice(0, 3).map((d, i) => {
+                  const nome = typeof d === 'string' ? d : d.nome
+                  const foto = typeof d === 'string' ? null : d.foto
+                  return (
+                    <div key={i} className="person-card">
+                      <img
+                        src={foto && foto !== '' ? foto : `https://ui-avatars.com/api/?name=${encodeURIComponent(nome)}&background=7833e2&color=fff&size=80`}
+                        alt={nome}
+                        className="circle-avatar person-avatar"
+                        onError={e => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(nome)}&background=7833e2&color=fff&size=80` }}
+                      />
+                      <p className="person-name">{nome}</p>
+                      <p className="person-role">Diretor</p>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </section>
 
           {/* Saga */}
@@ -460,8 +524,8 @@ export default function DetalhesPage() {
             <h2 id="saga-title" className="section-title">Da Saga</h2>
             {filme.sagas && filme.sagas.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {filme.sagas.map(saga => (
-                  <div key={saga.id} className="saga-card">
+                {filme.sagas.map((saga, i) => (
+                  <div key={saga.id || i} className="saga-card">
                     <div className="saga-info">
                       <p className="saga-title">{saga.nome}</p>
                       {saga.descricao && (
@@ -507,7 +571,7 @@ export default function DetalhesPage() {
                 return (
                   <div key={i} className="person-card">
                     <img
-                      src={foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(nome)}&background=333&color=fff&size=80`}
+                      src={foto && foto !== '' ? foto : `https://ui-avatars.com/api/?name=${encodeURIComponent(nome)}&background=333&color=fff&size=80`}
                       alt={nome}
                       className="circle-avatar person-avatar"
                       onError={e => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(nome)}&background=333&color=fff&size=80` }}

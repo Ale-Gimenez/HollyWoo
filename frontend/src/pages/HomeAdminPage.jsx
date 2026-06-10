@@ -21,7 +21,7 @@ export default function HomeAdminPage() {
                 + Adicionar Filme
               </button>
               <button className="btn btn-suggest" onClick={() => navigate('/sugestoes')}>
-                🚀 Sugestões
+                <i className="fi fi-sr-bell" style={{marginRight:6,verticalAlign:'middle'}}></i> Sugestões
               </button>
             </div>
           </div>

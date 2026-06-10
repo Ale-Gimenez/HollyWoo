@@ -40,6 +40,7 @@ export default function CatalogoPage() {
   const [activeTemas, setActiveTemas]       = useState([])
   const [activeEstilos, setActiveEstilos]   = useState([])
   const [anoFiltro, setAnoFiltro]           = useState('Todos')
+  const [activeEra, setActiveEra]           = useState('')
   const [page, setPage]                     = useState(1)
   const [toast, setToast]                   = useState(null)
   const prevFilteredCount = useRef(null)
@@ -52,7 +53,7 @@ export default function CatalogoPage() {
   function clearAll() {
     setActiveGeneros([]); setActiveClassifs([])
     setActiveTemas([]); setActiveEstilos([])
-    setSearch(''); setAnoFiltro('Todos'); setPage(1)
+    setSearch(''); setAnoFiltro('Todos'); setActiveEra(''); setPage(1)
   }
 
   const filtered = useMemo(() => {
@@ -102,6 +103,11 @@ export default function CatalogoPage() {
       })
     }
 
+    // Filtro por era (clássico / novo)
+    if (activeEra) {
+      list = list.filter(f => f.era === activeEra)
+    }
+
     // Filtro por década
     if (anoFiltro !== 'Todos') {
       const yr = Number(anoFiltro)
@@ -109,7 +115,7 @@ export default function CatalogoPage() {
     }
 
     return list
-  }, [filmes, search, activeGeneros, activeClassifs, activeTemas, activeEstilos, anoFiltro])
+  }, [filmes, search, activeGeneros, activeClassifs, activeTemas, activeEstilos, anoFiltro, activeEra])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE))
   const pageFilmes = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE)
@@ -128,7 +134,7 @@ export default function CatalogoPage() {
   const anos = ['Todos', '2020', '2010', '2000', '1990', '1980']
 
   const hasFilters = activeGeneros.length || activeClassifs.length ||
-    activeTemas.length || activeEstilos.length || anoFiltro !== 'Todos' || search.trim()
+    activeTemas.length || activeEstilos.length || anoFiltro !== 'Todos' || activeEra || search.trim()
 
   if (loading) {
     return (
@@ -226,14 +232,30 @@ export default function CatalogoPage() {
             ))}
           </div>
         </div>
+
+        <div>
+          <p className="filter-group-title">Era do Filme</p>
+          <div className="filter-chips">
+            {[{ val: 'classico', label: '🎞 Clássico' }, { val: 'novo', label: '✨ Novo' }].map(e => (
+              <button
+                key={e.val}
+                className={`chip filter-chip${activeEra === e.val ? ' active' : ''}`}
+                onClick={() => { setActiveEra(prev => prev === e.val ? '' : e.val); setPage(1) }}
+              >
+                {activeEra === e.val && <span className="chip-remove">✕</span>}
+                {e.label}
+              </button>
+            ))}
+          </div>
+        </div>
       </aside>
 
-      {/* MAIN */}
+      {/* MAIN */
       <main>
         <h1 className="catalogo-title">Catálogo de Filmes</h1>
 
         <div className="search-bar" style={{ marginBottom: '20px' }}>
-          <span className="search-icon">🔍</span>
+          <span className="search-icon"><i className="fi fi-sr-search"></i></span>
           <input
             type="search"
             placeholder="Está procurando um filme, ator ou diretor em específico?"
@@ -289,6 +311,12 @@ export default function CatalogoPage() {
                 {e} <span className="chip-remove">✕</span>
               </span>
             ))}
+            {activeEra && (
+              <span className="chip filter-chip active" style={{ fontSize: '0.78rem', cursor: 'pointer' }}
+                onClick={() => { setActiveEra(''); setPage(1) }}>
+                {activeEra === 'classico' ? '🎞 Clássico' : '✨ Novo'} <span className="chip-remove">✕</span>
+              </span>
+            )}
             {anoFiltro !== 'Todos' && (
               <span className="chip filter-chip active" style={{ fontSize: '0.78rem', cursor: 'pointer' }}
                 onClick={() => { setAnoFiltro('Todos'); setPage(1) }}>

@@ -38,23 +38,28 @@ export default function Header() {
               to={isLoggedIn ? (isAdmin ? '/home' : '/') : '/'}
               className={isActive('/home') || (location.pathname === '/' && !isAdmin) ? 'active' : ''}
             >
+              <i className="fi fi-sr-home" style={{ marginRight: 6, verticalAlign: 'middle' }}></i>
               Home
             </Link>
             <Link to="/catalogo" className={isActive('/catalogo') ? 'active' : ''}>
+              <i className="fi fi-sr-film" style={{ marginRight: 6, verticalAlign: 'middle' }}></i>
               Catálogo
             </Link>
             {isAdmin && (
               <Link to="/adicionar" className={isActive('/adicionar') ? 'active' : ''}>
+                <i className="fi fi-sr-square-plus" style={{ marginRight: 6, verticalAlign: 'middle' }}></i>
                 Adicionar Filme
               </Link>
             )}
             {isAdmin && (
               <Link to="/sugestoes" className={isActive('/sugestoes') ? 'active' : ''}>
+                <i className="fi fi-sr-bell" style={{ marginRight: 6, verticalAlign: 'middle' }}></i>
                 Sugestões
               </Link>
             )}
             {isLoggedIn && !isAdmin && (
               <Link to="/favoritos" className={isActive('/favoritos') ? 'active' : ''}>
+                <i className="fi fi-sr-heart" style={{ marginRight: 6, verticalAlign: 'middle' }}></i>
                 Favoritos
               </Link>
             )}
@@ -63,6 +68,7 @@ export default function Header() {
           <div className="header-actions">
             {!isLoggedIn ? (
               <button className="btn-entrar" onClick={() => navigate('/login')}>
+                <i className="fi fi-sr-sign-in-alt" style={{ marginRight: 6, verticalAlign: 'middle' }}></i>
                 Entrar
               </button>
             ) : (

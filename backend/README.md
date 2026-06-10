@@ -268,7 +268,7 @@ O refresh token expira em **7 dias** (configurável).
 Após rodar o projeto, crie um usuário comum pela API e depois altere sua role direto no banco:
 
 ```sql
-UPDATE usuario SET role = 'admin' WHERE id_usuario = (seu id aqui sem o parênteses);
+UPDATE usuario SET role = 'admin' WHERE email = 'seu@email.com';
 ```
 
 Ou, se já houver outro admin, use o endpoint `PATCH /usuarios/{id}/role`.

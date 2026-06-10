@@ -149,8 +149,16 @@ class FilmeOut(BaseModel):
     pais_origem: Optional[PaisOut] = None
     produtora_principal: Optional[ProdutoraOut] = None
     produtoras: List[ProdutoraOut] = []
+    categorias: List[CategoriaOut] = []
+    linguagens: List[LinguagemOut] = []
+    paises: List[PaisOut] = []
+    atores: List[AtorOut] = []
+    diretores: List[DiretorOut] = []
+    temas: List[TemaOut] = []
+    sagas: List[SagaOut] = []
+
     @classmethod
-    def from_orm_with_era(cls, filme) -> "FilmeListOut":
+    def from_orm_with_era(cls, filme) -> "FilmeOut":
         obj = cls.model_validate(filme)
         obj.era = calcular_era(obj.ano)
         return obj

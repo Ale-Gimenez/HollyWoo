@@ -6,15 +6,25 @@ import '../styles/Shared.css'
 /* ─── Popup: detalhe de sugestão de ADIÇÃO ──────────────────────────────── */
 function PopupDetalheAdicao({ filme, onAprovar, onRecusar, onClose }) {
   const [confirmando, setConfirmando] = useState(false)
+
+  // Extrai nomes de arrays que podem ser objetos ou strings
+  function listNomes(arr) {
+    if (!arr || arr.length === 0) return null
+    return arr.map(x => typeof x === 'string' ? x : x.nome).join(', ')
+  }
+
   const infoRows = [
     { label: 'Título',        valor: filme.titulo },
     { label: 'Ano',           valor: filme.ano },
     { label: 'Classificação', valor: filme.classificacao },
     { label: 'Duração',       valor: filme.duracao },
     { label: 'Orçamento',     valor: filme.orcamento ? `$ ${Number(filme.orcamento).toLocaleString('en-US', { minimumFractionDigits: 2 })}` : null },
-    { label: 'Categorias',    valor: filme.categorias?.length > 0 ? filme.categorias.join(', ') : null },
-    { label: 'Linguagens',    valor: filme.linguagens?.length > 0 ? filme.linguagens.join(', ') : null },
-    { label: 'Países',        valor: filme.paises?.length > 0 ? filme.paises.join(', ') : null },
+    { label: 'Categorias',    valor: listNomes(filme.categorias) },
+    { label: 'Linguagens',    valor: listNomes(filme.linguagens) },
+    { label: 'Países',        valor: listNomes(filme.paises) },
+    { label: 'Diretores',     valor: listNomes(filme.diretores) },
+    { label: 'Elenco',        valor: listNomes(filme.elenco) },
+    { label: 'Saga',          valor: listNomes(filme.sagas) },
     { label: 'Trailer',       valor: filme.trailer },
   ].filter(r => r.valor)
 
@@ -65,10 +75,14 @@ function PopupDetalheAdicao({ filme, onAprovar, onRecusar, onClose }) {
 function PopupDetalheEdicao({ sugestao, dadosAuxiliares, onAprovar, onRecusar, onClose }) {
   const [confirmando, setConfirmando] = useState(false)
 
-  // Resolve IDs de volta para nomes para exibição
   function resolveNomes(ids, lista, idKey) {
     if (!ids || !ids.length) return null
     return lista.filter(item => ids.includes(item[idKey])).map(item => item.nome).join(', ') || null
+  }
+
+  function listNomes(arr) {
+    if (!arr || arr.length === 0) return '—'
+    return arr.map(x => typeof x === 'string' ? x : x.nome).join(', ')
   }
 
   const campos = [
@@ -83,18 +97,23 @@ function PopupDetalheEdicao({ sugestao, dadosAuxiliares, onAprovar, onRecusar, o
     { label: 'Estilo Visual', atual: sugestao.filmeAtual?.estilo_visual, proposto: sugestao.estilo_visual },
     {
       label: 'Categorias',
-      atual: sugestao.filmeAtual?.categorias?.join(', '),
+      atual: sugestao.filmeAtual?.categorias?.join(', ') || '—',
       proposto: resolveNomes(sugestao.ids_categorias, dadosAuxiliares.categorias, 'id_categoria'),
     },
     {
       label: 'Linguagens',
-      atual: sugestao.filmeAtual?.linguagens?.join(', '),
+      atual: listNomes(sugestao.filmeAtual?.linguagens),
       proposto: resolveNomes(sugestao.ids_linguagens, dadosAuxiliares.linguagens, 'id_linguagem'),
     },
     {
       label: 'Países',
-      atual: sugestao.filmeAtual?.paises?.join(', '),
+      atual: listNomes(sugestao.filmeAtual?.paises),
       proposto: resolveNomes(sugestao.ids_paises, dadosAuxiliares.paises, 'id_pais'),
+    },
+    {
+      label: 'Sagas',
+      atual: sugestao.filmeAtual?.sagas?.map(s => s.nome).join(', ') || '—',
+      proposto: resolveNomes(sugestao.ids_sagas, dadosAuxiliares.sagas, 'id_saga'),
     },
   ].filter(c => c.proposto != null && String(c.proposto) !== String(c.atual ?? ''))
 
@@ -109,16 +128,16 @@ function PopupDetalheEdicao({ sugestao, dadosAuxiliares, onAprovar, onRecusar, o
             <h2 className="modal-title" style={{ marginBottom: 2 }}>Sugestão de Edição</h2>
             <p style={{ color: '#aaa', fontSize: '0.85rem' }}>
               Sugerido por <strong style={{ color: '#fff' }}>{sugestao.nome_usuario}</strong> para{' '}
-              <strong style={{ color: 'var(--purple-light)' }}>{sugestao.filmeAtual?.titulo}</strong>
+              <strong style={{ color: 'var(--purple-light)' }}>{sugestao.filmeAtual?.titulo || `Filme #${sugestao.id_filme}`}</strong>
             </p>
           </div>
         </div>
         {campos.length === 0 ? (
           <p style={{ color: '#888', margin: '20px 0' }}>Nenhuma alteração detectada nesta sugestão.</p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', margin: '20px 0' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', margin: '20px 0', maxHeight: '55vh', overflowY: 'auto', paddingRight: 4 }}>
             {campos.map((c, i) => (
-              <div key={i} style={{ background: '#252525', borderRadius: 10, padding: '12px 16px' }}>
+              <div key={i} style={{ background: '#252525', borderRadius: 10, padding: '12px 16px', flexShrink: 0 }}>
                 <p style={{ fontWeight: 800, color: 'var(--purple-light)', fontSize: '0.75rem', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   {c.label}
                 </p>
@@ -292,7 +311,7 @@ export default function SugestoesPage() {
       <h1 className="sugestoes-title">Sugestões Filmes</h1>
 
       <div className="search-bar" style={{ marginBottom: '32px' }}>
-        <span className="search-icon">🔍</span>
+        <span className="search-icon"><i className="fi fi-sr-search"></i></span>
         <input
           type="search"
           placeholder="Está procurando um filme em específico?"
@@ -346,7 +365,7 @@ export default function SugestoesPage() {
                 key={e.id}
                 titulo={e.filmeAtual?.titulo || `Filme #${e.id_filme}`}
                 poster={e.filmeAtual?.poster || ''}
-                meta={`Sugerido por ${e.nome_usuario} · Alterações: ${getCamposAlterados(e)}`}
+                meta={`Por ${e.nome_usuario} · Alterações: ${getCamposAlterados(e)}`}
                 resumo={null}
                 tipo="edicao"
                 onVer={() => setEdicaoSelecionada(e)}

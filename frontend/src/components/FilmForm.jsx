@@ -7,8 +7,9 @@ const CLASSIFICACOES = ['L', '+6', '+10', '+12', '+14', '+16', '+18']
 const ESTILOS = ['Vida Real', '3D', '2D', 'Stop Motion', 'Anime']
 
 /* ─── Multi-select dropdown com checkboxes ─────────────────────────────── */
-function MultiSelect({ id, label, options, value = [], onChange, placeholder = 'Escolha opções' }) {
+function MultiSelect({ id, label, options, value = [], onChange, placeholder = 'Escolha opções', displayKey = null, valueKey = null }) {
   const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState('')
   const ref = useRef(null)
 
   useEffect(() => {
@@ -19,15 +20,33 @@ function MultiSelect({ id, label, options, value = [], onChange, placeholder = '
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
+  // Se displayKey/valueKey fornecidos, options são objetos; caso contrário, strings
+  function getLabel(opt) {
+    return displayKey ? opt[displayKey] : opt
+  }
+  function getValue(opt) {
+    return valueKey ? opt[valueKey] : opt
+  }
+
   function toggle(opt) {
-    if (value.includes(opt)) {
-      onChange(value.filter(v => v !== opt))
+    const v = getValue(opt)
+    if (value.includes(v)) {
+      onChange(value.filter(x => x !== v))
     } else {
-      onChange([...value, opt])
+      onChange([...value, v])
     }
   }
 
-  const display = value.length === 0 ? placeholder : value.join(', ')
+  const filteredOptions = options.filter(opt => {
+    const label = getLabel(opt)
+    return !search || label.toLowerCase().includes(search.toLowerCase())
+  })
+
+  const selectedLabels = options
+    .filter(opt => value.includes(getValue(opt)))
+    .map(opt => getLabel(opt))
+
+  const display = selectedLabels.length === 0 ? placeholder : selectedLabels.join(', ')
 
   return (
     <div className="multiselect-wrapper" ref={ref}>
@@ -40,29 +59,47 @@ function MultiSelect({ id, label, options, value = [], onChange, placeholder = '
         aria-haspopup="listbox"
         aria-expanded={open}
       >
-        <span className={`multiselect-display${value.length === 0 ? ' placeholder' : ''}`}>
+        <span className={`multiselect-display${selectedLabels.length === 0 ? ' placeholder' : ''}`}>
           {display}
         </span>
         <span className="multiselect-arrow">{open ? '▲' : '▼'}</span>
       </button>
       {open && (
-        <ul className="multiselect-dropdown" role="listbox" aria-multiselectable="true">
-          {options.map(opt => {
-            const checked = value.includes(opt)
-            return (
-              <li
-                key={opt}
-                role="option"
-                aria-selected={checked}
-                className={`multiselect-option${checked ? ' selected' : ''}`}
-                onClick={() => toggle(opt)}
-              >
-                <span className="multiselect-checkbox">{checked ? '✓' : ''}</span>
-                {opt}
-              </li>
-            )
-          })}
-        </ul>
+        <div className="multiselect-dropdown-wrapper">
+          {options.length > 6 && (
+            <div className="multiselect-search-wrap">
+              <input
+                className="multiselect-search"
+                type="text"
+                placeholder="Buscar..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                onClick={e => e.stopPropagation()}
+                autoFocus
+              />
+            </div>
+          )}
+          <ul className="multiselect-dropdown" role="listbox" aria-multiselectable="true">
+            {filteredOptions.length === 0 ? (
+              <li className="multiselect-option" style={{ color: '#666', cursor: 'default' }}>Nenhum resultado</li>
+            ) : filteredOptions.map(opt => {
+              const v = getValue(opt)
+              const checked = value.includes(v)
+              return (
+                <li
+                  key={v}
+                  role="option"
+                  aria-selected={checked}
+                  className={`multiselect-option${checked ? ' selected' : ''}`}
+                  onClick={() => toggle(opt)}
+                >
+                  <span className="multiselect-checkbox">{checked ? '✓' : ''}</span>
+                  {getLabel(opt)}
+                </li>
+              )
+            })}
+          </ul>
+        </div>
       )}
     </div>
   )
@@ -70,16 +107,26 @@ function MultiSelect({ id, label, options, value = [], onChange, placeholder = '
 
 export default function FilmForm({ initial = {}, onSubmit, onCancel, submitLabel = 'Adicionar' }) {
   const { dadosAuxiliares } = useFilmes()
-  const { categorias, paises, linguagens, produtoras, sagas } = dadosAuxiliares
+  const { categorias, paises, linguagens, produtoras, sagas, atores, diretores } = dadosAuxiliares
 
-  // Listas de nomes para os dropdowns
+  // Nomes para dropdowns simples
   const nomesCategorias  = categorias.map(c => c.nome)
   const nomesPaises      = paises.map(p => p.nome)
   const nomesLinguagens  = linguagens.map(l => l.nome)
   const nomesProdutoras  = produtoras.map(p => p.nome)
   const nomesSagas       = sagas.map(s => s.nome)
 
-  // Resolve IDs iniciais de volta para nomes (para edição)
+  // Atores e diretores: options com id e nome completo
+  const opcoesAtores = atores.map(a => ({
+    id: a.id_ator,
+    label: `${a.nome} ${a.sobrenome || ''}`.trim()
+  }))
+  const opcoesDiretores = diretores.map(d => ({
+    id: d.id_diretor,
+    label: `${d.nome} ${d.sobrenome || ''}`.trim()
+  }))
+
+  // Resolve valores iniciais de categorias, países, linguagens, sagas a partir de IDs
   const initialCategorias = initial._ids?.ids_categorias?.length
     ? categorias.filter(c => initial._ids.ids_categorias.includes(c.id_categoria)).map(c => c.nome)
     : (Array.isArray(initial.categorias) ? initial.categorias : [])
@@ -95,6 +142,23 @@ export default function FilmForm({ initial = {}, onSubmit, onCancel, submitLabel
   const initialSagas = initial._ids?.ids_sagas?.length
     ? sagas.filter(s => initial._ids.ids_sagas.includes(s.id_saga)).map(s => s.nome)
     : (initial.sagas || []).map(s => s.nome || s)
+
+  // IDs iniciais de atores e diretores
+  const initialAtoresIds = initial._ids?.ids_atores?.length
+    ? initial._ids.ids_atores
+    : (initial.elenco || []).map(a => {
+        const nome = typeof a === 'string' ? a : a.nome
+        const found = atores.find(x => `${x.nome} ${x.sobrenome || ''}`.trim() === nome)
+        return found?.id_ator
+      }).filter(Boolean)
+
+  const initialDiretoresIds = initial._ids?.ids_diretores?.length
+    ? initial._ids.ids_diretores
+    : (initial.diretores || []).map(d => {
+        const nome = typeof d === 'string' ? d : d.nome
+        const found = diretores.find(x => `${x.nome} ${x.sobrenome || ''}`.trim() === nome)
+        return found?.id_diretor
+      }).filter(Boolean)
 
   const initialProdutora = (() => {
     if (initial._ids?.ids_produtoras?.length) {
@@ -122,8 +186,8 @@ export default function FilmForm({ initial = {}, onSubmit, onCancel, submitLabel
     paises:       initialPaises,
     linguagens:   initialLinguagens,
     sagas_nomes:  initialSagas,
-    diretores_raw: (initial.diretores || []).map(d => typeof d === 'string' ? d : d.nome).join(', '),
-    atores_raw:    (initial.elenco    || []).map(a => typeof a === 'string' ? a : a.nome).join(', '),
+    ids_atores:   initialAtoresIds,
+    ids_diretores: initialDiretoresIds,
     trailer:      initial.trailer || '',
   })
 
@@ -147,13 +211,14 @@ export default function FilmForm({ initial = {}, onSubmit, onCancel, submitLabel
     const errs = validate()
     if (Object.keys(errs).length) { setErrors(errs); return }
 
-    const diretores = form.diretores_raw
-      .split(',').map(s => s.trim()).filter(Boolean)
-      .map(nome => ({ nome, foto: `https://ui-avatars.com/api/?name=${encodeURIComponent(nome)}&background=7833e2&color=fff`, cargo: 'Diretor' }))
+    // Resolve nomes de diretores e atores selecionados
+    const diretoresSelecionados = diretores
+      .filter(d => form.ids_diretores.includes(d.id_diretor))
+      .map(d => ({ nome: `${d.nome} ${d.sobrenome || ''}`.trim(), foto: d.img || '', cargo: 'Diretor' }))
 
-    const elenco = form.atores_raw
-      .split(',').map(s => s.trim()).filter(Boolean)
-      .map(nome => ({ nome, personagem: '', foto: `https://ui-avatars.com/api/?name=${encodeURIComponent(nome)}&background=333&color=fff` }))
+    const elencoSelecionado = atores
+      .filter(a => form.ids_atores.includes(a.id_ator))
+      .map(a => ({ nome: `${a.nome} ${a.sobrenome || ''}`.trim(), personagem: a.nome_personagem || '', foto: a.img || '' }))
 
     // IDs das sagas selecionadas
     const ids_sagas = sagas
@@ -174,10 +239,12 @@ export default function FilmForm({ initial = {}, onSubmit, onCancel, submitLabel
       produtora_principal: { nome: form.produtora_principal },
       paises:       form.paises.filter(Boolean),
       linguagens:   form.linguagens.filter(Boolean),
-      diretores,
-      elenco,
+      diretores:    diretoresSelecionados,
+      elenco:       elencoSelecionado,
       trailer:      form.trailer || '',
       ids_sagas,
+      ids_atores:   form.ids_atores,
+      ids_diretores: form.ids_diretores,
       classico:     Number(form.ano) < 2015,
     })
   }
@@ -260,8 +327,16 @@ export default function FilmForm({ initial = {}, onSubmit, onCancel, submitLabel
           <input id="f-duracao" className="form-input" placeholder="Ex: 01:30:00" value={form.duracao} onChange={e => set('duracao', e.target.value)} />
         </div>
         <div className="form-group">
-          <label className="form-label" htmlFor="f-diretor">Diretor</label>
-          <input id="f-diretor" className="form-input" placeholder="Ex: Peter Jackson, Outro" value={form.diretores_raw} onChange={e => set('diretores_raw', e.target.value)} />
+          <MultiSelect
+            id="f-diretor"
+            label="Diretores"
+            options={opcoesDiretores}
+            value={form.ids_diretores}
+            onChange={val => set('ids_diretores', val)}
+            placeholder="Selecione diretores"
+            displayKey="label"
+            valueKey="id"
+          />
         </div>
       </div>
 
@@ -340,8 +415,16 @@ export default function FilmForm({ initial = {}, onSubmit, onCancel, submitLabel
           </select>
         </div>
         <div className="form-group">
-          <label className="form-label" htmlFor="f-atores">Atores</label>
-          <input id="f-atores" className="form-input" placeholder="Ex: Shakira, Ginnifer Goodwin" value={form.atores_raw} onChange={e => set('atores_raw', e.target.value)} />
+          <MultiSelect
+            id="f-atores"
+            label="Atores"
+            options={opcoesAtores}
+            value={form.ids_atores}
+            onChange={val => set('ids_atores', val)}
+            placeholder="Selecione atores"
+            displayKey="label"
+            valueKey="id"
+          />
         </div>
       </div>
 

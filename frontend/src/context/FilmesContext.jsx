@@ -33,14 +33,14 @@ function normalizeFilme(f) {
     orcamento: f.orcamento != null ? Number(f.orcamento) : null,
 
     categorias: (f.categorias || []).map(c => c.nome ?? c),
-    linguagens: (f.linguagens || []).map(l => l.nome ?? l),
-    paises:     (f.paises     || []).map(p => p.nome ?? p),
+    linguagens: (f.linguagens || []).map(l => ({ nome: l.nome ?? l, img: l.img || null })),
+    paises:     (f.paises     || []).map(p => ({ nome: p.nome ?? p, img: p.img || null })),
     temas:      (f.temas      || []).map(t => t.nome ?? t),
     sagas:      (f.sagas      || []).map(s => ({ id: s.id_saga, nome: s.nome, descricao: s.descricao })),
 
     produtora_principal: (() => {
-      if (f.produtora_principal) return { nome: f.produtora_principal.nome }
-      if (f.produtoras && f.produtoras.length > 0) return { nome: f.produtoras[0].nome }
+      if (f.produtora_principal) return { nome: f.produtora_principal.nome, img: f.produtora_principal.img || null }
+      if (f.produtoras && f.produtoras.length > 0) return { nome: f.produtoras[0].nome, img: f.produtoras[0].img || null }
       return null
     })(),
 
@@ -79,7 +79,7 @@ function normalizeDestaques(destaques) {
 
 /**
  * Converte o payload do FilmForm (formato frontend) para o formato que o backend espera.
- * Usa as listas auxiliares carregadas do backend para resolver strings → IDs.
+ * Agora atores e diretores já chegam como IDs diretos do MultiSelect.
  */
 function toBackendPayload(formData, dadosAuxiliares) {
   const { categorias, paises, linguagens, produtoras, atores, diretores } = dadosAuxiliares
@@ -88,20 +88,6 @@ function toBackendPayload(formData, dadosAuxiliares) {
     if (!nomes || !Array.isArray(nomes)) return []
     return lista.filter(item => nomes.includes(item.nome)).map(item => item[idKey])
   }
-
-  function resolveId(nomesArr, lista, idKey) {
-    const ids = []
-    for (const nome of nomesArr) {
-      const found = lista.find(item =>
-        `${item.nome} ${item.sobrenome || ''}`.trim() === nome || item.nome === nome
-      )
-      if (found) ids.push(found[idKey])
-    }
-    return ids
-  }
-
-  const nomesAtores    = (formData.elenco    || []).map(a => typeof a === 'string' ? a : a.nome)
-  const nomesDiretores = (formData.diretores || []).map(d => typeof d === 'string' ? d : d.nome)
 
   const nomeProdutora = typeof formData.produtora_principal === 'string'
     ? formData.produtora_principal
@@ -112,6 +98,28 @@ function toBackendPayload(formData, dadosAuxiliares) {
   const estiloVisual = Array.isArray(formData.estilo_visual)
     ? (formData.estilo_visual[0] || null)
     : (formData.estilo_visual || null)
+
+  // Atores e diretores: se já vieram como IDs (novo fluxo), usa direto;
+  // senão faz fallback para resolução por nome (compatibilidade)
+  let idsAtores = []
+  if (formData.ids_atores && formData.ids_atores.length > 0) {
+    idsAtores = formData.ids_atores
+  } else {
+    const nomesAtores = (formData.elenco || []).map(a => typeof a === 'string' ? a : a.nome)
+    idsAtores = atores
+      .filter(a => nomesAtores.includes(`${a.nome} ${a.sobrenome || ''}`.trim()) || nomesAtores.includes(a.nome))
+      .map(a => a.id_ator)
+  }
+
+  let idsDiretores = []
+  if (formData.ids_diretores && formData.ids_diretores.length > 0) {
+    idsDiretores = formData.ids_diretores
+  } else {
+    const nomesDiretores = (formData.diretores || []).map(d => typeof d === 'string' ? d : d.nome)
+    idsDiretores = diretores
+      .filter(d => nomesDiretores.includes(`${d.nome} ${d.sobrenome || ''}`.trim()) || nomesDiretores.includes(d.nome))
+      .map(d => d.id_diretor)
+  }
 
   return {
     titulo:         formData.titulo,
@@ -129,8 +137,8 @@ function toBackendPayload(formData, dadosAuxiliares) {
     ids_paises:     resolveIds(formData.paises,     paises,     'id_pais'),
     ids_linguagens: resolveIds(formData.linguagens, linguagens, 'id_linguagem'),
     ids_produtoras: produtoraObj ? [produtoraObj.id_produtora] : [],
-    ids_atores:     resolveId(nomesAtores,    atores,    'id_ator'),
-    ids_diretores:  resolveId(nomesDiretores, diretores, 'id_diretor'),
+    ids_atores:     idsAtores,
+    ids_diretores:  idsDiretores,
     ids_sagas:      formData.ids_sagas || [],
   }
 }
@@ -190,7 +198,6 @@ export function FilmesProvider({ children }) {
     const payload = toBackendPayload(formData, dadosAuxiliares)
     const created = await apiCreateFilme(payload)
     const norm = normalizeFilme(created)
-    // Não adiciona à lista — fica pendente de aprovação do admin
     return norm
   }
 
