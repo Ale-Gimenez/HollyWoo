@@ -6,31 +6,26 @@ import '../styles/Shared.css'
 /* ─── Popup: detalhe de sugestão de ADIÇÃO ──────────────────────────────── */
 function PopupDetalheAdicao({ filme, onAprovar, onRecusar, onClose }) {
   const [confirmando, setConfirmando] = useState(false)
-
   const infoRows = [
-    { label: 'Título',       valor: filme.titulo },
-    { label: 'Ano',          valor: filme.ano },
-    { label: 'Classificação',valor: filme.classificacao },
-    { label: 'Duração',      valor: filme.duracao },
-    { label: 'Orçamento',    valor: filme.orcamento ? `$ ${Number(filme.orcamento).toLocaleString('en-US', { minimumFractionDigits: 2 })}` : null },
-    { label: 'Categorias',   valor: filme.categorias?.length > 0 ? filme.categorias.join(', ') : null },
-    { label: 'Linguagens',   valor: filme.linguagens?.length > 0 ? filme.linguagens.join(', ') : null },
-    { label: 'Países',       valor: filme.paises?.length > 0 ? filme.paises.join(', ') : null },
-    { label: 'Trailer',      valor: filme.trailer },
+    { label: 'Título',        valor: filme.titulo },
+    { label: 'Ano',           valor: filme.ano },
+    { label: 'Classificação', valor: filme.classificacao },
+    { label: 'Duração',       valor: filme.duracao },
+    { label: 'Orçamento',     valor: filme.orcamento ? `$ ${Number(filme.orcamento).toLocaleString('en-US', { minimumFractionDigits: 2 })}` : null },
+    { label: 'Categorias',    valor: filme.categorias?.length > 0 ? filme.categorias.join(', ') : null },
+    { label: 'Linguagens',    valor: filme.linguagens?.length > 0 ? filme.linguagens.join(', ') : null },
+    { label: 'Países',        valor: filme.paises?.length > 0 ? filme.paises.join(', ') : null },
+    { label: 'Trailer',       valor: filme.trailer },
   ].filter(r => r.valor)
 
   return (
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal-box" style={{ maxWidth: '620px' }}>
         <h2 className="modal-title">Sugestão de Adição</h2>
-
         <div style={{ display: 'flex', gap: '20px', marginBottom: '24px' }}>
-          <img
-            src={filme.poster}
-            alt={filme.titulo}
+          <img src={filme.poster} alt={filme.titulo}
             style={{ width: 100, height: 140, objectFit: 'cover', borderRadius: 10, flexShrink: 0 }}
-            onError={e => { e.target.src = 'https://via.placeholder.com/100x140/2a2a2a/666' }}
-          />
+            onError={e => { e.target.src = 'https://via.placeholder.com/100x140/2a2a2a/666' }} />
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {infoRows.map((r, i) => (
               <div key={i} style={{ display: 'flex', gap: '8px', fontSize: '0.88rem' }}>
@@ -40,14 +35,12 @@ function PopupDetalheAdicao({ filme, onAprovar, onRecusar, onClose }) {
             ))}
           </div>
         </div>
-
         {filme.sinopse && (
           <div style={{ background: '#252525', borderRadius: 10, padding: '12px 16px', marginBottom: '20px' }}>
             <p style={{ color: 'var(--purple-light)', fontWeight: 700, fontSize: '0.8rem', marginBottom: '6px' }}>SINOPSE</p>
             <p style={{ fontSize: '0.88rem', color: '#ccc', lineHeight: 1.6 }}>{filme.sinopse}</p>
           </div>
         )}
-
         {confirmando ? (
           <div style={{ background: '#1a1a0a', border: '1px solid #7a4500', borderRadius: 10, padding: '14px 16px', marginBottom: '20px' }}>
             <p style={{ color: '#ffcc80', fontWeight: 700, marginBottom: '10px' }}>⚠ Tem certeza que deseja recusar esta sugestão?</p>
@@ -69,7 +62,7 @@ function PopupDetalheAdicao({ filme, onAprovar, onRecusar, onClose }) {
 }
 
 /* ─── Popup: detalhe de sugestão de EDIÇÃO (comparativo antes × depois) ── */
-function PopupDetalheEdicao({ sugestao, onAprovar, onRecusar, onClose }) {
+function PopupDetalheEdicao({ sugestao, dadosAuxiliares, onAprovar, onRecusar, onClose }) {
   const [confirmando, setConfirmando] = useState(false)
 
   // Resolve IDs de volta para nomes para exibição
@@ -79,14 +72,14 @@ function PopupDetalheEdicao({ sugestao, onAprovar, onRecusar, onClose }) {
   }
 
   const campos = [
-    { label: 'Título',        atual: sugestao.filmeAtual.titulo,         proposto: sugestao.titulo },
-    { label: 'Ano',           atual: sugestao.filmeAtual.ano,            proposto: sugestao.ano },
-    { label: 'Sinopse',       atual: sugestao.filmeAtual.sinopse,        proposto: sugestao.sinopse },
-    { label: 'Classificação', atual: sugestao.filmeAtual.classificacao,  proposto: sugestao.classificacao },
-    { label: 'Poster',        atual: sugestao.filmeAtual.poster,         proposto: sugestao.poster },
-    { label: 'Trailer',       atual: sugestao.filmeAtual.trailer,        proposto: sugestao.trailer },
-    { label: 'Duração',       atual: sugestao.filmeAtual.duracao,        proposto: sugestao.duracao },
-    { label: 'Orçamento',     atual: sugestao.filmeAtual.orcamento,      proposto: sugestao.orcamento },
+    { label: 'Título',        atual: sugestao.filmeAtual?.titulo,        proposto: sugestao.titulo },
+    { label: 'Ano',           atual: sugestao.filmeAtual?.ano,           proposto: sugestao.ano },
+    { label: 'Sinopse',       atual: sugestao.filmeAtual?.sinopse,       proposto: sugestao.sinopse },
+    { label: 'Classificação', atual: sugestao.filmeAtual?.classificacao, proposto: sugestao.classificacao },
+    { label: 'Poster',        atual: sugestao.filmeAtual?.poster,        proposto: sugestao.poster },
+    { label: 'Trailer',       atual: sugestao.filmeAtual?.trailer,       proposto: sugestao.trailer },
+    { label: 'Duração',       atual: sugestao.filmeAtual?.duracao,       proposto: sugestao.duracao },
+    { label: 'Orçamento',     atual: sugestao.filmeAtual?.orcamento,     proposto: sugestao.orcamento },
     { label: 'Estilo Visual', atual: sugestao.filmeAtual?.estilo_visual, proposto: sugestao.estilo_visual },
     {
       label: 'Categorias',
@@ -104,7 +97,7 @@ function PopupDetalheEdicao({ sugestao, onAprovar, onRecusar, onClose }) {
       proposto: resolveNomes(sugestao.ids_paises, dadosAuxiliares.paises, 'id_pais'),
     },
   ].filter(c => c.proposto != null && String(c.proposto) !== String(c.atual ?? ''))
-  
+
   return (
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal-box" style={{ maxWidth: '640px' }}>
@@ -143,7 +136,6 @@ function PopupDetalheEdicao({ sugestao, onAprovar, onRecusar, onClose }) {
             ))}
           </div>
         )}
-
         {confirmando ? (
           <div style={{ background: '#1a1a0a', border: '1px solid #7a4500', borderRadius: 10, padding: '14px 16px', marginBottom: '16px' }}>
             <p style={{ color: '#ffcc80', fontWeight: 700, marginBottom: '10px' }}>⚠ Tem certeza que deseja recusar esta sugestão?</p>
@@ -167,36 +159,21 @@ function PopupDetalheEdicao({ sugestao, onAprovar, onRecusar, onClose }) {
 /* ─── Card reutilizável ──────────────────────────────────────────────────── */
 function SugestaoCard({ titulo, poster, meta, resumo, tipo, onVer, onAprovar, onRecusar }) {
   return (
-    <article
-      className="sugestao-card"
-      style={{ cursor: 'pointer' }}
-      onClick={onVer}
-      role="button"
-      tabIndex={0}
-      onKeyDown={e => e.key === 'Enter' && onVer()}
-    >
-      <img
-        src={poster}
-        alt={titulo}
-        className="sugestao-poster"
-        onError={e => { e.target.src = 'https://via.placeholder.com/72x100/2a2a2a/666' }}
-      />
+    <article className="sugestao-card" style={{ cursor: 'pointer' }} onClick={onVer} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && onVer()}>
+      <img src={poster} alt={titulo} className="sugestao-poster"
+        onError={e => { e.target.src = 'https://via.placeholder.com/72x100/2a2a2a/666' }} />
       <div className="sugestao-info">
         <h3 className="sugestao-film-title">{titulo}</h3>
         <p className="sugestao-meta">{meta}</p>
-        {resumo && (
-          <p className="sugestao-changes" style={{ marginTop: 4 }}>
-            {resumo.substring(0, 120)}{resumo.length > 120 ? '...' : ''}
-          </p>
-        )}
+        {resumo && <p className="sugestao-changes" style={{ marginTop: 4 }}>{resumo.substring(0, 120)}{resumo.length > 120 ? '...' : ''}</p>}
         <span className={`sugestao-tipo-badge ${tipo === 'edicao' ? 'sugestao-tipo-edicao' : 'sugestao-tipo-adicao'}`}>
           {tipo === 'edicao' ? 'Edição' : 'Adição'}
         </span>
       </div>
       <div className="sugestao-actions" onClick={e => e.stopPropagation()}>
-        <button className="btn-icon btn-icon-green" title="Ver detalhes" aria-label="Ver" onClick={onVer}>👁</button>
-        <button className="btn-icon btn-icon-green" title="Aprovar" aria-label="Aprovar" onClick={onAprovar}>✓</button>
-        <button className="btn-icon btn-icon-red" title="Recusar" aria-label="Recusar" onClick={onRecusar}>✕</button>
+        <button className="btn-icon btn-icon-green" title="Ver detalhes" onClick={onVer}>👁</button>
+        <button className="btn-icon btn-icon-green" title="Aprovar" onClick={onAprovar}>✓</button>
+        <button className="btn-icon btn-icon-red" title="Recusar" onClick={onRecusar}>✕</button>
       </div>
     </article>
   )
@@ -224,8 +201,22 @@ export default function SugestoesPage() {
 
   useEffect(() => {
     setLoadingPage(true)
-    getPendentes()
-      .then(setPendentes)
+    Promise.all([getPendentes(), getSugestoes()])
+      .then(async ([pend, sugs]) => {
+        setPendentes(pend)
+        // Para cada sugestão, buscar o filme atual para exibir no comparativo
+        const sugsComFilme = await Promise.all(
+          sugs.map(async s => {
+            try {
+              const filmeAtual = await getFilmeDetalhes(s.id_filme)
+              return { ...s, filmeAtual }
+            } catch {
+              return { ...s, filmeAtual: null }
+            }
+          })
+        )
+        setEdicoes(sugsComFilme)
+      })
       .catch(err => setError(err.message))
       .finally(() => setLoadingPage(false))
   }, [])
@@ -250,38 +241,46 @@ export default function SugestoesPage() {
     }
   }
 
-  function handleAprovarEdicao(id) {
-    setEdicoes(prev => prev.filter(e => e.id !== id))
-    setEdicaoSelecionada(null)
+  async function handleAprovarEdicao(sugId) {
+    try {
+      await aprovarSugestao(sugId)
+      setEdicoes(prev => prev.filter(e => e.id !== sugId))
+      setEdicaoSelecionada(null)
+    } catch (err) {
+      alert('Erro ao aprovar edição: ' + err.message)
+    }
   }
 
-  function handleRecusarEdicao(id) {
-    setEdicoes(prev => prev.filter(e => e.id !== id))
-    setEdicaoSelecionada(null)
+  async function handleRecusarEdicao(sugId) {
+    try {
+      await recusarSugestao(sugId)
+      setEdicoes(prev => prev.filter(e => e.id !== sugId))
+      setEdicaoSelecionada(null)
+    } catch (err) {
+      alert('Erro ao recusar edição: ' + err.message)
+    }
   }
 
   const s = search.toLowerCase().trim()
-
-  const adicoesFiltradas = pendentes.filter(f =>
-    !s || f.titulo.toLowerCase().includes(s)
-  )
-
+  const adicoesFiltradas = pendentes.filter(f => !s || f.titulo.toLowerCase().includes(s))
   const edicoesFiltradas = edicoes.filter(e =>
-    !s || e.filmeAtual.titulo.toLowerCase().includes(s) || e.usuario.toLowerCase().includes(s)
+    !s || (e.filmeAtual?.titulo || '').toLowerCase().includes(s) || e.nome_usuario.toLowerCase().includes(s)
   )
 
   function getCamposAlterados(sug) {
     const campos = []
-    if (sug.titulo        && sug.titulo        !== sug.filmeAtual.titulo)                        campos.push('Título')
-    if (sug.ano           && String(sug.ano)   !== String(sug.filmeAtual.ano))                   campos.push('Ano')
-    if (sug.sinopse       && sug.sinopse       !== sug.filmeAtual.sinopse)                       campos.push('Sinopse')
-    if (sug.classificacao && sug.classificacao !== sug.filmeAtual.classificacao)                 campos.push('Classificação')
-    if (sug.trailer       && sug.trailer       !== sug.filmeAtual.trailer)                       campos.push('Trailer')
-    if (sug.duracao       && sug.duracao       !== sug.filmeAtual.duracao)                       campos.push('Duração')
-    if (sug.orcamento     && String(sug.orcamento) !== String(sug.filmeAtual.orcamento))         campos.push('Orçamento')
-    if (sug.categorias    && sug.categorias.join(',') !== (sug.filmeAtual.categorias||[]).join(',')) campos.push('Categorias')
-    if (sug.linguagens    && sug.linguagens.join(',') !== (sug.filmeAtual.linguagens||[]).join(',')) campos.push('Linguagens')
-    if (sug.poster        && sug.poster        !== sug.filmeAtual.poster)                        campos.push('Poster')
+    if (sug.titulo)        campos.push('Título')
+    if (sug.ano)           campos.push('Ano')
+    if (sug.sinopse)       campos.push('Sinopse')
+    if (sug.classificacao) campos.push('Classificação')
+    if (sug.trailer)       campos.push('Trailer')
+    if (sug.duracao)       campos.push('Duração')
+    if (sug.orcamento)     campos.push('Orçamento')
+    if (sug.estilo_visual) campos.push('Estilo Visual')
+    if (sug.ids_categorias?.length) campos.push('Categorias')
+    if (sug.ids_linguagens?.length) campos.push('Linguagens')
+    if (sug.ids_paises?.length)     campos.push('Países')
+    if (sug.ids_sagas?.length)      campos.push('Sagas')
     return campos.length ? campos.join(', ') : 'Nenhuma alteração'
   }
 
@@ -303,7 +302,7 @@ export default function SugestoesPage() {
         />
       </div>
 
-      {/* ── Seção: Adições Pendentes ── */}
+      {/* Adições Pendentes */}
       <section className="sugestoes-section" aria-labelledby="adicoes-title">
         <div className="sugestoes-section-header">
           <h2 id="adicoes-title" className="sugestoes-section-title">
@@ -324,16 +323,14 @@ export default function SugestoesPage() {
                 tipo="adicao"
                 onVer={() => setAdicaoSelecionada(f)}
                 onAprovar={() => handleAprovarAdicao(f.id)}
-                onRecusar={() => {
-                  if (confirm('Recusar e excluir esta sugestão?')) handleRecusarAdicao(f.id)
-                }}
+                onRecusar={() => { if (confirm('Recusar e excluir esta sugestão?')) handleRecusarAdicao(f.id) }}
               />
             ))
           )}
         </div>
       </section>
 
-      {/* ── Seção: Edições Sugeridas ── */}
+      {/* Edições Sugeridas */}
       <section className="sugestoes-section" aria-labelledby="edicoes-title" style={{ marginTop: '40px' }}>
         <div className="sugestoes-section-header">
           <h2 id="edicoes-title" className="sugestoes-section-title">
@@ -347,23 +344,20 @@ export default function SugestoesPage() {
             edicoesFiltradas.map(e => (
               <SugestaoCard
                 key={e.id}
-                titulo={e.filmeAtual.titulo}
-                poster={e.filmeAtual.poster}
-                meta={`Sugerido por ${e.usuario} · Alterações: ${getCamposAlterados(e)}`}
+                titulo={e.filmeAtual?.titulo || `Filme #${e.id_filme}`}
+                poster={e.filmeAtual?.poster || ''}
+                meta={`Sugerido por ${e.nome_usuario} · Alterações: ${getCamposAlterados(e)}`}
                 resumo={null}
                 tipo="edicao"
                 onVer={() => setEdicaoSelecionada(e)}
                 onAprovar={() => handleAprovarEdicao(e.id)}
-                onRecusar={() => {
-                  if (confirm('Recusar esta sugestão de edição?')) handleRecusarEdicao(e.id)
-                }}
+                onRecusar={() => { if (confirm('Recusar esta sugestão de edição?')) handleRecusarEdicao(e.id) }}
               />
             ))
           )}
         </div>
       </section>
 
-      {/* ── Popups ── */}
       {adicaoSelecionada && (
         <PopupDetalheAdicao
           filme={adicaoSelecionada}
@@ -376,6 +370,7 @@ export default function SugestoesPage() {
       {edicaoSelecionada && (
         <PopupDetalheEdicao
           sugestao={edicaoSelecionada}
+          dadosAuxiliares={dadosAuxiliares}
           onAprovar={() => handleAprovarEdicao(edicaoSelecionada.id)}
           onRecusar={() => handleRecusarEdicao(edicaoSelecionada.id)}
           onClose={() => setEdicaoSelecionada(null)}

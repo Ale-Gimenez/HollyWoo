@@ -21,6 +21,7 @@ filminis_integrado/
 ## Onde pegar Imagens
 https://wall.alphacoders.com/big.php?i=1274275
 https://www.adorocinema.com/filmes/filme-196960/fotos/
+https://www.bandeirasnacionais.com/#google_vignette
 
 
 ```bash
@@ -56,7 +57,7 @@ Caso não der certo coloque o arquivo hollywoo-DDL-DML.sql no Workbench e rode c
 | Role  | E-mail               | Senha    |
 |-------|----------------------|----------|
 | admin | admin@hollywoo.com   | admin123 |
-| user  | mary@email.com       | senha123 |
+| user  | mary@gmail.com       | mary123 |
 
 
 ### 3. Frontend

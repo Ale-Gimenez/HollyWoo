@@ -77,45 +77,85 @@ function PopupSugestoesFilme({ filme, onClose }) {
   }
 
   if (sugestaoVendo) {
-    // Reutiliza o PopupDetalheEdicao inline com os dados corretos
+    function resolveNomes(ids, lista, idKey) {
+      if (!ids || !ids.length) return null
+      const nomes = lista.filter(i => ids.includes(i[idKey])).map(i => i.nome)
+      return nomes.length ? nomes.join(', ') : null
+    }
+
     const campos = [
-      { label: 'Título',        atual: filme.titulo,        proposto: sugestaoVendo.titulo },
-      { label: 'Ano',           atual: filme.ano,           proposto: sugestaoVendo.ano },
-      { label: 'Sinopse',       atual: filme.sinopse,       proposto: sugestaoVendo.sinopse },
-      { label: 'Classificação', atual: filme.classificacao, proposto: sugestaoVendo.classificacao },
-      { label: 'Poster',        atual: filme.poster,        proposto: sugestaoVendo.poster },
-      { label: 'Trailer',       atual: filme.trailer,       proposto: sugestaoVendo.trailer },
+      { label: 'Título',        atual: filme.titulo,         proposto: sugestaoVendo.titulo },
+      { label: 'Ano',           atual: filme.ano,            proposto: sugestaoVendo.ano },
+      { label: 'Sinopse',       atual: filme.sinopse,        proposto: sugestaoVendo.sinopse },
+      { label: 'Classificação', atual: filme.classificacao,  proposto: sugestaoVendo.classificacao },
+      { label: 'Estilo Visual', atual: filme.estilo_visual,  proposto: sugestaoVendo.estilo_visual },
+      { label: 'Duração',       atual: filme.duracao,        proposto: sugestaoVendo.duracao },
+      { label: 'Orçamento',     atual: filme.orcamento,      proposto: sugestaoVendo.orcamento },
+      { label: 'Poster',        atual: filme.poster,         proposto: sugestaoVendo.poster },
+      { label: 'Banner',        atual: filme.poster_bg,      proposto: sugestaoVendo.banner },
+      { label: 'Trailer',       atual: filme.trailer,        proposto: sugestaoVendo.trailer },
+      {
+        label: 'Categorias',
+        atual: filme.categorias?.join(', ') || '—',
+        proposto: resolveNomes(sugestaoVendo.ids_categorias, dadosAuxiliares.categorias, 'id_categoria'),
+      },
+      {
+        label: 'Linguagens',
+        atual: filme.linguagens?.join(', ') || '—',
+        proposto: resolveNomes(sugestaoVendo.ids_linguagens, dadosAuxiliares.linguagens, 'id_linguagem'),
+      },
+      {
+        label: 'Países',
+        atual: filme.paises?.join(', ') || '—',
+        proposto: resolveNomes(sugestaoVendo.ids_paises, dadosAuxiliares.paises, 'id_pais'),
+      },
+      {
+        label: 'Sagas',
+        atual: filme.sagas?.map(s => s.nome).join(', ') || '—',
+        proposto: resolveNomes(sugestaoVendo.ids_sagas, dadosAuxiliares.sagas, 'id_saga'),
+      },
     ].filter(c => c.proposto != null && String(c.proposto) !== String(c.atual ?? ''))
 
     return (
       <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
-        <div className="modal-box">
-          <h2 className="modal-title">Sugestão de {sugestaoVendo.nome_usuario}</h2>
+        <div className="modal-box" style={{ maxWidth: '640px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+            <img src={filme.poster} alt={filme.titulo}
+              style={{ width: 48, height: 68, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }}
+              onError={e => { e.target.src = 'https://via.placeholder.com/48x68/2a2a2a/666' }} />
+            <div>
+              <h2 className="modal-title" style={{ marginBottom: 2 }}>Sugestão de Edição</h2>
+              <p style={{ color: '#aaa', fontSize: '0.85rem' }}>
+                Por <strong style={{ color: '#fff' }}>{sugestaoVendo.nome_usuario}</strong> →{' '}
+                <strong style={{ color: 'var(--purple-light)' }}>{filme.titulo}</strong>
+              </p>
+            </div>
+          </div>
           {campos.length === 0 ? (
-            <p style={{ color: '#888', margin: '20px 0' }}>Nenhuma alteração de texto nesta sugestão.</p>
+            <p style={{ color: '#888', margin: '20px 0' }}>Nenhuma alteração detectada nesta sugestão.</p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', margin: '16px 0' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', margin: '16px 0', maxHeight: '55vh', overflowY: 'auto', paddingRight: 4 }}>
               {campos.map((c, i) => (
-                <div key={i} style={{ background: '#252525', borderRadius: 10, padding: '12px 16px' }}>
-                  <p style={{ fontWeight: 800, color: 'var(--purple-light)', fontSize: '0.75rem', marginBottom: '10px', textTransform: 'uppercase' }}>{c.label}</p>
+                <div key={i} style={{ background: '#252525', borderRadius: 10, padding: '12px 16px', flexShrink: 0 }}>
+                  <p style={{ fontWeight: 800, color: 'var(--purple-light)', fontSize: '0.72rem', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{c.label}</p>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                     <div>
-                      <p style={{ fontSize: '0.7rem', color: '#666', marginBottom: '4px', fontWeight: 700 }}>ATUAL</p>
-                      <p style={{ fontSize: '0.85rem', color: '#999', wordBreak: 'break-word' }}>{String(c.atual || '—')}</p>
+                      <p style={{ fontSize: '0.68rem', color: '#666', marginBottom: '4px', fontWeight: 700 }}>ATUAL</p>
+                      <p style={{ fontSize: '0.85rem', color: '#999', wordBreak: 'break-word', lineHeight: 1.5 }}>{String(c.atual || '—')}</p>
                     </div>
                     <div>
-                      <p style={{ fontSize: '0.7rem', color: '#4caf50', marginBottom: '4px', fontWeight: 700 }}>PROPOSTO</p>
-                      <p style={{ fontSize: '0.85rem', color: '#fff', wordBreak: 'break-word' }}>{String(c.proposto)}</p>
+                      <p style={{ fontSize: '0.68rem', color: '#4caf50', marginBottom: '4px', fontWeight: 700 }}>PROPOSTO</p>
+                      <p style={{ fontSize: '0.85rem', color: '#fff', wordBreak: 'break-word', lineHeight: 1.5 }}>{String(c.proposto)}</p>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           )}
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <button className="btn btn-primary" onClick={handleAprovar}>✓ Aprovar</button>
+          <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+            <button className="btn btn-primary" onClick={handleAprovar}>✓ Aprovar Alterações</button>
             <button className="btn btn-delete" onClick={handleRecusar}>✕ Recusar</button>
-            <button className="btn btn-outline" onClick={() => setSugestaoVendo(null)}>Voltar</button>
+            <button className="btn btn-outline" onClick={() => setSugestaoVendo(null)}>← Voltar</button>
           </div>
         </div>
       </div>
