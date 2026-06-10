@@ -210,3 +210,28 @@ export async function apiSalvarDestaques(idsFilmes) {
     body: JSON.stringify({ ids_filmes: idsFilmes }),
   })
 }
+
+// ─── Sugestões de edição ──────────────────────────────────────────────────────
+
+export async function apiCriarSugestao(filmeId, data) {
+  return request(`/sugestoes/${filmeId}`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export async function apiGetSugestoes() {
+  return request('/sugestoes')
+}
+
+export async function apiGetSugestoesFilme(filmeId) {
+  return request(`/sugestoes/${filmeId}`)
+}
+
+export async function apiAprovarSugestao(sugId) {
+  return request(`/sugestoes/${sugId}/aprovar`, { method: 'PUT' })
+}
+
+export async function apiRecusarSugestao(sugId) {
+  return request(`/sugestoes/${sugId}`, { method: 'DELETE' })
+}

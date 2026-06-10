@@ -118,7 +118,8 @@ export default function CatalogoPage() {
   useEffect(() => {
     if (loading) return
     const buscando = search.trim().length > 0
-    if (buscando && filtered.length === 0 && prevFilteredCount.current !== 0) {
+    // prevFilteredCount.current === null significa primeira renderização — não disparar
+    if (buscando && filtered.length === 0 && prevFilteredCount.current !== null && prevFilteredCount.current !== 0) {
       setToast({ message: `404 — Nenhum filme encontrado para "${search.trim()}"`, type: 'error' })
     }
     prevFilteredCount.current = filtered.length

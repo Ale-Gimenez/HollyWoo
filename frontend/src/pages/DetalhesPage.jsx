@@ -29,96 +29,96 @@ function PopupDeletar({ titulo, onConfirm, onCancel }) {
   )
 }
 
-function PopupVerSugestao({ sugestao, filmeAtual, onAprovar, onRecusar, onClose }) {
-  const campos = [
-    { label: 'Título', atual: filmeAtual.titulo, proposto: sugestao.titulo },
-    { label: 'Ano', atual: filmeAtual.ano, proposto: sugestao.ano },
-    { label: 'Sinopse', atual: filmeAtual.sinopse, proposto: sugestao.sinopse },
-    { label: 'Classificação', atual: filmeAtual.classificacao, proposto: sugestao.classificacao },
-    { label: 'Poster', atual: filmeAtual.poster, proposto: sugestao.poster },
-    { label: 'Trailer', atual: filmeAtual.trailer, proposto: sugestao.trailer },
-  ].filter(c => c.proposto && String(c.proposto) !== String(c.atual || ''))
-
-  return (
-    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="modal-box" style={{ maxWidth: '600px' }}>
-        <h2 className="modal-title">Sugestão de {sugestao.nome}</h2>
-        <p style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '20px' }}>
-          Mudanças propostas para: <strong style={{ color: '#fff' }}>{filmeAtual.titulo}</strong>
-        </p>
-        {campos.length === 0 ? (
-          <p style={{ color: '#888' }}>Nenhuma alteração detectada.</p>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '24px' }}>
-            {campos.map((c, i) => (
-              <div key={i} style={{ background: '#252525', borderRadius: '10px', padding: '14px 16px' }}>
-                <p style={{ fontWeight: 800, color: 'var(--purple-light)', fontSize: '0.8rem', marginBottom: '8px', textTransform: 'uppercase' }}>{c.label}</p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <div>
-                    <p style={{ fontSize: '0.72rem', color: '#888', marginBottom: '4px' }}>Atual</p>
-                    <p style={{ fontSize: '0.85rem', color: '#ccc', wordBreak: 'break-word' }}>{c.atual || '—'}</p>
-                  </div>
-                  <div>
-                    <p style={{ fontSize: '0.72rem', color: '#4caf50', marginBottom: '4px' }}>Proposto</p>
-                    <p style={{ fontSize: '0.85rem', color: '#fff', wordBreak: 'break-word' }}>{c.proposto}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button className="btn btn-primary" onClick={onAprovar}>✓ Aceitar Alterações</button>
-          <button className="btn btn-delete" onClick={onRecusar}>✕ Recusar</button>
-          <button className="btn btn-outline" onClick={onClose}>Fechar</button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 function PopupSugestoesFilme({ filme, onClose }) {
+  const { getSugestoesFilme, aprovarSugestao, recusarSugestao, dadosAuxiliares } = useFilmes()
   const [sugestaoVendo, setSugestaoVendo] = useState(null)
-  const [sugestoes, setSugestoes] = useState([
-    { id: 1, nome: 'Matheus Soares', avatar: 'https://i.pravatar.cc/40?img=12',
-      titulo: filme.titulo + ' (Edit)', ano: filme.ano ? filme.ano + 1 : null,
-      sinopse: 'Sinopse alternativa proposta pelo usuário com mais detalhes sobre a trama do filme.',
-      classificacao: '14', poster: filme.poster, trailer: filme.trailer },
-    { id: 2, nome: 'Gabriella Esturrari', avatar: 'https://i.pravatar.cc/40?img=25',
-      titulo: null, ano: filme.ano ? filme.ano - 1 : null,
-      classificacao: '16', sinopse: null, poster: null, trailer: null },
-  ])
+  const [sugestoes, setSugestoes] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    getSugestoesFilme(filme.id)
+      .then(data => setSugestoes(data.map(s => ({ ...s, filmeAtual: filme }))))
+      .catch(() => setSugestoes([]))
+      .finally(() => setLoading(false))
+  }, [filme.id])
+
+  async function handleAprovar() {
+    try {
+      await aprovarSugestao(sugestaoVendo.id)
+      setSugestoes(prev => prev.filter(s => s.id !== sugestaoVendo.id))
+      setSugestaoVendo(null)
+    } catch (err) {
+      alert('Erro ao aprovar: ' + err.message)
+    }
+  }
+
+  async function handleRecusar() {
+    try {
+      await recusarSugestao(sugestaoVendo.id)
+      setSugestoes(prev => prev.filter(s => s.id !== sugestaoVendo.id))
+      setSugestaoVendo(null)
+    } catch (err) {
+      alert('Erro ao recusar: ' + err.message)
+    }
+  }
 
   function getMudancasTexto(s) {
     const campos = []
-    if (s.titulo && s.titulo !== filme.titulo) campos.push('Título')
-    if (s.ano && String(s.ano) !== String(filme.ano)) campos.push('Ano')
-    if (s.sinopse && s.sinopse !== filme.sinopse) campos.push('Sinopse')
-    if (s.classificacao && s.classificacao !== filme.classificacao) campos.push('Classificação')
-    if (s.poster && s.poster !== filme.poster) campos.push('Poster')
-    if (s.trailer && s.trailer !== filme.trailer) campos.push('Trailer')
+    if (s.titulo)        campos.push('Título')
+    if (s.ano)           campos.push('Ano')
+    if (s.sinopse)       campos.push('Sinopse')
+    if (s.classificacao) campos.push('Classificação')
+    if (s.poster)        campos.push('Poster')
+    if (s.trailer)       campos.push('Trailer')
+    if (s.ids_categorias?.length) campos.push('Categorias')
+    if (s.ids_linguagens?.length) campos.push('Linguagens')
+    if (s.ids_paises?.length)     campos.push('Países')
     return campos.length > 0 ? campos.join(', ') : 'Sem alterações detectadas'
   }
 
-  function handleAprovar() {
-    setSugestoes(prev => prev.filter(s => s.id !== sugestaoVendo.id))
-    setSugestaoVendo(null)
-  }
-
-  function handleRecusar() {
-    setSugestoes(prev => prev.filter(s => s.id !== sugestaoVendo.id))
-    setSugestaoVendo(null)
-  }
-
   if (sugestaoVendo) {
+    // Reutiliza o PopupDetalheEdicao inline com os dados corretos
+    const campos = [
+      { label: 'Título',        atual: filme.titulo,        proposto: sugestaoVendo.titulo },
+      { label: 'Ano',           atual: filme.ano,           proposto: sugestaoVendo.ano },
+      { label: 'Sinopse',       atual: filme.sinopse,       proposto: sugestaoVendo.sinopse },
+      { label: 'Classificação', atual: filme.classificacao, proposto: sugestaoVendo.classificacao },
+      { label: 'Poster',        atual: filme.poster,        proposto: sugestaoVendo.poster },
+      { label: 'Trailer',       atual: filme.trailer,       proposto: sugestaoVendo.trailer },
+    ].filter(c => c.proposto != null && String(c.proposto) !== String(c.atual ?? ''))
+
     return (
-      <PopupVerSugestao
-        sugestao={sugestaoVendo}
-        filmeAtual={filme}
-        onAprovar={handleAprovar}
-        onRecusar={handleRecusar}
-        onClose={() => setSugestaoVendo(null)}
-      />
+      <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+        <div className="modal-box">
+          <h2 className="modal-title">Sugestão de {sugestaoVendo.nome_usuario}</h2>
+          {campos.length === 0 ? (
+            <p style={{ color: '#888', margin: '20px 0' }}>Nenhuma alteração de texto nesta sugestão.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', margin: '16px 0' }}>
+              {campos.map((c, i) => (
+                <div key={i} style={{ background: '#252525', borderRadius: 10, padding: '12px 16px' }}>
+                  <p style={{ fontWeight: 800, color: 'var(--purple-light)', fontSize: '0.75rem', marginBottom: '10px', textTransform: 'uppercase' }}>{c.label}</p>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div>
+                      <p style={{ fontSize: '0.7rem', color: '#666', marginBottom: '4px', fontWeight: 700 }}>ATUAL</p>
+                      <p style={{ fontSize: '0.85rem', color: '#999', wordBreak: 'break-word' }}>{String(c.atual || '—')}</p>
+                    </div>
+                    <div>
+                      <p style={{ fontSize: '0.7rem', color: '#4caf50', marginBottom: '4px', fontWeight: 700 }}>PROPOSTO</p>
+                      <p style={{ fontSize: '0.85rem', color: '#fff', wordBreak: 'break-word' }}>{String(c.proposto)}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button className="btn btn-primary" onClick={handleAprovar}>✓ Aprovar</button>
+            <button className="btn btn-delete" onClick={handleRecusar}>✕ Recusar</button>
+            <button className="btn btn-outline" onClick={() => setSugestaoVendo(null)}>Voltar</button>
+          </div>
+        </div>
+      </div>
     )
   }
 
@@ -126,62 +126,58 @@ function PopupSugestoesFilme({ filme, onClose }) {
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal-box">
         <h2 className="modal-title">Sugestões: {filme.titulo}</h2>
-        {sugestoes.length === 0 ? (
+        {loading ? (
+          <div className="loading-state"><div className="spinner" /></div>
+        ) : sugestoes.length === 0 ? (
           <p style={{ color: '#888', marginBottom: '20px' }}>Nenhuma sugestão pendente para este filme.</p>
         ) : (
           <div className="popup-sugestoes-list">
             {sugestoes.map(s => (
-              <div
-                key={s.id}
-                className="popup-sugestoes-item"
-                style={{ cursor: 'pointer' }}
-                onClick={() => setSugestaoVendo(s)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={e => e.key === 'Enter' && setSugestaoVendo(s)}
-              >
+              <div key={s.id} className="popup-sugestoes-item" style={{ cursor: 'pointer' }}
+                onClick={() => setSugestaoVendo(s)} role="button" tabIndex={0}
+                onKeyDown={e => e.key === 'Enter' && setSugestaoVendo(s)}>
                 <div className="popup-sugestoes-info">
-                  <img src={s.avatar} alt={s.nome} className="circle-avatar" width={36} height={36} />
+                  <img src={s.avatar_usuario || `https://ui-avatars.com/api/?name=${encodeURIComponent(s.nome_usuario)}&background=333&color=fff`}
+                    alt={s.nome_usuario} className="circle-avatar" width={36} height={36} />
                   <div className="popup-sugestoes-text">
-                    <p className="popup-sugestoes-name">{s.nome}</p>
+                    <p className="popup-sugestoes-name">{s.nome_usuario}</p>
                     <p className="popup-sugestoes-changes">Mudanças Propostas: {getMudancasTexto(s)}</p>
                   </div>
                 </div>
                 <div className="popup-sugestoes-btns" onClick={e => e.stopPropagation()}>
-                  <button
-                    className="btn-icon btn-icon-green"
-                    title="Ver sugestão"
-                    aria-label="Ver"
-                    onClick={() => setSugestaoVendo(s)}
-                  >👁</button>
-                  <button
-                    className="btn-icon btn-icon-red"
-                    title="Recusar"
-                    aria-label="Recusar"
-                    onClick={() => setSugestoes(prev => prev.filter(x => x.id !== s.id))}
-                  >✕</button>
+                  <button className="btn-icon btn-icon-green" title="Ver sugestão" onClick={() => setSugestaoVendo(s)}>👁</button>
+                  <button className="btn-icon btn-icon-red" title="Recusar" onClick={async () => {
+                    try { await recusarSugestao(s.id); setSugestoes(prev => prev.filter(x => x.id !== s.id)) }
+                    catch (err) { alert('Erro: ' + err.message) }
+                  }}>✕</button>
                 </div>
               </div>
             ))}
           </div>
         )}
-        <button
-          className="btn btn-delete"
-          style={{ fontSize: '0.85rem' }}
-          onClick={() => setSugestoes([])}
-        >🗑 Limpar Sugestões</button>
+        <button className="btn btn-outline" style={{ marginTop: '16px' }} onClick={onClose}>Fechar</button>
       </div>
     </div>
   )
 }
 
 function PopupSolicitarEdicao({ filme, onClose }) {
+  const { criarSugestao } = useFilmes()
   const [enviado, setEnviado] = useState(false)
+  const [erro, setErro] = useState(null)
+  const [enviando, setEnviando] = useState(false)
 
-  function handleEnviar(data) {
-    // TODO: integrar com endpoint de sugestões quando disponível
-    console.log('Sugestão de edição enviada:', data)
-    setEnviado(true)
+  async function handleEnviar(data) {
+    setEnviando(true)
+    setErro(null)
+    try {
+      await criarSugestao(filme.id, data)
+      setEnviado(true)
+    } catch (err) {
+      setErro(err.message || 'Erro ao enviar sugestão. Tente novamente.')
+    } finally {
+      setEnviando(false)
+    }
   }
 
   if (enviado) {
@@ -201,12 +197,21 @@ function PopupSolicitarEdicao({ filme, onClose }) {
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal-box" style={{ maxWidth: '780px' }}>
         <h2 className="modal-title">Editar Filme: {filme.titulo}</h2>
-        <FilmForm
-          initial={filme}
-          onSubmit={handleEnviar}
-          onCancel={onClose}
-          submitLabel="Solicitar Edição"
-        />
+        {erro && (
+          <div style={{ background: '#2a0a0a', border: '1px solid #cc0000', borderRadius: 8, padding: '10px 14px', marginBottom: 16, color: '#ff6b6b', fontSize: '0.88rem' }}>
+            ⊙ {erro}
+          </div>
+        )}
+        {enviando ? (
+          <div className="loading-state"><div className="spinner" /><p>Enviando sugestão...</p></div>
+        ) : (
+          <FilmForm
+            initial={filme}
+            onSubmit={handleEnviar}
+            onCancel={onClose}
+            submitLabel="Solicitar Edição"
+          />
+        )}
       </div>
     </div>
   )
@@ -215,7 +220,7 @@ function PopupSolicitarEdicao({ filme, onClose }) {
 export default function DetalhesPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { filmes, getFilmeDetalhes, updateFilme, deleteFilme } = useFilmes()
+  const { filmes, getFilmeDetalhes, updateFilme, deleteFilme, criarSugestao, getSugestoesFilme, aprovarSugestao, recusarSugestao, dadosAuxiliares } = useFilmes()
   const { isAdmin, isLoggedIn, isFavorito, toggleFavorito } = useAuth()
 
   const [filmeDetalhes, setFilmeDetalhes] = useState(null)
@@ -279,12 +284,17 @@ export default function DetalhesPage() {
 
   function handleDelete() {
     deleteFilme(filme.id)
-    navigate('/catalogo')
+      .then(() => navigate('/catalogo'))
+      .catch(err => console.error('Erro ao deletar:', err))
   }
 
   function handleEdit(data) {
     updateFilme(filme.id, data)
-    setShowEdit(false)
+      .then(updated => {
+        setFilmeDetalhes(updated)
+        setShowEdit(false)
+      })
+      .catch(err => console.error('Erro ao atualizar:', err))
   }
 
   return (

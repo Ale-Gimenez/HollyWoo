@@ -218,3 +218,32 @@ class RefreshTokenBlacklist(Base):
 
 
 
+
+# ─── Sugestões de edição ──────────────────────────────────────────────────────
+
+class SugestaoEdicao(Base):
+    __tablename__ = "sugestao_edicao"
+    id             = Column(Integer, primary_key=True, autoincrement=True)
+    id_filme       = Column(Integer, ForeignKey("filme.id_filme"), nullable=False)
+    id_usuario     = Column(Integer, ForeignKey("usuario.id_usuario"), nullable=False)
+    status         = Column(Enum("pendente", "aprovada", "recusada"), nullable=False, default="pendente")
+    criado_em      = Column(DateTime, default=func.now())
+    # Campos opcionais — apenas os que o usuário quis alterar
+    titulo         = Column(String(255))
+    ano            = Column(Integer)
+    sinopse        = Column(Text)
+    classificacao  = Column(String(10))
+    poster         = Column(String(255))
+    banner         = Column(String(255))
+    trailer        = Column(String(255))
+    duracao        = Column(Time)
+    orcamento      = Column(Numeric(15, 2))
+    estilo_visual  = Column(String(50))
+    # IDs de relações como CSV (ex: "1,3,7")
+    ids_categorias = Column(String(500))
+    ids_paises     = Column(String(500))
+    ids_linguagens = Column(String(500))
+    ids_sagas      = Column(String(500))
+
+    filme   = relationship("Filme")
+    usuario = relationship("Usuario")

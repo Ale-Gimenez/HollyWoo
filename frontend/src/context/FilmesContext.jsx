@@ -2,89 +2,61 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import {
   apiGetFilmes, apiGetFilme, apiCreateFilme,
   apiUpdateFilme, apiDeleteFilme, apiAprovarFilme, apiGetPendentes,
-  apiGetSagas,
+  apiGetSagas, apiGetCategorias, apiGetPaises, apiGetLinguagens,
+  apiGetProdutoras, apiGetAtores, apiGetDiretores,
+  apiCriarSugestao, apiGetSugestoes, apiGetSugestoesFilme,
+  apiAprovarSugestao, apiRecusarSugestao,
 } from '../service/api'
 
 const FilmesContext = createContext(null)
 
 /**
  * Converte um filme do backend para o formato que o frontend usa.
- *
- * Backend (FilmeOut / FilmeListOut):
- *   id_filme, titulo, ano, poster, banner, sinopse, trailer,
- *   flag, classificacao, estilo_visual, era,
- *   pais_origem: { id_pais, nome, img }
- *   categorias:  [{ id_categoria, nome }]
- *   linguagens:  [{ id_linguagem, nome, img }]
- *   produtoras:  [{ id_produtora, nome, img }]
- *   atores:      [{ id_ator, nome, sobrenome, nome_personagem, img }]
- *   diretores:   [{ id_diretor, nome, sobrenome, img }]
- *
- * Frontend espera:
- *   id, titulo, ano, poster, poster_bg, sinopse, trailer,
- *   flag, classificacao, estilo_visual, era,
- *   categorias: ['Animação', 'Aventura', ...]   ← strings
- *   linguagens: ['Inglês', ...]                 ← strings
- *   paises:     ['Estados Unidos', ...]         ← strings
- *   produtora_principal: { nome }
- *   elenco:  [{ nome, personagem, foto }]
- *   diretores: [{ nome, cargo, foto }]
  */
 function normalizeFilme(f) {
   return {
-    // ─── Identidade ───────────────────────────────────────────────────────
     id:     f.id_filme,
     titulo: f.titulo,
     ano:    f.ano,
     flag:   f.flag,
 
-    // ─── Mídia ────────────────────────────────────────────────────────────
     poster:    f.poster   || '',
     poster_bg: f.banner   || '',
     trailer:   f.trailer  || '',
     sinopse:   f.sinopse  || '',
 
-    // ─── Classificação e estilo ───────────────────────────────────────────
     classificacao: f.classificacao || 'Livre',
     estilo_visual: f.estilo_visual ? [f.estilo_visual] : [],
     era:           f.era || null,
-    saga:          f.saga || null,
 
-    // ─── Campos extras agora presentes em FilmeListOut também ────────────
     duracao:   f.duracao  || null,
     orcamento: f.orcamento != null ? Number(f.orcamento) : null,
 
-    // ─── Listas como strings (o frontend filtra/exibe por string) ─────────
     categorias: (f.categorias || []).map(c => c.nome ?? c),
     linguagens: (f.linguagens || []).map(l => l.nome ?? l),
     paises:     (f.paises     || []).map(p => p.nome ?? p),
     temas:      (f.temas      || []).map(t => t.nome ?? t),
     sagas:      (f.sagas      || []).map(s => ({ id: s.id_saga, nome: s.nome, descricao: s.descricao })),
 
-    // ─── Produtora principal ──────────────────────────────────────────────
-    // FilmeOut tem 'produtoras' (lista) e 'pais_origem' (objeto)
     produtora_principal: (() => {
-      // Tenta pegar do campo direto ou do primeiro da lista
       if (f.produtora_principal) return { nome: f.produtora_principal.nome }
       if (f.produtoras && f.produtoras.length > 0) return { nome: f.produtoras[0].nome }
       return null
     })(),
 
-    // ─── Elenco (o frontend usa 'elenco', o backend retorna 'atores') ─────
     elenco: (f.atores || []).map(a => ({
       nome:       `${a.nome} ${a.sobrenome || ''}`.trim(),
       personagem: a.nome_personagem || '',
       foto:       a.img || '',
     })),
 
-    // ─── Diretores ────────────────────────────────────────────────────────
     diretores: (f.diretores || []).map(d => ({
       nome:  `${d.nome} ${d.sobrenome || ''}`.trim(),
       cargo: 'Diretor',
       foto:  d.img || '',
     })),
 
-    // ─── IDs para formulários de edição ───────────────────────────────────
+    // IDs preservados para o formulário de edição
     _ids: {
       id_filme:          f.id_filme,
       id_pais_origem:    f.pais_origem?.id_pais ?? null,
@@ -99,30 +71,87 @@ function normalizeFilme(f) {
   }
 }
 
-// ─── Destaques da home ────────────────────────────────────────────────────────
-// O endpoint /home/destaques retorna [{ id, ordem, filme: FilmeListOut }]
-// Precisamos extrair só o filme de cada destaque
 function normalizeDestaques(destaques) {
   return (destaques || [])
     .sort((a, b) => a.ordem - b.ordem)
     .map(d => normalizeFilme(d.filme))
 }
 
+/**
+ * Converte o payload do FilmForm (formato frontend) para o formato que o backend espera.
+ * Usa as listas auxiliares carregadas do backend para resolver strings → IDs.
+ */
+function toBackendPayload(formData, dadosAuxiliares) {
+  const { categorias, paises, linguagens, produtoras, atores, diretores } = dadosAuxiliares
+
+  function resolveIds(nomes, lista, idKey) {
+    if (!nomes || !Array.isArray(nomes)) return []
+    return lista.filter(item => nomes.includes(item.nome)).map(item => item[idKey])
+  }
+
+  function resolveId(nomesArr, lista, idKey) {
+    const ids = []
+    for (const nome of nomesArr) {
+      const found = lista.find(item =>
+        `${item.nome} ${item.sobrenome || ''}`.trim() === nome || item.nome === nome
+      )
+      if (found) ids.push(found[idKey])
+    }
+    return ids
+  }
+
+  const nomesAtores    = (formData.elenco    || []).map(a => typeof a === 'string' ? a : a.nome)
+  const nomesDiretores = (formData.diretores || []).map(d => typeof d === 'string' ? d : d.nome)
+
+  const nomeProdutora = typeof formData.produtora_principal === 'string'
+    ? formData.produtora_principal
+    : formData.produtora_principal?.nome
+  const produtoraObj = produtoras.find(p => p.nome === nomeProdutora)
+
+  // estilo_visual: frontend pode enviar array (MultiSelect) ou string — banco espera string
+  const estiloVisual = Array.isArray(formData.estilo_visual)
+    ? (formData.estilo_visual[0] || null)
+    : (formData.estilo_visual || null)
+
+  return {
+    titulo:         formData.titulo,
+    ano:            formData.ano ? Number(formData.ano) : null,
+    duracao:        formData.duracao || null,
+    sinopse:        formData.sinopse || null,
+    poster:         formData.poster  || null,
+    banner:         formData.poster_bg || null,
+    trailer:        formData.trailer || null,
+    orcamento:      formData.orcamento ? Number(formData.orcamento) : null,
+    classificacao:  formData.classificacao || null,
+    estilo_visual:  estiloVisual,
+    id_produtora_principal: produtoraObj?.id_produtora ?? null,
+    ids_categorias: resolveIds(formData.categorias, categorias, 'id_categoria'),
+    ids_paises:     resolveIds(formData.paises,     paises,     'id_pais'),
+    ids_linguagens: resolveIds(formData.linguagens, linguagens, 'id_linguagem'),
+    ids_produtoras: produtoraObj ? [produtoraObj.id_produtora] : [],
+    ids_atores:     resolveId(nomesAtores,    atores,    'id_ator'),
+    ids_diretores:  resolveId(nomesDiretores, diretores, 'id_diretor'),
+    ids_sagas:      formData.ids_sagas || [],
+  }
+}
+
 export function FilmesProvider({ children }) {
   const [filmes, setFilmes] = useState([])
-  const [sagas, setSagas] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+
+  // Listas auxiliares do backend
+  const [dadosAuxiliares, setDadosAuxiliares] = useState({
+    categorias: [], paises: [], linguagens: [],
+    produtoras: [], atores: [], diretores: [], sagas: [],
+  })
 
   const fetchFilmes = useCallback(async (params = {}) => {
     setLoading(true)
     setError(null)
     try {
       const data = await apiGetFilmes({ limit: 100, ...params })
-      console.log('[FilmesContext] raw data[0]:', data[0])
-      const normalized = data.map(normalizeFilme)
-      console.log('[FilmesContext] normalized[0]:', normalized[0])
-      setFilmes(normalized)
+      setFilmes(data.map(normalizeFilme))
     } catch (err) {
       setError(err.message)
       setFilmes([])
@@ -131,17 +160,21 @@ export function FilmesProvider({ children }) {
     }
   }, [])
 
-  const fetchSagas = useCallback(async () => {
+  const fetchDadosAuxiliares = useCallback(async () => {
     try {
-      const data = await apiGetSagas()
-      setSagas(data)
+      const [categorias, paises, linguagens, produtoras, atores, diretores, sagas] =
+        await Promise.all([
+          apiGetCategorias(), apiGetPaises(), apiGetLinguagens(),
+          apiGetProdutoras(), apiGetAtores(), apiGetDiretores(), apiGetSagas(),
+        ])
+      setDadosAuxiliares({ categorias, paises, linguagens, produtoras, atores, diretores, sagas })
     } catch (err) {
-      console.error('[FilmesContext] erro ao buscar sagas:', err)
+      console.error('[FilmesContext] erro ao buscar dados auxiliares:', err)
     }
   }, [])
 
   useEffect(() => { fetchFilmes() }, [fetchFilmes])
-  useEffect(() => { fetchSagas() }, [fetchSagas])
+  useEffect(() => { fetchDadosAuxiliares() }, [fetchDadosAuxiliares])
 
   async function getFilmeDetalhes(id) {
     const data = await apiGetFilme(id)
@@ -154,12 +187,16 @@ export function FilmesProvider({ children }) {
   }
 
   async function addFilme(formData) {
-    const created = await apiCreateFilme(formData)
-    return normalizeFilme(created)
+    const payload = toBackendPayload(formData, dadosAuxiliares)
+    const created = await apiCreateFilme(payload)
+    const norm = normalizeFilme(created)
+    // Não adiciona à lista — fica pendente de aprovação do admin
+    return norm
   }
 
   async function updateFilme(id, formData) {
-    const updated = await apiUpdateFilme(id, formData)
+    const payload = toBackendPayload(formData, dadosAuxiliares)
+    const updated = await apiUpdateFilme(id, payload)
     const norm = normalizeFilme(updated)
     setFilmes(prev => prev.map(f => String(f.id) === String(id) ? norm : f))
     return norm
@@ -182,17 +219,58 @@ export function FilmesProvider({ children }) {
     return norm
   }
 
+  async function criarSugestao(filmeId, formData) {
+    const payload = toBackendPayload(formData, dadosAuxiliares)
+    return apiCriarSugestao(filmeId, {
+      titulo:         payload.titulo        || null,
+      ano:            payload.ano           || null,
+      sinopse:        payload.sinopse       || null,
+      classificacao:  payload.classificacao || null,
+      poster:         payload.poster        || null,
+      banner:         payload.banner        || null,
+      trailer:        payload.trailer       || null,
+      duracao:        payload.duracao       || null,
+      orcamento:      payload.orcamento     || null,
+      estilo_visual:  payload.estilo_visual || null,
+      ids_categorias: payload.ids_categorias || [],
+      ids_paises:     payload.ids_paises     || [],
+      ids_linguagens: payload.ids_linguagens || [],
+      ids_sagas:      payload.ids_sagas      || [],
+    })
+  }
+
+  async function getSugestoes() {
+    return apiGetSugestoes()
+  }
+
+  async function getSugestoesFilme(filmeId) {
+    return apiGetSugestoesFilme(filmeId)
+  }
+
+  async function aprovarSugestao(sugId) {
+    return apiAprovarSugestao(sugId)
+  }
+
+  async function recusarSugestao(sugId) {
+    return apiRecusarSugestao(sugId)
+  }
+
   return (
     <FilmesContext.Provider value={{
-      filmes, sagas, loading, error,
+      filmes, loading, error,
+      dadosAuxiliares,
       fetchFilmes,
-      fetchSagas,
       getFilmeDetalhes,
       getPendentes,
       addFilme,
       updateFilme,
       deleteFilme,
       aprovarFilme,
+      criarSugestao,
+      getSugestoes,
+      getSugestoesFilme,
+      aprovarSugestao,
+      recusarSugestao,
       normalizeDestaques,
     }}>
       {children}

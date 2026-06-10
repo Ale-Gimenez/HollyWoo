@@ -177,7 +177,8 @@ def update_filme(
 
     scalar_fields = {
         "titulo", "orcamento", "sinopse", "ano",
-        "poster", "banner", "trailer", "id_produtora_principal", "id_pais_origem"
+        "poster", "banner", "trailer", "id_produtora_principal", "id_pais_origem",
+        "classificacao", "estilo_visual",
     }
     for field in scalar_fields:
         if field in data:

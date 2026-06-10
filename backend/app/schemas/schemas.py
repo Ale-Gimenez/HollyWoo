@@ -147,17 +147,10 @@ class FilmeOut(BaseModel):
     estilo_visual: Optional[str] = None
     era: Optional[str] = None           # "classico" | "novo" | None
     pais_origem: Optional[PaisOut] = None
+    produtora_principal: Optional[ProdutoraOut] = None
     produtoras: List[ProdutoraOut] = []
-    paises: List[PaisOut] = []
-    categorias: List[CategoriaOut] = []
-    atores: List[AtorOut] = []
-    diretores: List[DiretorOut] = []
-    linguagens: List[LinguagemOut] = []
-    temas: List[TemaOut] = []
-    sagas: List[SagaOut] = []
-
     @classmethod
-    def from_orm_with_era(cls, filme) -> "FilmeOut":
+    def from_orm_with_era(cls, filme) -> "FilmeListOut":
         obj = cls.model_validate(filme)
         obj.era = calcular_era(obj.ano)
         return obj
@@ -178,6 +171,7 @@ class FilmeListOut(BaseModel):
     estilo_visual: Optional[str] = None
     era: Optional[str] = None           # "classico" | "novo" | None
     pais_origem: Optional[PaisOut] = None
+    produtora_principal: Optional[ProdutoraOut] = None
     categorias: List[CategoriaOut] = []
     linguagens: List[LinguagemOut] = []
     produtoras: List[ProdutoraOut] = []
@@ -268,3 +262,46 @@ class DestaqueHomeSet(BaseModel):
 
 class MsgOut(BaseModel):
     detail: str
+
+# ─── Sugestões de edição ──────────────────────────────────────────────────────
+
+class SugestaoEdicaoCreate(BaseModel):
+    titulo:         Optional[str]        = None
+    ano:            Optional[int]        = None
+    sinopse:        Optional[str]        = None
+    classificacao:  Optional[str]        = None
+    poster:         Optional[str]        = None
+    banner:         Optional[str]        = None
+    trailer:        Optional[str]        = None
+    duracao:        Optional[str]        = None
+    orcamento:      Optional[float]      = None
+    estilo_visual:  Optional[str]        = None
+    ids_categorias: List[int]            = []
+    ids_paises:     List[int]            = []
+    ids_linguagens: List[int]            = []
+    ids_sagas:      List[int]            = []
+
+
+class SugestaoEdicaoOut(BaseModel):
+    model_config = {"from_attributes": True}
+    id:             int
+    id_filme:       int
+    id_usuario:     int
+    nome_usuario:   str
+    avatar_usuario: Optional[str]  = None
+    status:         str
+    criado_em:      Optional[str]  = None
+    titulo:         Optional[str]  = None
+    ano:            Optional[int]  = None
+    sinopse:        Optional[str]  = None
+    classificacao:  Optional[str]  = None
+    poster:         Optional[str]  = None
+    banner:         Optional[str]  = None
+    trailer:        Optional[str]  = None
+    duracao:        Optional[str]  = None
+    orcamento:      Optional[float] = None
+    estilo_visual:  Optional[str]  = None
+    ids_categorias: List[int]      = []
+    ids_paises:     List[int]      = []
+    ids_linguagens: List[int]      = []
+    ids_sagas:      List[int]      = []

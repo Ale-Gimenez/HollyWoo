@@ -72,6 +72,12 @@ function PopupDetalheAdicao({ filme, onAprovar, onRecusar, onClose }) {
 function PopupDetalheEdicao({ sugestao, onAprovar, onRecusar, onClose }) {
   const [confirmando, setConfirmando] = useState(false)
 
+  // Resolve IDs de volta para nomes para exibição
+  function resolveNomes(ids, lista, idKey) {
+    if (!ids || !ids.length) return null
+    return lista.filter(item => ids.includes(item[idKey])).map(item => item.nome).join(', ') || null
+  }
+
   const campos = [
     { label: 'Título',        atual: sugestao.filmeAtual.titulo,         proposto: sugestao.titulo },
     { label: 'Ano',           atual: sugestao.filmeAtual.ano,            proposto: sugestao.ano },
@@ -81,29 +87,39 @@ function PopupDetalheEdicao({ sugestao, onAprovar, onRecusar, onClose }) {
     { label: 'Trailer',       atual: sugestao.filmeAtual.trailer,        proposto: sugestao.trailer },
     { label: 'Duração',       atual: sugestao.filmeAtual.duracao,        proposto: sugestao.duracao },
     { label: 'Orçamento',     atual: sugestao.filmeAtual.orcamento,      proposto: sugestao.orcamento },
-    { label: 'Categorias',    atual: sugestao.filmeAtual.categorias?.join(', '), proposto: sugestao.categorias?.join(', ') },
-    { label: 'Linguagens',    atual: sugestao.filmeAtual.linguagens?.join(', '), proposto: sugestao.linguagens?.join(', ') },
+    { label: 'Estilo Visual', atual: sugestao.filmeAtual?.estilo_visual, proposto: sugestao.estilo_visual },
+    {
+      label: 'Categorias',
+      atual: sugestao.filmeAtual?.categorias?.join(', '),
+      proposto: resolveNomes(sugestao.ids_categorias, dadosAuxiliares.categorias, 'id_categoria'),
+    },
+    {
+      label: 'Linguagens',
+      atual: sugestao.filmeAtual?.linguagens?.join(', '),
+      proposto: resolveNomes(sugestao.ids_linguagens, dadosAuxiliares.linguagens, 'id_linguagem'),
+    },
+    {
+      label: 'Países',
+      atual: sugestao.filmeAtual?.paises?.join(', '),
+      proposto: resolveNomes(sugestao.ids_paises, dadosAuxiliares.paises, 'id_pais'),
+    },
   ].filter(c => c.proposto != null && String(c.proposto) !== String(c.atual ?? ''))
-
+  
   return (
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal-box" style={{ maxWidth: '640px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '6px' }}>
-          <img
-            src={sugestao.filmeAtual.poster}
-            alt={sugestao.filmeAtual.titulo}
+          <img src={sugestao.filmeAtual?.poster} alt={sugestao.filmeAtual?.titulo}
             style={{ width: 48, height: 68, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }}
-            onError={e => { e.target.src = 'https://via.placeholder.com/48x68/2a2a2a/666' }}
-          />
+            onError={e => { e.target.src = 'https://via.placeholder.com/48x68/2a2a2a/666' }} />
           <div>
             <h2 className="modal-title" style={{ marginBottom: 2 }}>Sugestão de Edição</h2>
             <p style={{ color: '#aaa', fontSize: '0.85rem' }}>
-              Sugerido por <strong style={{ color: '#fff' }}>{sugestao.usuario}</strong> para{' '}
-              <strong style={{ color: 'var(--purple-light)' }}>{sugestao.filmeAtual.titulo}</strong>
+              Sugerido por <strong style={{ color: '#fff' }}>{sugestao.nome_usuario}</strong> para{' '}
+              <strong style={{ color: 'var(--purple-light)' }}>{sugestao.filmeAtual?.titulo}</strong>
             </p>
           </div>
         </div>
-
         {campos.length === 0 ? (
           <p style={{ color: '#888', margin: '20px 0' }}>Nenhuma alteração detectada nesta sugestão.</p>
         ) : (
@@ -120,7 +136,7 @@ function PopupDetalheEdicao({ sugestao, onAprovar, onRecusar, onClose }) {
                   </div>
                   <div>
                     <p style={{ fontSize: '0.7rem', color: '#4caf50', marginBottom: '4px', fontWeight: 700 }}>PROPOSTO</p>
-                    <p style={{ fontSize: '0.85rem', color: '#fff', wordBreak: 'break-word', lineHeight: 1.5 }}>{c.proposto}</p>
+                    <p style={{ fontSize: '0.85rem', color: '#fff', wordBreak: 'break-word', lineHeight: 1.5 }}>{String(c.proposto)}</p>
                   </div>
                 </div>
               </div>
@@ -186,79 +202,24 @@ function SugestaoCard({ titulo, poster, meta, resumo, tipo, onVer, onAprovar, on
   )
 }
 
-/* ─── Dados mock de sugestões de edição ─────────────────────────────────── */
-const MOCK_EDICOES = [
-  {
-    id: 'e1',
-    usuario: 'Matheus Soares',
-    filmeAtual: {
-      id: 1,
-      titulo: 'Zootopia',
-      poster: 'https://m.media-amazon.com/images/M/MV5BOTMyMjEyNzIzMV5BMl5BanBnXkFtZTgwNzIyNjU0NDE@._V1_SX300.jpg',
-      ano: 2016,
-      sinopse: 'Em um mundo onde animais evoluíram para falar e viver em sociedade, a jovem coelha Judy Hopps se torna a primeira policial de sua espécie.',
-      classificacao: 'Livre',
-      duracao: '01:48:00',
-      orcamento: 150000000,
-      categorias: ['Animação', 'Aventura'],
-      linguagens: ['Inglês'],
-      trailer: '',
-      poster_bg: '',
-    },
-    titulo: null,
-    ano: null,
-    sinopse: 'Em um mundo fantástico habitado por animais antropomórficos, a coelha Judy Hopps (Ginnifer Goodwin) torna-se a primeira policial de sua espécie na metrópole Zootopia. Determinada a provar seu valor, ela envolve o astuto raposo Nick Wilde (Jason Bateman) para solucionar um caso misterioso de animais desaparecidos.',
-    classificacao: null,
-    duracao: null,
-    orcamento: null,
-    categorias: ['Animação', 'Aventura', 'Comédia'],
-    linguagens: null,
-    trailer: 'https://www.youtube.com/watch?v=jWM0ct-OLsM',
-    poster: null,
-  },
-  {
-    id: 'e2',
-    usuario: 'Gabriella Esturrari',
-    filmeAtual: {
-      id: 2,
-      titulo: 'Moana',
-      poster: 'https://m.media-amazon.com/images/M/MV5BMjI4MzU5NTExNF5BMl5BanBnXkFtZTgwNzY1MTEwMDI@._V1_SX300.jpg',
-      ano: 2016,
-      sinopse: 'A filha de um chefe polinésio embarca em uma viagem para salvar seu povo.',
-      classificacao: 'Livre',
-      duracao: '01:47:00',
-      orcamento: 150000000,
-      categorias: ['Animação', 'Aventura'],
-      linguagens: ['Inglês'],
-      trailer: '',
-      poster_bg: '',
-    },
-    titulo: null,
-    ano: null,
-    sinopse: null,
-    classificacao: '+6',
-    duracao: null,
-    orcamento: 175000000,
-    categorias: null,
-    linguagens: ['Inglês', 'Português'],
-    trailer: null,
-    poster: null,
-  },
-]
-
 /* ─── Página principal ───────────────────────────────────────────────────── */
 export default function SugestoesPage() {
-  const { getPendentes, aprovarFilme, deleteFilme } = useFilmes()
-  const [search, setSearch] = useState('')
+  const {
+    getPendentes, aprovarFilme, deleteFilme,
+    getSugestoes, aprovarSugestao, recusarSugestao,
+    getFilmeDetalhes, dadosAuxiliares,
+  } = useFilmes()
 
-  // ── Adições ──
-  const [pendentes, setPendentes] = useState([])
+  const [search, setSearch] = useState('')
   const [loadingPage, setLoadingPage] = useState(true)
   const [error, setError] = useState(null)
+
+  // Adições pendentes
+  const [pendentes, setPendentes] = useState([])
   const [adicaoSelecionada, setAdicaoSelecionada] = useState(null)
 
-  // ── Edições ──
-  const [edicoes, setEdicoes] = useState(MOCK_EDICOES)
+  // Sugestões de edição
+  const [edicoes, setEdicoes] = useState([])
   const [edicaoSelecionada, setEdicaoSelecionada] = useState(null)
 
   useEffect(() => {
