@@ -13,9 +13,11 @@ router = APIRouter(prefix="/home", tags=["Home"])
 
 @router.get("/destaques", response_model=List[DestaqueHomeOut])
 def listar_destaques(db: Session = Depends(get_db)):
-    """Retorna os filmes em destaque ordenados. Público."""
+    """Retorna os filmes em destaque ordenados. Público. Só exibe filmes aprovados (flag=True)."""
     return (
         db.query(DestaqueHome)
+        .join(Filme, Filme.id_filme == DestaqueHome.id_filme)
+        .filter(Filme.flag == True)
         .order_by(DestaqueHome.ordem)
         .all()
     )

@@ -5,7 +5,6 @@ import Toast from '../components/Toast'
 import '../styles/CatalogoPage.css'
 import '../styles/Shared.css'
 
-// Categorias reais do banco (tabela `categoria`)
 const GENEROS = [
   'Animação', 'Aventura', 'Comédia', 'Fantasia',
   'Musical', 'Família', 'Ficção Científica',
@@ -13,7 +12,6 @@ const GENEROS = [
 
 const CLASSIFICACOES = ['L', '+6', '+10', '+12', '+14', '+16', '+18']
 
-// Temas reais do banco (tabela `tema`)
 const TEMAS = [
   { emoji: '🦕', label: 'Dinossauros' },
   { emoji: '🚀', label: 'Espaço' },
@@ -27,7 +25,6 @@ const TEMAS = [
   { emoji: '🚗', label: 'Carros' },
 ]
 
-// Estilos reais do banco (coluna `estilo_visual`)
 const ESTILOS = ['3D', '2D', 'Stop Motion', 'Anime']
 
 const PER_PAGE = 8
@@ -59,7 +56,6 @@ export default function CatalogoPage() {
   const filtered = useMemo(() => {
     let list = filmes
 
-    // Busca por texto
     if (search.trim()) {
       const q = search.toLowerCase()
       list = list.filter(f =>
@@ -69,14 +65,12 @@ export default function CatalogoPage() {
       )
     }
 
-    // Filtro por gênero/categoria (vem da tabela `categoria` via `filme_categoria`)
     if (activeGeneros.length) {
       list = list.filter(f =>
         (f.categorias || []).some(c => activeGeneros.includes(c))
       )
     }
 
-    // Filtro por classificação indicativa
     if (activeClassifs.length) {
       list = list.filter(f => {
         const classif = f.classificacao || 'L'
@@ -84,14 +78,12 @@ export default function CatalogoPage() {
       })
     }
 
-    // Filtro por tema (vem da tabela `tema` via `filme_tema`)
     if (activeTemas.length) {
       list = list.filter(f =>
         (f.temas || []).some(t => activeTemas.includes(t))
       )
     }
 
-    // Filtro por estilo visual (coluna `estilo_visual` no filme)
     if (activeEstilos.length) {
       list = list.filter(f => {
         const estilo = f.estilo_visual
@@ -103,12 +95,10 @@ export default function CatalogoPage() {
       })
     }
 
-    // Filtro por era (clássico / novo)
     if (activeEra) {
       list = list.filter(f => f.era === activeEra)
     }
 
-    // Filtro por década
     if (anoFiltro !== 'Todos') {
       const yr = Number(anoFiltro)
       list = list.filter(f => f.ano != null && f.ano >= yr && f.ano < yr + 10)
@@ -120,11 +110,10 @@ export default function CatalogoPage() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE))
   const pageFilmes = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE)
 
-  // Dispara toast de erro quando a busca textual não encontrar nada
   useEffect(() => {
     if (loading) return
     const buscando = search.trim().length > 0
-    // prevFilteredCount.current === null significa primeira renderização — não disparar
+
     if (buscando && filtered.length === 0 && prevFilteredCount.current !== null && prevFilteredCount.current !== 0) {
       setToast({ message: `404 — Nenhum filme encontrado para "${search.trim()}"`, type: 'error' })
     }
@@ -154,15 +143,15 @@ export default function CatalogoPage() {
           onClose={() => setToast(null)}
         />
       )}
-      {/* SIDEBAR */}
+      
       <aside className="catalogo-sidebar" aria-label="Filtros">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div className="catalogo-sidebar-header">
           <h2 className="catalogo-sidebar-title">Filtros</h2>
           {hasFilters && (
             <button
               className="btn-clear-filters"
               onClick={clearAll}
-              style={{ margin: 0, padding: '4px 10px', fontSize: '0.78rem' }}
+              className="btn-clear-filters btn-clear-filters-sm"
             >
               Limpar
             </button>
@@ -250,11 +239,11 @@ export default function CatalogoPage() {
         </div>
       </aside>
 
-      {/* MAIN */
+      
       <main>
         <h1 className="catalogo-title">Catálogo de Filmes</h1>
 
-        <div className="search-bar" style={{ marginBottom: '20px' }}>
+        <div className="search-bar search-bar-mb">
           <span className="search-icon"><i className="fi fi-sr-search"></i></span>
           <input
             type="search"
@@ -284,41 +273,41 @@ export default function CatalogoPage() {
           </div>
         </div>
 
-        {/* Chips ativos */}
+        
         {hasFilters && (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+          <div className="active-chips">
             {activeGeneros.map(g => (
-              <span key={g} className="chip filter-chip active" style={{ fontSize: '0.78rem', cursor: 'pointer' }}
+              <span key={g} className="chip filter-chip active chip-sm"
                 onClick={() => toggleChip(activeGeneros, setActiveGeneros, g)}>
                 {g} <span className="chip-remove">✕</span>
               </span>
             ))}
             {activeClassifs.map(c => (
-              <span key={c} className="chip filter-chip active" style={{ fontSize: '0.78rem', cursor: 'pointer' }}
+              <span key={c} className="chip filter-chip active chip-sm"
                 onClick={() => toggleChip(activeClassifs, setActiveClassifs, c)}>
                 {c} <span className="chip-remove">✕</span>
               </span>
             ))}
             {activeTemas.map(t => (
-              <span key={t} className="chip filter-chip active" style={{ fontSize: '0.78rem', cursor: 'pointer' }}
+              <span key={t} className="chip filter-chip active chip-sm"
                 onClick={() => toggleChip(activeTemas, setActiveTemas, t)}>
                 {TEMAS.find(x => x.label === t)?.emoji} {t} <span className="chip-remove">✕</span>
               </span>
             ))}
             {activeEstilos.map(e => (
-              <span key={e} className="chip filter-chip active" style={{ fontSize: '0.78rem', cursor: 'pointer' }}
+              <span key={e} className="chip filter-chip active chip-sm"
                 onClick={() => toggleChip(activeEstilos, setActiveEstilos, e)}>
                 {e} <span className="chip-remove">✕</span>
               </span>
             ))}
             {activeEra && (
-              <span className="chip filter-chip active" style={{ fontSize: '0.78rem', cursor: 'pointer' }}
+              <span className="chip filter-chip active chip-sm"
                 onClick={() => { setActiveEra(''); setPage(1) }}>
                 {activeEra === 'classico' ? '🎞 Clássico' : '✨ Novo'} <span className="chip-remove">✕</span>
               </span>
             )}
             {anoFiltro !== 'Todos' && (
-              <span className="chip filter-chip active" style={{ fontSize: '0.78rem', cursor: 'pointer' }}
+              <span className="chip filter-chip active chip-sm"
                 onClick={() => { setAnoFiltro('Todos'); setPage(1) }}>
                 {anoFiltro}s <span className="chip-remove">✕</span>
               </span>
@@ -331,7 +320,7 @@ export default function CatalogoPage() {
             <p className="catalogo-empty-icon">🎬</p>
             <p>Nenhum filme encontrado com os filtros aplicados.</p>
             {hasFilters && (
-              <button className="btn-clear-filters" onClick={clearAll} style={{ marginTop: '12px' }}>
+              <button className="btn-clear-filters btn-mt">
                 Limpar filtros
               </button>
             )}

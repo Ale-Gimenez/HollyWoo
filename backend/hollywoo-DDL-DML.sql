@@ -535,7 +535,7 @@ INSERT INTO filme (titulo, id_produtora_principal, id_pais_origem, orcamento, du
  'https://br.web.img3.acsta.net/c_310_420/pictures/22/03/10/21/58/3973130.jpg',
  'https://artfiles.alphacoders.com/158/thumb-800-158206.webp',
  'https://www.youtube.com/embed/wAUM6RJwNGU',
- 'L', '3D', FALSE),
+ 'L', '3D', TRUE),
 
 -- 19
 ('Cara de Um, Focinho de Outro',
@@ -862,7 +862,7 @@ INSERT INTO filme (titulo, id_produtora_principal, id_pais_origem, orcamento, du
  'https://br.web.img2.acsta.net/c_310_420/pictures/15/10/15/22/24/429658.jpg',
  'https://images7.alphacoders.com/113/thumb-440-1130240.webp',
  'https://www.youtube.com/embed/lMpFbAGZJxE',
- 'L', '3D', FALSE),
+ 'L', '3D', TRUE),
 
 -- 26
 ('Planeta do Tesouro',
@@ -892,7 +892,7 @@ INSERT INTO filme (titulo, id_produtora_principal, id_pais_origem, orcamento, du
  'https://br.web.img3.acsta.net/c_310_420/pictures/23/06/14/20/35/4946834.png',
  'https://images.alphacoders.com/134/thumb-440-1340910.webp',
  'https://www.youtube.com/embed/Y7pMkHxDfaU',
- 'L', '3D', FALSE),
+ 'L', '3D', TRUE),
 
 -- 29
 ('O Espanta Tubarões',

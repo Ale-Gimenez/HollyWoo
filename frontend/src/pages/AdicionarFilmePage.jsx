@@ -15,8 +15,13 @@ export default function AdicionarFilmePage() {
     setSalvando(true)
     setErro(null)
     try {
-      await addFilme(data)
-      navigate('/catalogo')
+      const created = await addFilme(data)
+
+      if (created && created.flag === false) {
+        navigate('/')
+      } else {
+        navigate('/catalogo')
+      }
     } catch (err) {
       setErro(err.message || 'Erro ao adicionar filme. Tente novamente.')
     } finally {
@@ -29,17 +34,14 @@ export default function AdicionarFilmePage() {
       <div className="adicionar-card">
         <h1 className="adicionar-title">Adicionar Filme</h1>
         {erro && (
-          <div style={{
-            background: '#2a0a0a', border: '1px solid #cc0000', borderRadius: 8,
-            padding: '12px 16px', marginBottom: 20, color: '#ff6b6b', fontSize: '0.9rem'
-          }}>
+          <div className="inline-error-box">
             ⊙ {erro}
           </div>
         )}
         {salvando ? (
           <div className="loading-state">
             <div className="spinner" />
-            <p>Enviando filme para aprovação...</p>
+            <p>Adicionando filme ao catálogo...</p>
           </div>
         ) : (
           <FilmForm

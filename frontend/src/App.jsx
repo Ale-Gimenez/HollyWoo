@@ -29,7 +29,7 @@ function AppRoutes() {
 
   if (loadingAuth) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+      <div className="loading-center">
         <div className="spinner" />
       </div>
     )
@@ -40,13 +40,13 @@ function AppRoutes() {
       <Header />
       <main className="main-content">
         <Routes>
-          {/* Public / shared */}
+          
           <Route path="/login" element={<LoginPage />} />
           <Route path="/cadastro" element={<CadastroPage />} />
           <Route path="/catalogo" element={<CatalogoPage />} />
           <Route path="/detalhes/:id" element={<DetalhesPage />} />
 
-          {/* Landing / home root */}
+          
           <Route
             path="/"
             element={
@@ -56,7 +56,7 @@ function AppRoutes() {
             }
           />
 
-          {/* Admin only */}
+          
           <Route path="/home" element={
             <PrivateRoute adminOnly>
               <HomeAdminPage />
@@ -73,7 +73,7 @@ function AppRoutes() {
             </PrivateRoute>
           } />
 
-          {/* User only */}
+          
           <Route path="/favoritos" element={
             <PrivateRoute>
               <FavoritosPage />
@@ -85,10 +85,10 @@ function AppRoutes() {
             </PrivateRoute>
           } />
 
-          {/* Diagnóstico temporário */}
+          
           <Route path="/diagnostico" element={<DiagnosticoPage />} />
 
-          {/* Fallback */}
+          
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

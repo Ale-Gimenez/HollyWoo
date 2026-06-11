@@ -6,7 +6,7 @@ import '../styles/Shared.css'
 
 function Logo() {
   return (
-    <img src="/logoprin.png" alt="HollyWoo" width="52" height="52" style={{ objectFit: 'contain' }} />
+    <img src="/logoprin.png" alt="HollyWoo" width="52" height="52" className="logo-img" />
   )
 }
 

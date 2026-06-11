@@ -1,4 +1,4 @@
-# Filminis — Projeto Integrado (Frontend + Backend)
+# Filminis — HollyWoo
 
 Projeto unificado com o frontend React (Vite) conectado ao backend FastAPI via proxy.
 
@@ -18,19 +18,13 @@ filminis_integrado/
 
 ### 1. Backend
 
-## Onde pegar Imagens
-https://wall.alphacoders.com/big.php?i=1274275
-https://www.adorocinema.com/filmes/filme-196960/fotos/
-https://www.bandeirasnacionais.com/#google_vignette
-
-
 ```bash
 cd backend
 
 # Crie e ative o ambiente virtual
-python -m venv .venv
-source .venv/bin/activate        # Linux/Mac
-.venv\Scripts\activate           # Windows
+python -m venv env
+source .env/bin/activate        # Linux/Mac
+.env\Scripts\activate           # Windows
 
 # Instale dependências
 pip install -r requirements.txt
@@ -49,15 +43,17 @@ Documentação automática: http://localhost:8000/docs
 ---
 
 ### 2. Banco MySQL
-# Rode o seguinte comando (criar tabelas e população)
-mysql -u root -p < hollywoo-DDL-DML.sql
-
-Caso não der certo coloque o arquivo hollywoo-DDL-DML.sql no Workbench e rode clicando no raio
+# criar tabelas e população
+Coloque o arquivo hollywoo-DDL-DML.sql no Workbench e rode tudo clicando no raio
 
 | Role  | E-mail               | Senha    |
 |-------|----------------------|----------|
 | admin | admin@hollywoo.com   | admin123 |
 | user  | mary@gmail.com       | mary123 |
+
+# Importante
+É importante mencionar que caso algumas imagens de atores ou diretores não aparecerem é por 
+conta do link delas no banco ser inválido, não é porque o front não está puxando direito.
 
 
 ### 3. Frontend

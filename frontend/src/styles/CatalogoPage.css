@@ -8,7 +8,6 @@
   align-items: start;
 }
 
-/* Sidebar */
 .catalogo-sidebar {
   background: #1e1e1e;
   border-radius: 12px;
@@ -64,7 +63,6 @@
   color: #fff;
 }
 
-/* Main */
 .catalogo-main {}
 
 .catalogo-title {
@@ -127,7 +125,6 @@
   margin-bottom: 12px;
 }
 
-/* Error toast for catalog */
 .catalogo-error-toast {
   position: fixed;
   top: 80px;
@@ -144,3 +141,32 @@
   font-weight: 700;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
+
+/* ============================
+   CATALOGO - CLASSES EXTRAS
+   ============================ */
+.catalogo-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.btn-clear-filters-sm {
+  margin: 0;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+}
+
+.search-bar-mb { margin-bottom: 20px; }
+.search-bar-mb-lg { margin-bottom: 32px; }
+
+.active-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.chip-sm { font-size: 0.78rem; }
+
+.btn-mt { margin-top: 12px; }

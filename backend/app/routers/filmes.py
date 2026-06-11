@@ -9,7 +9,8 @@ from app.dependencies.auth import get_current_user, require_admin
 from app.models.models import (
     Ator, Categoria, Diretor, Filme, FilmeAtor, FilmeCategoria,
     FilmeDiretor, FilmeLinguagem, FilmePais, FilmeProdutora,
-    FilmeSaga, Linguagem, Pais, Produtora, Saga, Usuario,
+    FilmeSaga, FilmeTema, Linguagem, Pais, Produtora, Saga, Usuario,
+    DestaqueHome, SugestaoEdicao,
 )
 from app.schemas.schemas import (
     FilmeCreate, FilmeListOut, FilmeOut, FilmeUpdate, MsgOut
@@ -211,8 +212,11 @@ def delete_filme(
     _: Usuario = Depends(require_admin),
 ):
     filme = _get_or_404(db, filme_id)
-    for Model in (FilmeProdutora, FilmePais, FilmeCategoria, FilmeAtor, FilmeDiretor, FilmeLinguagem, FilmeSaga):
+    for Model in (FilmeProdutora, FilmePais, FilmeCategoria, FilmeAtor, FilmeDiretor, FilmeLinguagem, FilmeSaga, FilmeTema):
         db.query(Model).filter(Model.id_filme == filme_id).delete()
+    # Apaga destaques e sugestões que referenciam este filme
+    db.query(DestaqueHome).filter(DestaqueHome.id_filme == filme_id).delete()
+    db.query(SugestaoEdicao).filter(SugestaoEdicao.id_filme == filme_id).delete()
     db.delete(filme)
     db.commit()
     return MsgOut(detail="Filme removido com sucesso")

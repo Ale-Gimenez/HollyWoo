@@ -13,7 +13,7 @@ export default function Toast({ message, type = 'info', onClose, duration = 3000
       <span>{message}</span>
       <button
         onClick={onClose}
-        style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: '1rem' }}
+        className="toast-close-btn"
         aria-label="Fechar"
       >
         ✕

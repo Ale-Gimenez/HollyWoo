@@ -1,11 +1,6 @@
-/**
- * Serviço de API — conecta o frontend ao backend FastAPI via proxy Vite.
- * Todas as chamadas usam o prefixo /api que o Vite redireciona para http://localhost:8000
- */
+
 
 const BASE = '/api'
-
-// ─── Utilitários ──────────────────────────────────────────────────────────────
 
 function getToken() {
   return localStorage.getItem('access_token')
@@ -35,12 +30,9 @@ async function request(path, options = {}) {
     throw new Error(detail)
   }
 
-  // 204 No Content
   if (res.status === 204) return null
   return res.json()
 }
-
-// ─── Auth ──────────────────────────────────────────────────────────────────────
 
 export async function apiLogin(email, senha) {
   const data = await request('/auth/login', {
@@ -99,8 +91,6 @@ export async function apiRefreshToken() {
   return data
 }
 
-// ─── Usuário ──────────────────────────────────────────────────────────────────
-
 export async function apiGetMe() {
   return request('/usuarios/me')
 }
@@ -126,8 +116,6 @@ export async function apiUpdateRole(userId, role) {
     body: JSON.stringify({ role }),
   })
 }
-
-// ─── Filmes ───────────────────────────────────────────────────────────────────
 
 export async function apiGetFilmes(params = {}) {
   const qs = new URLSearchParams()
@@ -168,8 +156,6 @@ export async function apiGetPendentes() {
   return request('/filmes/pendentes')
 }
 
-// ─── Dados auxiliares ─────────────────────────────────────────────────────────
-
 export async function apiGetCategorias() {
   return request('/dados/categorias')
 }
@@ -198,8 +184,6 @@ export async function apiGetSagas() {
   return request('/dados/sagas')
 }
 
-// ─── Destaques da Home ────────────────────────────────────────────────────────
-
 export async function apiGetDestaques() {
   return request('/home/destaques')
 }
@@ -210,8 +194,6 @@ export async function apiSalvarDestaques(idsFilmes) {
     body: JSON.stringify({ ids_filmes: idsFilmes }),
   })
 }
-
-// ─── Sugestões de edição ──────────────────────────────────────────────────────
 
 export async function apiCriarSugestao(filmeId, data) {
   return request(`/sugestoes/${filmeId}`, {

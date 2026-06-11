@@ -86,14 +86,12 @@
   width: 8px;
 }
 
-/* Body */
 .landing-body {
   max-width: 1200px;
   margin: 0 auto;
   padding: 48px 24px;
 }
 
-/* Trending */
 .landing-trending {
   margin-bottom: 56px;
 }
@@ -104,7 +102,6 @@
   gap: 16px;
 }
 
-/* Promo banners */
 .landing-promo {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -175,7 +172,6 @@
   opacity: 0.7;
 }
 
-/* Recommendations */
 .landing-recommendations {
   display: flex;
   flex-direction: row;
@@ -223,4 +219,25 @@
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+/* ============================
+   LANDING - CLASSES EXTRAS
+   ============================ */
+.promo-btn-catalogo {
+  background: #fff;
+  color: #7833e2;
+  font-weight: 800;
+  font-size: 0.85rem;
+  margin-top: 8px;
+}
+
+.rec-card-year {
+  color: #aaa;
+  font-size: 0.85rem;
+}
+
+.btn-rec {
+  font-size: 0.8rem;
+  padding: 6px 14px;
 }

@@ -29,11 +29,11 @@ export default function SolicitarAdicaoPage() {
   if (sent) {
     return (
       <div className="solicitar-page">
-        <div className="adicionar-card" style={{ maxWidth: '800px', textAlign: 'center', padding: '40px 20px' }}>
-          <p style={{ fontSize: '2.5rem', marginBottom: '12px' }}>✅</p>
-          <h2 style={{ color: '#fff', marginBottom: '8px' }}>Solicitação Enviada!</h2>
-          <p style={{ color: '#aaa', fontSize: '0.9rem' }}>Obrigado pela colaboração. Um admin irá revisar sua sugestão em breve.</p>
-          <p style={{ color: '#666', fontSize: '0.85rem', marginTop: '6px' }}>Redirecionando...</p>
+        <div className="adicionar-card" className="adicionar-card-center">
+          <p className="success-icon">✅</p>
+          <h2 className="success-title">Solicitação Enviada!</h2>
+          <p className="success-text">Obrigado pela colaboração. Um admin irá revisar sua sugestão em breve.</p>
+          <p className="success-redirect">Redirecionando...</p>
         </div>
       </div>
     )
@@ -41,13 +41,10 @@ export default function SolicitarAdicaoPage() {
 
   return (
     <div className="solicitar-page">
-      <div className="adicionar-card" style={{ maxWidth: '800px' }}>
+      <div className="adicionar-card" className="adicionar-card-wide">
         <h1 className="adicionar-title">Sugerir Adição de Filme</h1>
         {erro && (
-          <div style={{
-            background: '#2a0a0a', border: '1px solid #cc0000', borderRadius: 8,
-            padding: '12px 16px', marginBottom: 20, color: '#ff6b6b', fontSize: '0.9rem'
-          }}>
+          <div className="inline-error-box">
             ⊙ {erro}
           </div>
         )}

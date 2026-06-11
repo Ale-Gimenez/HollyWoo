@@ -6,7 +6,6 @@ import '../styles/Shared.css'
 const CLASSIFICACOES = ['L', '+6', '+10', '+12', '+14', '+16', '+18']
 const ESTILOS = ['Vida Real', '3D', '2D', 'Stop Motion', 'Anime']
 
-/* ─── Multi-select dropdown com checkboxes ─────────────────────────────── */
 function MultiSelect({ id, label, options, value = [], onChange, placeholder = 'Escolha opções', displayKey = null, valueKey = null }) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
@@ -20,7 +19,6 @@ function MultiSelect({ id, label, options, value = [], onChange, placeholder = '
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
-  // Se displayKey/valueKey fornecidos, options são objetos; caso contrário, strings
   function getLabel(opt) {
     return displayKey ? opt[displayKey] : opt
   }
@@ -81,7 +79,7 @@ function MultiSelect({ id, label, options, value = [], onChange, placeholder = '
           )}
           <ul className="multiselect-dropdown" role="listbox" aria-multiselectable="true">
             {filteredOptions.length === 0 ? (
-              <li className="multiselect-option" style={{ color: '#666', cursor: 'default' }}>Nenhum resultado</li>
+              <li className="multiselect-option" className="multiselect-no-result">Nenhum resultado</li>
             ) : filteredOptions.map(opt => {
               const v = getValue(opt)
               const checked = value.includes(v)
@@ -109,14 +107,12 @@ export default function FilmForm({ initial = {}, onSubmit, onCancel, submitLabel
   const { dadosAuxiliares } = useFilmes()
   const { categorias, paises, linguagens, produtoras, sagas, atores, diretores } = dadosAuxiliares
 
-  // Nomes para dropdowns simples
   const nomesCategorias  = categorias.map(c => c.nome)
   const nomesPaises      = paises.map(p => p.nome)
   const nomesLinguagens  = linguagens.map(l => l.nome)
   const nomesProdutoras  = produtoras.map(p => p.nome)
   const nomesSagas       = sagas.map(s => s.nome)
 
-  // Atores e diretores: options com id e nome completo
   const opcoesAtores = atores.map(a => ({
     id: a.id_ator,
     label: `${a.nome} ${a.sobrenome || ''}`.trim()
@@ -126,7 +122,6 @@ export default function FilmForm({ initial = {}, onSubmit, onCancel, submitLabel
     label: `${d.nome} ${d.sobrenome || ''}`.trim()
   }))
 
-  // Resolve valores iniciais de categorias, países, linguagens, sagas a partir de IDs
   const initialCategorias = initial._ids?.ids_categorias?.length
     ? categorias.filter(c => initial._ids.ids_categorias.includes(c.id_categoria)).map(c => c.nome)
     : (Array.isArray(initial.categorias) ? initial.categorias : [])
@@ -143,7 +138,6 @@ export default function FilmForm({ initial = {}, onSubmit, onCancel, submitLabel
     ? sagas.filter(s => initial._ids.ids_sagas.includes(s.id_saga)).map(s => s.nome)
     : (initial.sagas || []).map(s => s.nome || s)
 
-  // IDs iniciais de atores e diretores
   const initialAtoresIds = initial._ids?.ids_atores?.length
     ? initial._ids.ids_atores
     : (initial.elenco || []).map(a => {
@@ -211,7 +205,6 @@ export default function FilmForm({ initial = {}, onSubmit, onCancel, submitLabel
     const errs = validate()
     if (Object.keys(errs).length) { setErrors(errs); return }
 
-    // Resolve nomes de diretores e atores selecionados
     const diretoresSelecionados = diretores
       .filter(d => form.ids_diretores.includes(d.id_diretor))
       .map(d => ({ nome: `${d.nome} ${d.sobrenome || ''}`.trim(), foto: d.img || '', cargo: 'Diretor' }))
@@ -220,7 +213,6 @@ export default function FilmForm({ initial = {}, onSubmit, onCancel, submitLabel
       .filter(a => form.ids_atores.includes(a.id_ator))
       .map(a => ({ nome: `${a.nome} ${a.sobrenome || ''}`.trim(), personagem: a.nome_personagem || '', foto: a.img || '' }))
 
-    // IDs das sagas selecionadas
     const ids_sagas = sagas
       .filter(s => form.sagas_nomes.includes(s.nome))
       .map(s => s.id_saga)
@@ -251,7 +243,7 @@ export default function FilmForm({ initial = {}, onSubmit, onCancel, submitLabel
 
   return (
     <form className="film-form" onSubmit={handleSubmit}>
-      {/* Upload zones */}
+      
       <div className="film-form-upload-row">
         <div className="film-form-upload-col">
           <p className="film-form-upload-label">Poster</p>
@@ -305,7 +297,7 @@ export default function FilmForm({ initial = {}, onSubmit, onCancel, submitLabel
         </div>
       </div>
 
-      {/* Row 1: Título, País, Duração, Diretor */}
+      
       <div className="film-form-row-4">
         <div className="form-group">
           <label className="form-label" htmlFor="f-titulo">Título</label>
@@ -340,7 +332,7 @@ export default function FilmForm({ initial = {}, onSubmit, onCancel, submitLabel
         </div>
       </div>
 
-      {/* Row 2: Gênero, Produtora, Ano, Trailer */}
+      
       <div className="film-form-row-4">
         <div className="form-group">
           <MultiSelect
@@ -370,7 +362,7 @@ export default function FilmForm({ initial = {}, onSubmit, onCancel, submitLabel
         </div>
       </div>
 
-      {/* Row 3: Saga, Estilo Visual, Linguagens */}
+      
       <div className="film-form-row-3">
         <div className="form-group">
           <MultiSelect
@@ -401,7 +393,7 @@ export default function FilmForm({ initial = {}, onSubmit, onCancel, submitLabel
         </div>
       </div>
 
-      {/* Row 4: Orçamento, Classificação, Atores */}
+      
       <div className="film-form-row-3">
         <div className="form-group">
           <label className="form-label" htmlFor="f-orcamento">Orçamento</label>
@@ -428,7 +420,7 @@ export default function FilmForm({ initial = {}, onSubmit, onCancel, submitLabel
         </div>
       </div>
 
-      {/* Sinopse */}
+      
       <div className="form-group">
         <label className="form-label" htmlFor="f-sinopse">Sinopse</label>
         <textarea

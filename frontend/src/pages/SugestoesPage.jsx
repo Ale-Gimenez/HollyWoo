@@ -3,11 +3,9 @@ import { useFilmes } from '../context/FilmesContext'
 import '../styles/Pages.css'
 import '../styles/Shared.css'
 
-/* ─── Popup: detalhe de sugestão de ADIÇÃO ──────────────────────────────── */
 function PopupDetalheAdicao({ filme, onAprovar, onRecusar, onClose }) {
   const [confirmando, setConfirmando] = useState(false)
 
-  // Extrai nomes de arrays que podem ser objetos ou strings
   function listNomes(arr) {
     if (!arr || arr.length === 0) return null
     return arr.map(x => typeof x === 'string' ? x : x.nome).join(', ')
@@ -30,37 +28,36 @@ function PopupDetalheAdicao({ filme, onAprovar, onRecusar, onClose }) {
 
   return (
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="modal-box" style={{ maxWidth: '620px' }}>
-        <h2 className="modal-title">Sugestão de Adição</h2>
-        <div style={{ display: 'flex', gap: '20px', marginBottom: '24px' }}>
+      <div className="modal-box modal-sm-plus">
+        <h2 className="modal-title"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="svg-inline"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg> Sugestão de Adição</h2>
+        <div className="popup-adic-body">
           <img src={filme.poster} alt={filme.titulo}
-            style={{ width: 100, height: 140, objectFit: 'cover', borderRadius: 10, flexShrink: 0 }}
-            onError={e => { e.target.src = 'https://via.placeholder.com/100x140/2a2a2a/666' }} />
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            className="popup-adic-poster" onError={e => { e.target.src = 'https://via.placeholder.com/100x140/2a2a2a/666' }} />
+          <div className="popup-adic-info">
             {infoRows.map((r, i) => (
-              <div key={i} style={{ display: 'flex', gap: '8px', fontSize: '0.88rem' }}>
-                <span style={{ color: 'var(--purple-light)', fontWeight: 700, minWidth: 90, flexShrink: 0 }}>{r.label}:</span>
-                <span style={{ color: '#e0e0e0', wordBreak: 'break-word' }}>{r.valor}</span>
+              <div key={i} className="popup-adic-row">
+                <span className="popup-adic-label">{r.label}:</span>
+                <span className="popup-adic-value">{r.valor}</span>
               </div>
             ))}
           </div>
         </div>
         {filme.sinopse && (
-          <div style={{ background: '#252525', borderRadius: 10, padding: '12px 16px', marginBottom: '20px' }}>
-            <p style={{ color: 'var(--purple-light)', fontWeight: 700, fontSize: '0.8rem', marginBottom: '6px' }}>SINOPSE</p>
-            <p style={{ fontSize: '0.88rem', color: '#ccc', lineHeight: 1.6 }}>{filme.sinopse}</p>
+          <div className="popup-adic-sinopse">
+            <p className="popup-adic-sinopse-label">SINOPSE</p>
+            <p className="popup-adic-sinopse-text">{filme.sinopse}</p>
           </div>
         )}
         {confirmando ? (
-          <div style={{ background: '#1a1a0a', border: '1px solid #7a4500', borderRadius: 10, padding: '14px 16px', marginBottom: '20px' }}>
-            <p style={{ color: '#ffcc80', fontWeight: 700, marginBottom: '10px' }}>⚠ Tem certeza que deseja recusar esta sugestão?</p>
-            <div style={{ display: 'flex', gap: '10px' }}>
+          <div className="confirm-recusa-box">
+            <p className="confirm-recusa-text">⚠ Tem certeza que deseja recusar esta sugestão?</p>
+            <div className="confirm-recusa-actions">
               <button className="btn btn-delete" onClick={onRecusar}>Sim, recusar</button>
               <button className="btn btn-outline" onClick={() => setConfirmando(false)}>Cancelar</button>
             </div>
           </div>
         ) : (
-          <div style={{ display: 'flex', gap: '12px' }}>
+          <div className="modal-actions">
             <button className="btn btn-primary" onClick={onAprovar}>✓ Aprovar Filme</button>
             <button className="btn btn-delete" onClick={() => setConfirmando(true)}>✕ Recusar</button>
             <button className="btn btn-outline" onClick={onClose}>Fechar</button>
@@ -71,7 +68,6 @@ function PopupDetalheAdicao({ filme, onAprovar, onRecusar, onClose }) {
   )
 }
 
-/* ─── Popup: detalhe de sugestão de EDIÇÃO (comparativo antes × depois) ── */
 function PopupDetalheEdicao({ sugestao, dadosAuxiliares, onAprovar, onRecusar, onClose }) {
   const [confirmando, setConfirmando] = useState(false)
 
@@ -119,36 +115,35 @@ function PopupDetalheEdicao({ sugestao, dadosAuxiliares, onAprovar, onRecusar, o
 
   return (
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="modal-box" style={{ maxWidth: '640px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '6px' }}>
+      <div className="modal-box modal-md">
+        <div className="popup-sug-header">
           <img src={sugestao.filmeAtual?.poster} alt={sugestao.filmeAtual?.titulo}
-            style={{ width: 48, height: 68, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }}
-            onError={e => { e.target.src = 'https://via.placeholder.com/48x68/2a2a2a/666' }} />
+            className="popup-sug-poster" onError={e => { e.target.src = 'https://via.placeholder.com/48x68/2a2a2a/666' }} />
           <div>
-            <h2 className="modal-title" style={{ marginBottom: 2 }}>Sugestão de Edição</h2>
-            <p style={{ color: '#aaa', fontSize: '0.85rem' }}>
-              Sugerido por <strong style={{ color: '#fff' }}>{sugestao.nome_usuario}</strong> para{' '}
-              <strong style={{ color: 'var(--purple-light)' }}>{sugestao.filmeAtual?.titulo || `Filme #${sugestao.id_filme}`}</strong>
+            <h2 className="modal-title modal-title-sm"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="svg-inline"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg> Sugestão de Edição</h2>
+            <p className="popup-sug-subtitle">
+              Sugerido por <strong className="text-white">{sugestao.nome_usuario}</strong> para{' '}
+              <strong className="text-purple">{sugestao.filmeAtual?.titulo || `Filme #${sugestao.id_filme}`}</strong>
             </p>
           </div>
         </div>
         {campos.length === 0 ? (
-          <p style={{ color: '#888', margin: '20px 0' }}>Nenhuma alteração detectada nesta sugestão.</p>
+          <p className="no-changes-text">Nenhuma alteração detectada nesta sugestão.</p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', margin: '20px 0', maxHeight: '55vh', overflowY: 'auto', paddingRight: 4 }}>
+          <div className="campos-diff-list">
             {campos.map((c, i) => (
-              <div key={i} style={{ background: '#252525', borderRadius: 10, padding: '12px 16px', flexShrink: 0 }}>
-                <p style={{ fontWeight: 800, color: 'var(--purple-light)', fontSize: '0.75rem', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <div key={i} className="campo-diff-item">
+                <p className="campo-diff-label">
                   {c.label}
                 </p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className="campo-diff-grid">
                   <div>
-                    <p style={{ fontSize: '0.7rem', color: '#666', marginBottom: '4px', fontWeight: 700 }}>ATUAL</p>
-                    <p style={{ fontSize: '0.85rem', color: '#999', wordBreak: 'break-word', lineHeight: 1.5 }}>{c.atual || '—'}</p>
+                    <p className="campo-diff-heading campo-diff-heading-atual">ATUAL</p>
+                    <p className="campo-diff-value campo-diff-value-atual">{c.atual || '—'}</p>
                   </div>
                   <div>
-                    <p style={{ fontSize: '0.7rem', color: '#4caf50', marginBottom: '4px', fontWeight: 700 }}>PROPOSTO</p>
-                    <p style={{ fontSize: '0.85rem', color: '#fff', wordBreak: 'break-word', lineHeight: 1.5 }}>{String(c.proposto)}</p>
+                    <p className="campo-diff-heading campo-diff-heading-proposto">PROPOSTO</p>
+                    <p className="campo-diff-value campo-diff-value-proposto">{String(c.proposto)}</p>
                   </div>
                 </div>
               </div>
@@ -156,15 +151,15 @@ function PopupDetalheEdicao({ sugestao, dadosAuxiliares, onAprovar, onRecusar, o
           </div>
         )}
         {confirmando ? (
-          <div style={{ background: '#1a1a0a', border: '1px solid #7a4500', borderRadius: 10, padding: '14px 16px', marginBottom: '16px' }}>
-            <p style={{ color: '#ffcc80', fontWeight: 700, marginBottom: '10px' }}>⚠ Tem certeza que deseja recusar esta sugestão?</p>
-            <div style={{ display: 'flex', gap: '10px' }}>
+          <div className="confirm-recusa-box">
+            <p className="confirm-recusa-text">⚠ Tem certeza que deseja recusar esta sugestão?</p>
+            <div className="confirm-recusa-actions">
               <button className="btn btn-delete" onClick={onRecusar}>Sim, recusar</button>
               <button className="btn btn-outline" onClick={() => setConfirmando(false)}>Cancelar</button>
             </div>
           </div>
         ) : (
-          <div style={{ display: 'flex', gap: '12px' }}>
+          <div className="modal-actions">
             <button className="btn btn-primary" onClick={onAprovar}>✓ Aceitar Alterações</button>
             <button className="btn btn-delete" onClick={() => setConfirmando(true)}>✕ Recusar</button>
             <button className="btn btn-outline" onClick={onClose}>Fechar</button>
@@ -175,16 +170,15 @@ function PopupDetalheEdicao({ sugestao, dadosAuxiliares, onAprovar, onRecusar, o
   )
 }
 
-/* ─── Card reutilizável ──────────────────────────────────────────────────── */
 function SugestaoCard({ titulo, poster, meta, resumo, tipo, onVer, onAprovar, onRecusar }) {
   return (
-    <article className="sugestao-card" style={{ cursor: 'pointer' }} onClick={onVer} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && onVer()}>
+    <article className="sugestao-card" onClick={onVer} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && onVer()}>
       <img src={poster} alt={titulo} className="sugestao-poster"
         onError={e => { e.target.src = 'https://via.placeholder.com/72x100/2a2a2a/666' }} />
       <div className="sugestao-info">
         <h3 className="sugestao-film-title">{titulo}</h3>
         <p className="sugestao-meta">{meta}</p>
-        {resumo && <p className="sugestao-changes" style={{ marginTop: 4 }}>{resumo.substring(0, 120)}{resumo.length > 120 ? '...' : ''}</p>}
+        {resumo && <p className="sugestao-changes">{resumo.substring(0, 120)}{resumo.length > 120 ? '...' : ''}</p>}
         <span className={`sugestao-tipo-badge ${tipo === 'edicao' ? 'sugestao-tipo-edicao' : 'sugestao-tipo-adicao'}`}>
           {tipo === 'edicao' ? 'Edição' : 'Adição'}
         </span>
@@ -198,7 +192,6 @@ function SugestaoCard({ titulo, poster, meta, resumo, tipo, onVer, onAprovar, on
   )
 }
 
-/* ─── Página principal ───────────────────────────────────────────────────── */
 export default function SugestoesPage() {
   const {
     getPendentes, aprovarFilme, deleteFilme,
@@ -210,11 +203,9 @@ export default function SugestoesPage() {
   const [loadingPage, setLoadingPage] = useState(true)
   const [error, setError] = useState(null)
 
-  // Adições pendentes
   const [pendentes, setPendentes] = useState([])
   const [adicaoSelecionada, setAdicaoSelecionada] = useState(null)
 
-  // Sugestões de edição
   const [edicoes, setEdicoes] = useState([])
   const [edicaoSelecionada, setEdicaoSelecionada] = useState(null)
 
@@ -223,7 +214,7 @@ export default function SugestoesPage() {
     Promise.all([getPendentes(), getSugestoes()])
       .then(async ([pend, sugs]) => {
         setPendentes(pend)
-        // Para cada sugestão, buscar o filme atual para exibir no comparativo
+
         const sugsComFilme = await Promise.all(
           sugs.map(async s => {
             try {
@@ -304,13 +295,13 @@ export default function SugestoesPage() {
   }
 
   if (loadingPage) return <div className="loading-state"><div className="spinner" /><p>Carregando sugestões...</p></div>
-  if (error) return <div className="loading-state"><p style={{ color: '#f66' }}>Erro: {error}</p></div>
+  if (error) return <div className="loading-state"><p className="error-text">Erro: {error}</p></div>
 
   return (
     <main className="sugestoes-page">
-      <h1 className="sugestoes-title">Sugestões Filmes</h1>
+      <h1 className="sugestoes-title"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="svg-inline"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg> Sugestões Filmes</h1>
 
-      <div className="search-bar" style={{ marginBottom: '32px' }}>
+      <div className="search-bar search-bar-mb-lg">
         <span className="search-icon"><i className="fi fi-sr-search"></i></span>
         <input
           type="search"
@@ -321,16 +312,16 @@ export default function SugestoesPage() {
         />
       </div>
 
-      {/* Adições Pendentes */}
+      
       <section className="sugestoes-section" aria-labelledby="adicoes-title">
         <div className="sugestoes-section-header">
           <h2 id="adicoes-title" className="sugestoes-section-title">
-            Adições Pendentes ({adicoesFiltradas.length})
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="svg-inline"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg> Adições Pendentes ({adicoesFiltradas.length})
           </h2>
         </div>
         <div className="sugestoes-list">
           {adicoesFiltradas.length === 0 ? (
-            <p style={{ color: '#666', fontSize: '0.9rem' }}>Nenhuma adição pendente.</p>
+            <p className="empty-text">Nenhuma adição pendente.</p>
           ) : (
             adicoesFiltradas.map(f => (
               <SugestaoCard
@@ -349,16 +340,16 @@ export default function SugestoesPage() {
         </div>
       </section>
 
-      {/* Edições Sugeridas */}
-      <section className="sugestoes-section" aria-labelledby="edicoes-title" style={{ marginTop: '40px' }}>
+      
+      <section className="sugestoes-section">
         <div className="sugestoes-section-header">
           <h2 id="edicoes-title" className="sugestoes-section-title">
-            Edições Sugeridas ({edicoesFiltradas.length})
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="svg-inline"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg> Edições Sugeridas ({edicoesFiltradas.length})
           </h2>
         </div>
         <div className="sugestoes-list">
           {edicoesFiltradas.length === 0 ? (
-            <p style={{ color: '#666', fontSize: '0.9rem' }}>Nenhuma edição sugerida pendente.</p>
+            <p className="empty-text">Nenhuma edição sugerida pendente.</p>
           ) : (
             edicoesFiltradas.map(e => (
               <SugestaoCard

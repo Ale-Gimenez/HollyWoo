@@ -1,7 +1,4 @@
-/* ============================
-   HOLLYWOO – DESIGN SYSTEM
-   ============================ */
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Boogaloo&family=Inter:wght@400;600;700;800;900&display=swap');
 
 :root {
   --bg-primary: #121212;
@@ -18,12 +15,12 @@
   --btn-primary-hover: #6420c8;
   --btn-cancel-bg: #cc0d59;
   --btn-cancel-hover: #a80a49;
-  --btn-accept-bg: #2da900;
-  --btn-accept-hover: #1c6600;
-  --btn-edit-bg: #374fc7;
-  --btn-edit-hover: #2a3ea0;
-  --btn-delete-bg: #c0392b;
-  --btn-delete-hover: #922b21;
+  --btn-accept-bg: linear-gradient(90deg, #2da900, #1c6600);
+  --btn-accept-hover: linear-gradient(90deg, #269100, #155500);
+  --btn-edit-bg: linear-gradient(90deg, #10d8df, #374fc7);
+  --btn-edit-hover: linear-gradient(90deg, #0dbfc6, #2a3ea0);
+  --btn-delete-bg: linear-gradient(90deg, #990000, #fa1c1c);
+  --btn-delete-hover: linear-gradient(90deg, #7a0000, #d41414);
   --btn-suggest-bg: #3a3a3a;
   --btn-suggest-hover: #555555;
 
@@ -52,7 +49,7 @@
 html { scroll-behavior: smooth; }
 
 body {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   min-height: 100vh;
@@ -68,12 +65,10 @@ input, textarea, select { font-family: inherit; }
 ::-webkit-scrollbar-track { background: var(--bg-secondary); }
 ::-webkit-scrollbar-thumb { background: var(--purple-main); border-radius: 4px; }
 
-/* Layout */
 .page-wrapper { min-height: 100vh; display: flex; flex-direction: column; }
 .main-content { flex: 1; }
 .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
 
-/* Utility */
 .text-purple { color: var(--purple-light); }
 .text-muted { color: var(--text-muted); }
 .text-secondary { color: var(--text-secondary); }

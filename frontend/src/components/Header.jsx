@@ -6,7 +6,7 @@ import '../styles/Header.css'
 
 function Logo() {
   return (
-    <img src="/logoprin.png" alt="HollyWoo" width="36" height="36" style={{ objectFit: 'contain' }} />
+    <img src="/logoprin.png" alt="HollyWoo" width="36" height="36" className="logo-img" />
   )
 }
 
@@ -38,28 +38,28 @@ export default function Header() {
               to={isLoggedIn ? (isAdmin ? '/home' : '/') : '/'}
               className={isActive('/home') || (location.pathname === '/' && !isAdmin) ? 'active' : ''}
             >
-              <i className="fi fi-sr-home" style={{ marginRight: 6, verticalAlign: 'middle' }}></i>
+              <i className="fi fi-sr-home icon-inline"></i>
               Home
             </Link>
             <Link to="/catalogo" className={isActive('/catalogo') ? 'active' : ''}>
-              <i className="fi fi-sr-film" style={{ marginRight: 6, verticalAlign: 'middle' }}></i>
+              <i className="fi fi-sr-film icon-inline"></i>
               Catálogo
             </Link>
             {isAdmin && (
               <Link to="/adicionar" className={isActive('/adicionar') ? 'active' : ''}>
-                <i className="fi fi-sr-square-plus" style={{ marginRight: 6, verticalAlign: 'middle' }}></i>
+                <i className="fi fi-sr-square-plus icon-inline"></i>
                 Adicionar Filme
               </Link>
             )}
             {isAdmin && (
               <Link to="/sugestoes" className={isActive('/sugestoes') ? 'active' : ''}>
-                <i className="fi fi-sr-bell" style={{ marginRight: 6, verticalAlign: 'middle' }}></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="svg-inline"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
                 Sugestões
               </Link>
             )}
             {isLoggedIn && !isAdmin && (
               <Link to="/favoritos" className={isActive('/favoritos') ? 'active' : ''}>
-                <i className="fi fi-sr-heart" style={{ marginRight: 6, verticalAlign: 'middle' }}></i>
+                <i className="fi fi-sr-heart icon-inline"></i>
                 Favoritos
               </Link>
             )}
@@ -68,7 +68,7 @@ export default function Header() {
           <div className="header-actions">
             {!isLoggedIn ? (
               <button className="btn-entrar" onClick={() => navigate('/login')}>
-                <i className="fi fi-sr-sign-in-alt" style={{ marginRight: 6, verticalAlign: 'middle' }}></i>
+                <i className="fi fi-sr-sign-in-alt icon-inline"></i>
                 Entrar
               </button>
             ) : (

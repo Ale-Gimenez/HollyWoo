@@ -14,12 +14,11 @@ export default function LandingPage() {
   const [heroIdx, setHeroIdx] = useState(0)
   const [heroFilmes, setHeroFilmes] = useState([])
 
-  // Carrega destaques reais da home
   useEffect(() => {
     apiGetDestaques()
       .then(data => {
         const normalized = normalizeDestaques(data)
-        // Se não há destaques configurados, usa os primeiros filmes como fallback
+
         setHeroFilmes(normalized.length > 0 ? normalized : filmes.slice(0, 5))
       })
       .catch(() => {
@@ -49,7 +48,7 @@ export default function LandingPage() {
 
   return (
     <div>
-      {/* HERO */}
+      
       {hero && (
         <section className="landing-hero" aria-label="Destaque">
           <div
@@ -97,7 +96,7 @@ export default function LandingPage() {
       )}
 
       <div className="landing-body">
-        {/* TRENDING */}
+        
         <section className="landing-trending">
           <h2 className="section-title">Filmes em Tendência</h2>
           <div className="landing-films-grid-6">
@@ -105,7 +104,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* PROMO BANNERS */}
+        
         <section className="landing-promo" aria-label="Promoções">
           <div className="promo-card promo-card-purple">
             <div className="promo-card-content">
@@ -116,7 +115,7 @@ export default function LandingPage() {
               </p>
               <button
                 className="btn"
-                style={{ background: '#fff', color: '#7833e2', fontWeight: 800, fontSize: '0.85rem', marginTop: '8px' }}
+                className="promo-btn-catalogo"
                 onClick={() => navigate('/catalogo')}
               >
                 🎬 Catálogo
@@ -132,8 +131,7 @@ export default function LandingPage() {
                 Não conseguiu achar algum filme que queria? Solicite a adição do filme agora!
               </p>
               <button
-                className="btn btn-primary"
-                style={{ marginTop: '8px' }}
+                className="btn btn-primary btn-mt"
                 onClick={() => isLoggedIn ? navigate('/solicitar-adicao') : navigate('/login')}
               >
                 + Adicionar Filme
@@ -143,7 +141,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* RECOMMENDATIONS */}
+        
         <section aria-label="Recomendações">
           <h2 className="section-title">Provavelmente Você vai Gostar</h2>
           <div className="landing-recommendations">
@@ -159,11 +157,10 @@ export default function LandingPage() {
                   <p className="rec-card-title">{f.titulo}</p>
                   <div className="rec-card-meta">
                     <span className="badge-classif">{f.classificacao || 'L'}</span>
-                    <span style={{ color: '#aaa', fontSize: '0.85rem' }}>{f.ano}</span>
+                    <span className="rec-card-year">{f.ano}</span>
                   </div>
                   <button
-                    className="btn btn-primary"
-                    style={{ fontSize: '0.8rem', padding: '6px 14px' }}
+                    className="btn btn-primary btn-rec"
                     onClick={e => { e.stopPropagation(); navigate(`/detalhes/${f.id}`) }}
                   >
                     Detalhes &rsaquo;

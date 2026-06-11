@@ -3,7 +3,7 @@ import '../styles/Footer.css'
 
 function Logo() {
   return (
-    <img src="/logoprin.png" alt="HollyWoo" width="36" height="36" style={{ objectFit: 'contain' }} />
+    <img src="/logoprin.png" alt="HollyWoo" width="36" height="36" className="logo-img" />
   )
 }
 
@@ -32,11 +32,11 @@ export default function Footer() {
         <div className="footer-section">
           <h4>Serviços</h4>
           <p>
-            <i className="fi fi-sr-phone-call" style={{ marginRight: 8, verticalAlign: 'middle' }}></i>
+            <i className="fi fi-sr-phone-call icon-inline"></i>
             800-123-0604
           </p>
           <p>
-            <i className="fi fi-sr-envelope" style={{ marginRight: 8, verticalAlign: 'middle' }}></i>
+            <i className="fi fi-sr-envelope icon-inline"></i>
             hollywoo@gmail.com
           </p>
         </div>

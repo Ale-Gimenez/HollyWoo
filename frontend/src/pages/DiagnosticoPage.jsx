@@ -1,7 +1,4 @@
-/**
- * Página de diagnóstico temporária — acesse em /diagnostico
- * Delete depois que tudo funcionar.
- */
+
 import { useEffect, useState } from 'react'
 
 export default function DiagnosticoPage() {
@@ -26,12 +23,9 @@ export default function DiagnosticoPage() {
   }, [])
 
   return (
-    <div style={{ padding: '40px', fontFamily: 'monospace' }}>
+    <div className="diagnostico-wrapper">
       <h1>Diagnóstico API</h1>
-      <pre style={{
-        background: '#1a1a1a', color: '#0f0', padding: '20px',
-        borderRadius: '8px', whiteSpace: 'pre-wrap', wordBreak: 'break-word'
-      }}>
+      <pre className="diagnostico-pre">
         {resultado}
       </pre>
     </div>

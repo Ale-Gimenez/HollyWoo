@@ -27,7 +27,7 @@ export default function FavoritosPage() {
     <main className="favoritos-page">
       <h1 className="section-title favoritos-title">Filmes Favoritos</h1>
 
-      <div className="search-bar" style={{ marginBottom: '20px' }}>
+      <div className="search-bar" className="search-bar-mb">
         <span className="search-icon">🔍</span>
         <input
           type="search"
@@ -38,7 +38,7 @@ export default function FavoritosPage() {
         />
       </div>
 
-      <p style={{ color: '#aaa', fontSize: '0.9rem', marginBottom: '20px' }}>
+      <p className="favoritos-count">
         <strong>{filtered.length}</strong> filmes exibidos
       </p>
 
@@ -46,7 +46,7 @@ export default function FavoritosPage() {
         <div className="favoritos-empty">
           <p className="favoritos-empty-icon">❤️</p>
           <p>Você ainda não tem filmes favoritos.</p>
-          <button className="btn btn-primary" style={{ marginTop: '16px' }} onClick={() => navigate('/catalogo')}>
+          <button className="btn btn-primary btn-mt" onClick={() => navigate('/catalogo')}>
             Explorar Catálogo
           </button>
         </div>

@@ -10,9 +10,6 @@ import {
 
 const FilmesContext = createContext(null)
 
-/**
- * Converte um filme do backend para o formato que o frontend usa.
- */
 function normalizeFilme(f) {
   return {
     id:     f.id_filme,
@@ -56,7 +53,6 @@ function normalizeFilme(f) {
       foto:  d.img || '',
     })),
 
-    // IDs preservados para o formulário de edição
     _ids: {
       id_filme:          f.id_filme,
       id_pais_origem:    f.pais_origem?.id_pais ?? null,
@@ -77,10 +73,6 @@ function normalizeDestaques(destaques) {
     .map(d => normalizeFilme(d.filme))
 }
 
-/**
- * Converte o payload do FilmForm (formato frontend) para o formato que o backend espera.
- * Agora atores e diretores já chegam como IDs diretos do MultiSelect.
- */
 function toBackendPayload(formData, dadosAuxiliares) {
   const { categorias, paises, linguagens, produtoras, atores, diretores } = dadosAuxiliares
 
@@ -94,13 +86,10 @@ function toBackendPayload(formData, dadosAuxiliares) {
     : formData.produtora_principal?.nome
   const produtoraObj = produtoras.find(p => p.nome === nomeProdutora)
 
-  // estilo_visual: frontend pode enviar array (MultiSelect) ou string — banco espera string
   const estiloVisual = Array.isArray(formData.estilo_visual)
     ? (formData.estilo_visual[0] || null)
     : (formData.estilo_visual || null)
 
-  // Atores e diretores: se já vieram como IDs (novo fluxo), usa direto;
-  // senão faz fallback para resolução por nome (compatibilidade)
   let idsAtores = []
   if (formData.ids_atores && formData.ids_atores.length > 0) {
     idsAtores = formData.ids_atores
@@ -148,7 +137,6 @@ export function FilmesProvider({ children }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  // Listas auxiliares do backend
   const [dadosAuxiliares, setDadosAuxiliares] = useState({
     categorias: [], paises: [], linguagens: [],
     produtoras: [], atores: [], diretores: [], sagas: [],
@@ -198,6 +186,10 @@ export function FilmesProvider({ children }) {
     const payload = toBackendPayload(formData, dadosAuxiliares)
     const created = await apiCreateFilme(payload)
     const norm = normalizeFilme(created)
+
+    if (created.flag === true) {
+      setFilmes(prev => [...prev, norm])
+    }
     return norm
   }
 

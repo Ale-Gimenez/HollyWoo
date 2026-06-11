@@ -606,3 +606,132 @@
 .modal-lg {
   max-width: 780px;
 }
+
+/* ============================
+   UTILITÁRIOS EXTRAS
+   ============================ */
+.loading-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60vh;
+}
+
+.logo-img {
+  object-fit: contain;
+}
+
+.icon-inline {
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.svg-inline {
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+.text-white { color: #fff; }
+
+.inline-error-box {
+  background: #2a0a0a;
+  border: 1px solid #cc0000;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  color: #ff6b6b;
+  font-size: 0.9rem;
+}
+
+.btn-mt { margin-top: 8px; }
+
+.empty-text {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.no-changes-text {
+  color: #888;
+  margin: 20px 0;
+}
+
+.error-text { color: #f66; }
+
+.multiselect-no-result {
+  color: #666;
+  cursor: default;
+}
+
+.toast-close-btn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.popup-save-btn { margin-top: 4px; }
+
+.modal-center { text-align: center; }
+
+.modal-title-sm { margin-bottom: 2px; }
+
+.modal-sm-plus { max-width: 620px; }
+.modal-md { max-width: 640px; }
+
+.success-icon {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+}
+
+.success-icon-sm { font-size: 2rem; }
+
+.success-title {
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.success-text {
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+.success-redirect {
+  color: #666;
+  font-size: 0.85rem;
+  margin-top: 6px;
+}
+
+.confirm-recusa-box {
+  background: #1a1a0a;
+  border: 1px solid #7a4500;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.confirm-recusa-text {
+  color: #ffcc80;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.confirm-recusa-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.diagnostico-wrapper {
+  padding: 40px;
+  font-family: monospace;
+}
+
+.diagnostico-pre {
+  background: #1a1a1a;
+  color: #0f0;
+  padding: 20px;
+  border-radius: 8px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

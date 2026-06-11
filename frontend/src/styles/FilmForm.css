@@ -256,3 +256,11 @@
   border-radius: 0;
   box-shadow: none;
 }
+
+/* ============================
+   FILMFORM - CLASSES EXTRAS
+   ============================ */
+.multiselect-no-result {
+  color: #666;
+  cursor: default;
+}

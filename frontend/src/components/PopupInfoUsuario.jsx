@@ -52,7 +52,7 @@ export default function PopupInfoUsuario({ onClose, onLogout }) {
                     placeholder="E-mail"
                   />
                 </div>
-                <button className="btn btn-primary btn-sm" style={{ marginTop: '4px' }} onClick={handleSave}>
+                <button className="btn btn-primary btn-sm popup-save-btn" onClick={handleSave}>
                   Salvar
                 </button>
               </>

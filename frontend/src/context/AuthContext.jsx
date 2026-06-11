@@ -8,7 +8,6 @@ export function AuthProvider({ children }) {
   const [favoritos, setFavoritos] = useState([])
   const [loadingAuth, setLoadingAuth] = useState(true)
 
-  // Ao montar, tenta restaurar sessão do token salvo
   useEffect(() => {
     const token = localStorage.getItem('access_token')
     if (!token) { setLoadingAuth(false); return }
@@ -56,7 +55,7 @@ export function AuthProvider({ children }) {
   async function cadastrar(form) {
     try {
       await apiCadastrar(form)
-      // Faz login automático após cadastro
+
       const loginResult = await login(form.email, form.senha)
       return loginResult
     } catch (err) {

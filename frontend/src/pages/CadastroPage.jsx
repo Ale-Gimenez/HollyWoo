@@ -6,7 +6,7 @@ import '../styles/Shared.css'
 
 function Logo() {
   return (
-    <img src="/logoprin.png" alt="HollyWoo" width="52" height="52" style={{ objectFit: 'contain' }} />
+    <img src="/logoprin.png" alt="HollyWoo" width="52" height="52" className="logo-img" />
   )
 }
 
@@ -34,7 +34,7 @@ export default function CadastroPage() {
   return (
     <main className="auth-page">
       <div className="auth-card auth-card-wide">
-        <div className="auth-logo-wrap" style={{ alignItems: 'center', marginBottom: '16px' }}>
+        <div className="auth-logo-wrap" className="auth-logo-wrap auth-logo-center">
           <Logo />
           <span className="auth-brand-name">HollyWoo</span>
           <span className="auth-slogan">Diversão para os pequenos</span>
